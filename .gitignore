@@ -1,0 +1,23 @@
+# Rust
+target
+debug
+**/*.rs.bk
+
+# Js / Ts
+node_modules
+dist
+coverage
+
+# Misc
+.DS_Store
+temp
+.cache
+.idea
+*.log
+*.tgz
+lib-cov
+logs
+
+# White List
+!AGENT.md
+!CLAUDE.md

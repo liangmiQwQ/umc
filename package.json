@@ -1,0 +1,17 @@
+{
+  "name": "umc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fmt": "dprint fmt"
+  },
+  "devDependencies": {
+    "dprint": "catalog:cli",
+    "oxlint": "catalog:cli",
+    "oxlint-tsgolint": "catalog:cli",
+    "taze": "catalog:cli",
+    "typescript": "catalog:types",
+    "vitest": "catalog:cli"
+  },
+  "packageManager": "pnpm@10.22.0"
+}

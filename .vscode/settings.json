@@ -1,0 +1,12 @@
+{
+  "oxc.enable": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "dprint.dprint",
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  },
+  "rust-analyzer.procMacro.ignored": {
+    "napi-derive": ["napi"],
+    "tracing": ["instrument"]
+  }
+}
