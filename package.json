@@ -7,7 +7,8 @@
     "lint": "oxlint --type-aware",
     "build": "pnpm -r build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "deps": "taze -r -w major && pnpm install"
   },
   "devDependencies": {
     "dprint": "catalog:cli",
