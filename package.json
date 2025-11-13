@@ -5,7 +5,9 @@
   "scripts": {
     "fmt": "dprint fmt",
     "lint": "oxlint --type-aware",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
   },
   "devDependencies": {
     "dprint": "catalog:cli",
