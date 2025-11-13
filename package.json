@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "fmt": "dprint fmt"
+    "fmt": "dprint fmt",
+    "lint": "oxlint --type-aware",
+    "build": "pnpm -r build"
   },
   "devDependencies": {
     "dprint": "catalog:cli",

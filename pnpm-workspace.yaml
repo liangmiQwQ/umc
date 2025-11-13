@@ -8,7 +8,12 @@ catalogs:
     dprint: ^0.50.2
     oxlint: ^1.28.0
     oxlint-tsgolint: ^0.6.0
-    vitest: ^4.0.8
     taze: ^19.9.0
+    tsdown: ^0.16.4
+    vitest: ^4.0.8
   types:
     typescript: ^5.9.3
+
+onlyBuiltDependencies:
+  - dprint
+  - esbuild

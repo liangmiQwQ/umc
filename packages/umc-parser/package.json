@@ -1,0 +1,17 @@
+{
+  "name": "umc-parsser",
+  "version": "0.0.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "description": "Parser for markup and structured language",
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsdown"
+  },
+  "devDependencies": {
+    "tsdown": "catalog:cli",
+    "typescript": "catalog:types",
+    "vitest": "catalog:cli"
+  }
+}
