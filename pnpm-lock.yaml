@@ -61,7 +61,7 @@ importers:
         specifier: catalog:cli
         version: 4.0.9(jiti@2.6.1)(yaml@2.8.1)
 
-  napi/umc_parser:
+  packages/umc_parser:
     devDependencies:
       '@emnapi/core':
         specifier: ^1.7.1
