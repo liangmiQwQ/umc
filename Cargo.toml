@@ -5,7 +5,7 @@ members = ["crates/*", "napi/*"]
 [workspace.package]
 authors = ["Liang Mi <https://github.com/liangmiQwQ>", "contributors"]
 categories = ["compilers", "development-tools", "web-programming"]
-keywords = ["parser", "HTML", "CSS", "JSON", "AST"]
+keywords = ["UMC", "parser", "HTML", "CSS", "JSON", "AST"]
 license = "MIT"
 repository = "https://github.com/liangmiQwQ/umc"
 description = "The Universal Markup-language Compiler, Rust-based."

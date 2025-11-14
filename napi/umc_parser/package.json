@@ -11,7 +11,7 @@
     "directory": "napi/umc_parser"
   },
   "license": "MIT",
-  "keywords": ["umc", "parser", "ast", "structured-language"],
+  "keywords": ["UMC", "parser", "ast", "structured-language"],
   "files": [
     "index.d.ts",
     "index.js",
