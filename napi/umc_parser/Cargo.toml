@@ -1,9 +1,17 @@
-
 [package]
-authors = ["LongYinan <lynweklm@gmail.com>"]
-edition = "2021"
-name = "umc_parser"
-version = "0.1.0"
+name = "umc_parser_napi"
+version = "0.0.0-alpha.0"
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+include = ["/src", "build.rs"]
+keywords.workspace = true
+license.workspace = true
+publish = true
+repository.workspace = true
+rust-version.workspace = true
+description.workspace = true
 
 [lib]
 crate-type = ["cdylib"]

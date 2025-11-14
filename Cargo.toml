@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/umc_parser"]
+members = ["crates/*", "napi/*"]
 
 [workspace.package]
 authors = ["Liang Mi <https://github.com/liangmiQwQ>", "contributors"]

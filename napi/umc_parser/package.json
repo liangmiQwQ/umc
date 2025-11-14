@@ -1,7 +1,7 @@
 {
   "name": "umc_parser",
-  "version": "1.1.1",
-  "description": "Template project for writing node package with napi-rs",
+  "version": "0.0.0-alpha.0",
+  "description": "The Universal Markup-language Compiler, Rust-based.",
   "main": "index.js",
   "types": "index.d.ts",
   "browser": "browser.js",
