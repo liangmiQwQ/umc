@@ -16,7 +16,16 @@
     "oxlint-tsgolint": "catalog:cli",
     "taze": "catalog:cli",
     "typescript": "catalog:types",
-    "vitest": "catalog:cli"
+    "vitest": "catalog:cli",
+    "lint-staged": "catalog:cli"
+  },
+  "lint-staged": {
+    "*.@(js|ts|tsx|yml|yaml|md|json|html|toml)": "dprint fmt --staged",
+    "*.@(js|ts|tsx)": "pnpm lint-code -- --fix",
+    "*.rs": [
+      "cargo fmt",
+      "cargo fix --allow-dirty --allow-staged"
+    ]
   },
   "packageManager": "pnpm@10.22.0"
 }

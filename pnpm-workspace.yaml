@@ -9,6 +9,7 @@ catalogs:
     taze: ^19.9.0
     tsdown: ^0.16.4
     vitest: ^4.0.9
+    lint-staged: ^16.2.6
   types:
     typescript: ^5.9.3
 

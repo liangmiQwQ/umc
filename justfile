@@ -13,8 +13,8 @@ init:
   
 fix:
   cargo fmt --all -- --emit=files
-  -cargo shear --fix
   cargo fix --allow-dirty --allow-staged
+  -cargo shear --fix
   pnpm fmt
   pnpm lint --fix
 
