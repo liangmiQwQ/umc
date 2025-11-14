@@ -32,6 +32,7 @@ ready:
   just fix
   just test
   git status
+  git diff --exit-code --quiet
 
 lint: 
   cargo clippy --workspace --all-targets --all-features
