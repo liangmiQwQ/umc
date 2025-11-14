@@ -5,7 +5,6 @@
   "scripts": {
     "fmt": "dprint fmt",
     "lint": "oxlint --type-aware",
-    "build": "pnpm -r build",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "deps": "taze -r -w major && pnpm install"

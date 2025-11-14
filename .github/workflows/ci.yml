@@ -35,11 +35,8 @@ jobs:
       - name: Try Fix
         run: just lint
 
-      - name: Build
-        run: nr build
-
       - name: Typecheck
-        run: nr typecheck
+        run: pnpm typecheck
 
       - name: Check Files
         run: git diff --exit-code --quiet
@@ -71,9 +68,6 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: nr build
 
       - name: Test
         run: just test
