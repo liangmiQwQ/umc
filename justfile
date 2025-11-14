@@ -27,7 +27,7 @@ test:
   cargo test --all-features --workspace
 
 ready:
-  # git diff --exit-code --quiet
+  git diff --exit-code --quiet
   cargo clippy --workspace --all-targets --all-features
   just fix
   just test
