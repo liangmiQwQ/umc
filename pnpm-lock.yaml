@@ -18,6 +18,9 @@ catalogs:
     oxlint-tsgolint:
       specifier: ^0.6.0
       version: 0.6.0
+    simple-git-hooks:
+      specifier: ^2.13.1
+      version: 2.13.1
     taze:
       specifier: ^19.9.0
       version: 19.9.0
@@ -45,6 +48,9 @@ importers:
       oxlint-tsgolint:
         specifier: catalog:cli
         version: 0.6.0
+      simple-git-hooks:
+        specifier: catalog:cli
+        version: 2.13.1
       taze:
         specifier: catalog:cli
         version: 19.9.0
@@ -732,6 +738,10 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
+
+  simple-git-hooks@2.13.1:
+    resolution: {integrity: sha512-WszCLXwT4h2k1ufIXAgsbiTOazqqevFCIncOuUBZJ91DdvWcC5+OFkluWRQPrcuSYd8fjq+o2y1QfWqYMoAToQ==}
+    hasBin: true
 
   slice-ansi@7.1.2:
     resolution: {integrity: sha512-iOBWFgUX7caIZiuutICxVgX1SdxwAVFFKwt1EvMYYec/NWO5meOJ6K5uQxhrYBdQJne4KxiqZc+KptFOWFSI9w==}
@@ -1430,6 +1440,8 @@ snapshots:
   siginfo@2.0.0: {}
 
   signal-exit@4.1.0: {}
+
+  simple-git-hooks@2.13.1: {}
 
   slice-ansi@7.1.2:
     dependencies:

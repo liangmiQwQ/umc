@@ -17,7 +17,11 @@
     "taze": "catalog:cli",
     "typescript": "catalog:types",
     "vitest": "catalog:cli",
-    "lint-staged": "catalog:cli"
+    "lint-staged": "catalog:cli",
+    "simple-git-hooks": "catalog:cli"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
   },
   "lint-staged": {
     "*.@(js|ts|tsx|yml|yaml|md|json|html|toml)": "dprint fmt --staged",

@@ -4,17 +4,19 @@ packages:
 catalogs:
   cli:
     dprint: ^0.50.2
+    lint-staged: ^16.2.6
     oxlint: ^1.28.0
     oxlint-tsgolint: ^0.6.0
+    simple-git-hooks: ^2.13.1
     taze: ^19.9.0
     tsdown: ^0.16.4
     vitest: ^4.0.9
-    lint-staged: ^16.2.6
   types:
     typescript: ^5.9.3
 
 onlyBuiltDependencies:
   - dprint
   - esbuild
+  - simple-git-hooks
 
 verifyDepsBeforeRun: install
