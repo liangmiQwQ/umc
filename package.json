@@ -6,6 +6,7 @@
     "fmt": "dprint fmt",
     "lint": "oxlint --type-aware",
     "typecheck": "tsc --noEmit",
+    "build": "tsc && pnpm -r build",
     "test": "vitest",
     "deps": "taze -r -w major && pnpm install"
   },

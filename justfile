@@ -37,3 +37,7 @@ ready:
 lint: 
   cargo clippy --workspace --all-targets --all-features
   pnpm lint
+
+build:
+  cargo build
+  pnpm build
