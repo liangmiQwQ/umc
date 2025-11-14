@@ -26,17 +26,20 @@ jobs:
       - name: Setup Rust
         uses: oxc-project/setup-rust@v1.0.9
         with:
-          tools: just
+          tools: just,cargo-shear
           components: clippy rustfmt
 
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Try Fix
+      - name: Lint
         run: just lint
 
       - name: Typecheck
         run: pnpm typecheck
+
+      - name: Build
+        run: just build
 
       - name: Check Files
         run: git diff --exit-code --quiet
@@ -68,6 +71,9 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: just build
 
       - name: Test
         run: just test

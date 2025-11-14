@@ -35,6 +35,7 @@ ready:
   git diff --exit-code --quiet
 
 lint: 
+  cargo shear
   cargo clippy --workspace --all-targets --all-features
   pnpm lint
 
