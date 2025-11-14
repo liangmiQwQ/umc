@@ -8,8 +8,7 @@
     "build": "pnpm -r build",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "deps": "taze -r -w && pnpm install",
-    "deps:major": "taze -r -w major && pnpm install"
+    "deps": "taze -r -w major && pnpm install"
   },
   "devDependencies": {
     "dprint": "catalog:cli",

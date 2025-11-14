@@ -17,3 +17,7 @@ fix:
   cargo fix --allow-dirty --allow-staged
   pnpm fmt
   pnpm lint --fix
+
+update:
+  cargo update
+  pnpm deps
