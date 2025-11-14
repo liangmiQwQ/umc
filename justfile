@@ -15,4 +15,5 @@ fix:
   cargo fmt --all -- --emit=files
   -cargo shear --fix
   cargo fix --allow-dirty --allow-staged
-
+  pnpm fmt
+  pnpm lint --fix
