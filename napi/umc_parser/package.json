@@ -1,5 +1,5 @@
 {
-  "name": "umc_parser",
+  "name": "umc-parser",
   "version": "0.0.0-alpha.0",
   "description": "The Universal Markup-language Compiler, Rust-based.",
   "main": "index.js",
@@ -26,6 +26,7 @@
   ],
   "napi": {
     "binaryName": "umc_parser",
+    "packageName": "@umc-project/umc-parser",
     "targets": [
       "x86_64-pc-windows-msvc",
       "aarch64-pc-windows-msvc",
