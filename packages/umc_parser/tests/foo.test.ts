@@ -1,3 +1,4 @@
 import { expect, it } from 'vitest';
+import { plus100 } from '../napi';
 
-it(() => expect(1 + 1).toBe(2));
+it(() => expect(plus100(1)).toBe(101));
