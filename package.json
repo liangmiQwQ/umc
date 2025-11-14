@@ -26,10 +26,7 @@
   "lint-staged": {
     "*.@(js|ts|tsx|yml|yaml|md|json|html|toml)": "dprint fmt --staged",
     "*.@(js|ts|tsx)": "pnpm lint-code -- --fix",
-    "*.rs": [
-      "cargo fmt",
-      "cargo fix --allow-dirty --allow-staged"
-    ]
+    "*.rs": "cargo fmt --"
   },
   "packageManager": "pnpm@10.22.0"
 }
