@@ -18,9 +18,7 @@
     "structured-language"
   ],
   "files": [
-    "index.d.ts",
-    "index.js",
-    "browser.js"
+    "napi"
   ],
   "scripts": {
     "build": "napi build --output-dir napi --platform",
