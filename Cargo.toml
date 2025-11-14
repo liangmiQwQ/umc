@@ -12,3 +12,8 @@ description = "The Universal Markup-language Compiler, Rust-based."
 
 edition = "2024"
 rust-version = "1.89.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"
