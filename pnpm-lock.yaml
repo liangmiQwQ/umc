@@ -27,6 +27,13 @@ catalogs:
     vitest:
       specifier: ^4.0.9
       version: 4.0.9
+  napi:
+    '@napi-rs/cli':
+      specifier: ^3.4.1
+      version: 3.4.1
+    '@napi-rs/wasm-runtime':
+      specifier: ^1.0.7
+      version: 1.0.7
   types:
     typescript:
       specifier: ^5.9.3
@@ -64,10 +71,10 @@ importers:
   packages/umc_parser:
     devDependencies:
       '@napi-rs/cli':
-        specifier: ^3.4.1
+        specifier: catalog:napi
         version: 3.4.1(@emnapi/runtime@1.7.1)
       '@napi-rs/wasm-runtime':
-        specifier: ^1.0.7
+        specifier: catalog:napi
         version: 1.0.7
 
 packages:
