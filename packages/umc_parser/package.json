@@ -59,7 +59,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@napi-rs/cli": "^3.4.1",
-    "@napi-rs/wasm-runtime": "^1.0.7"
+    "@napi-rs/cli": "catalog:napi",
+    "@napi-rs/wasm-runtime": "catalog:napi"
   }
 }
