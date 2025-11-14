@@ -10,7 +10,7 @@
     "CHANGELOG-*.md",
     "CHANGELOG.md",
     "pnpm-lock.yaml",
-    "**/napi/**"
+    "/packages/*/napi/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.12.wasm",
