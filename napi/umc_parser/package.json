@@ -23,7 +23,7 @@
     "browser.js"
   ],
   "scripts": {
-    "build": "napi build--output-dir src-js --platform",
+    "build": "napi build --output-dir src-js --platform",
     "build:release": "pnpm build --release",
     "prepublishOnly": "napi prepublish -t npm"
   },
