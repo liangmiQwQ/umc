@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: lts/*
 
+      - name: Setup Rust
+        uses: oxc-project/setup-rust@v1.0.9
+        with:
+          tools: just
+          components: clippy rustfmt
+
       - name: Install
         run: pnpm install --frozen-lockfile
 
@@ -57,6 +63,11 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
+
+      - name: Setup Rust
+        uses: oxc-project/setup-rust@v1.0.9
+        with:
+          tools: just
 
       - name: Install
         run: pnpm install --frozen-lockfile
