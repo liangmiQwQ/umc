@@ -12,6 +12,9 @@ repository.workspace = true
 rust-version.workspace = true
 description.workspace = true
 
+[package.metadata]
+cargo-shear.ignored = ["napi"]
+
 [lib]
 crate-type = ["cdylib"]
 
