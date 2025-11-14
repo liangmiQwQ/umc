@@ -23,20 +23,20 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Setup
-        run: npm i -g @antfu/ni
-
       - name: Install
-        run: nci
+        run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: nr lint
+      - name: Try Fix
+        run: just lint
 
       - name: Build
         run: nr build
 
       - name: Typecheck
         run: nr typecheck
+
+      - name: Check Files
+        run: git diff --exit-code --quiet
 
   test:
     runs-on: ${{ matrix.os }}
@@ -58,14 +58,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Setup
-        run: npm i -g @antfu/ni
-
       - name: Install
-        run: nci
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: nr build
 
       - name: Test
-        run: nr test
+        run: just test
