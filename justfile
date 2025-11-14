@@ -28,7 +28,11 @@ test:
 
 ready:
   git diff --exit-code --quiet
-  cargo clippy --workspace --all-targets --all-features
+  just lint
   just fix
   just test
   git status
+
+lint: 
+  cargo clippy --workspace --all-targets --all-features
+  pnpm lint
