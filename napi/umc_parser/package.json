@@ -11,14 +11,7 @@
     "directory": "napi/umc_parser"
   },
   "license": "MIT",
-  "keywords": [
-    "napi-rs",
-    "NAPI",
-    "N-API",
-    "Rust",
-    "node-addon",
-    "node-addon-api"
-  ],
+  "keywords": ["umc", "parser", "ast", "structured-language"],
   "files": [
     "index.d.ts",
     "index.js",
