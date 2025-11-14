@@ -13,6 +13,9 @@ catalogs:
     vitest: ^4.0.9
   types:
     typescript: ^5.9.3
+  napi:
+    '@napi-rs/cli': ^3.4.1
+    '@napi-rs/wasm-runtime': ^1.0.7
 
 onlyBuiltDependencies:
   - dprint
