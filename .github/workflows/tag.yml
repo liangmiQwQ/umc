@@ -8,6 +8,9 @@ on:
       - '**/package.json'
       - '**/Cargo.toml'
 
+permissions:
+  contents: write
+
 jobs:
   check-and-tag:
     runs-on: ubuntu-latest
