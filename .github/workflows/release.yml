@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  release-npm:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: just build
 
-      - name: Generate GitHub Changelog
+      - name: Generate Changelog
         run: pnpm dlx changelogithub
         continue-on-error: true
         env:
