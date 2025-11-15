@@ -2,9 +2,9 @@
   "name": "umc-parser",
   "version": "0.0.0-alpha.0",
   "description": "The Universal Markup-language Compiler, Rust-based.",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "browser": "browser.js",
+  "main": "napi/index.js",
+  "types": "napi/index.d.ts",
+  "browser": "napi/browser.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/liangmiQwQ/umc.git",
@@ -18,9 +18,12 @@
     "structured-language"
   ],
   "files": [
-    "dist/**/*.{js,ts,mjs,cjs,mts,cts}"
+    "napi/index.js",
+    "napi/index.d.ts",
+    "napi/browser.js"
   ],
   "scripts": {
+    "artifacts": "napi artifacts",
     "build": "napi build --output-dir napi --platform",
     "build:release": "pnpm build --release",
     "prepublishOnly": "napi prepublish -t npm"

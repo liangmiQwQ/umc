@@ -5,8 +5,20 @@ on:
     tags:
       - 'v*'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  release-npm:
+  release:
+    name: Release NAPI Parser
+    uses: ./.github/workflows/reusable-release-napi.yml
+    with:
+      name: parser
+    permissions:
+      id-token: write
+
+  github-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -14,28 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set node
-        uses: actions/setup-node@v5
-        with:
-          node-version: lts/*
-
-      - name: Setup Rust
-        uses: oxc-project/setup-rust@v1.0.9
-        with:
-          tools: just,cargo-shear
-          components: clippy rustfmt
-
-      - name: Build
-        run: just build
-
       - name: Generate Changelog
         run: pnpm dlx changelogithub
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to NPM
-        run: pnpm -r publish --access public --no-git-checks
