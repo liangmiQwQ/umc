@@ -18,7 +18,7 @@
     "structured-language"
   ],
   "files": [
-    "napi"
+    "dist/**/*.{js,ts,mjs,cjs,mts,cts}"
   ],
   "scripts": {
     "build": "napi build --output-dir napi --platform",
