@@ -62,6 +62,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: catalog:types
+        version: 24.10.1
       bumpp:
         specifier: catalog:cli
         version: 10.3.1
@@ -107,9 +110,6 @@ importers:
       '@iarna/toml':
         specifier: catalog:scripts
         version: 2.2.5
-      '@types/node':
-        specifier: catalog:types
-        version: 24.10.1
       tsx:
         specifier: catalog:scripts
         version: 4.20.6
