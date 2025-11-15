@@ -18,6 +18,18 @@ jobs:
     permissions:
       id-token: write
 
+  release-crates:
+    name: Release Crates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Rust
+        uses: oxc-project/setup-rust@v1.0.9
+
+      - name: Publish
+        run: cargo publish
+
   github-release:
     runs-on: ubuntu-latest
     permissions:
