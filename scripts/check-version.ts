@@ -61,7 +61,12 @@ function main() {
   const rootDir = join(import.meta.dirname, '../');
   const versions = [...getJsPackagesVersions(rootDir), ...getRustCratesVersions(rootDir)];
   if (versions.length > 0) {
-    const tag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+    let tag: string = 'unknown';
+    try {
+      execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+    } catch (e) {
+      console.warn(`No prev tags gotten, use the default instead. ${e}`);
+    }
 
     if (versions.every(e => e === versions[0]) && tag !== versions[0]) {
       console.log('Found version changed');
