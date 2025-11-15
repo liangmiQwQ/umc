@@ -1,6 +1,6 @@
 {
   "name": "umc-parser",
-  "version": "0.0.0-beta.1",
+  "version": "0.0.0-beta.2",
   "description": "The Universal Markup-language Compiler, Rust-based.",
   "main": "napi/index.js",
   "types": "napi/index.d.ts",
