@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release-parser:
+  release-napi-parser:
     name: Release NAPI Parser
     uses: ./.github/workflows/reusable-release-napi.yml
     with:

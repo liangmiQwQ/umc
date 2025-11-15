@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }} # use pat to trigger release
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -32,8 +33,6 @@ jobs:
 
       - name: Check Version and Create Tag
         id: version_check
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Run the check script, exit if no version changes
           if ! pnpm script check-version.ts; then
@@ -45,6 +44,13 @@ jobs:
           ls -la
           TAG_NAME=$(cat VERSION_INFO)
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
+
+          # Prevent tags dupe
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists, skipping"
+            echo "skip_tag=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
