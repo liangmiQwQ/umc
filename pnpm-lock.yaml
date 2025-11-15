@@ -74,7 +74,7 @@ importers:
         specifier: catalog:cli
         version: 4.0.9(jiti@2.6.1)(yaml@2.8.1)
 
-  packages/umc_parser:
+  packages/parser:
     devDependencies:
       '@napi-rs/cli':
         specifier: catalog:napi
