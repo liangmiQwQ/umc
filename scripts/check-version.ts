@@ -1,7 +1,7 @@
 import { parse as parseToml } from '@iarna/toml';
-import { readdirSync, readFileSync, statSync } from 'fs';
+import { execSync } from 'child_process';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { exitCode } from 'process';
 import type { PackageJson } from 'type-fest';
 
 function getJsPackagesVersions(dir: string, results: string[] = []): string[] {
@@ -61,8 +61,13 @@ function main() {
   const rootDir = join(import.meta.dirname, '../');
   const versions = [...getJsPackagesVersions(rootDir), ...getRustCratesVersions(rootDir)];
   if (versions.length > 0) {
-    if (versions.every(e => e === versions[0])) {
-      // pass
+    const tag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+
+    if (versions.every(e => e === versions[0]) && tag !== versions[0]) {
+      console.log('Found version changed');
+      console.log(`Old version: ${tag}`);
+      console.log(`New version: ${versions[0]}`);
+      writeFileSync(join(rootDir, 'VERSION_INFO'), versions[0], 'utf-8');
     }
   }
   process.exit(0);

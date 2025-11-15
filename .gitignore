@@ -17,6 +17,7 @@ temp
 *.tgz
 lib-cov
 logs
+VERSION_INFO
 
 # White List
 !AGENT.md

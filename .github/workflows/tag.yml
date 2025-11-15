@@ -1,0 +1,44 @@
+name: Version Check and Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/package.json'
+      - '**/Cargo.toml'
+
+jobs:
+  check-and-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set node
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Version
+        run: pnpm script check-version.ts
+
+      - name: Create new tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME=$(cat VERSION_INFO)
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "release: $TAG_NAME"
+          git push origin "$TAG_NAME"
+
+          echo "Created new tag: $TAG_NAME"
