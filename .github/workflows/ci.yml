@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: just lint
 
+      - name: Format
+        run: just fmt
+
       - name: Typecheck
         run: pnpm typecheck
 

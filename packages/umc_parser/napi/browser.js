@@ -1,1 +1,1 @@
-export * from '@umc-project/umc-parser-wasm32-wasi'
+export * from '@umc-project/parser-wasm32-wasi'

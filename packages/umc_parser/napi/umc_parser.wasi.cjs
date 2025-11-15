@@ -39,9 +39,9 @@ if (__nodeFs.existsSync(__wasmDebugFilePath)) {
   __wasmFilePath = __wasmDebugFilePath
 } else if (!__nodeFs.existsSync(__wasmFilePath)) {
   try {
-    __wasmFilePath = __nodePath.resolve('@umc-project/umc-parser-wasm32-wasi')
+    __wasmFilePath = __nodePath.resolve('@umc-project/parser-wasm32-wasi')
   } catch {
-    throw new Error('Cannot find umc_parser.wasm32-wasi.wasm file, and @umc-project/umc-parser-wasm32-wasi package is not installed.')
+    throw new Error('Cannot find umc_parser.wasm32-wasi.wasm file, and @umc-project/parser-wasm32-wasi package is not installed.')
   }
 }
 

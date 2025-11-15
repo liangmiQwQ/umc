@@ -11,11 +11,14 @@ init:
   corepack enable
   pnpm install
   
-fix:
+fmt: 
+  pnpm fmt
   cargo fmt --all -- --emit=files
+
+fix:
+  just fmt
   cargo fix --allow-dirty --allow-staged
   -cargo shear --fix
-  pnpm fmt
   pnpm lint --fix
 
 update:
