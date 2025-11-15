@@ -3,7 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "fmt": "dprint fmt"
+    "fmt": "dprint fmt",
+    "lint": "oxlint --type-aware",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc && pnpm -r build",
+    "test": "vitest",
+    "deps": "taze -r -w major && pnpm install",
+    "changelog": "changelogithub",
+    "script": "pnpm -C scripts script",
+    "bump": "bumpp -r"
   },
   "devDependencies": {
     "dprint": "catalog:cli",
@@ -11,7 +19,20 @@
     "oxlint-tsgolint": "catalog:cli",
     "taze": "catalog:cli",
     "typescript": "catalog:types",
-    "vitest": "catalog:cli"
+    "vitest": "catalog:cli",
+    "lint-staged": "catalog:cli",
+    "simple-git-hooks": "catalog:cli",
+    "changelogithub": "catalog:cli",
+    "bumpp": "catalog:cli",
+    "@types/node": "catalog:types"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
+  },
+  "lint-staged": {
+    "*.@(js|ts|tsx|yml|yaml|md|json|html|toml)": "dprint fmt --staged",
+    "*.@(js|ts|tsx)": "pnpm lint -- --fix",
+    "*.rs": "cargo fmt --"
   },
   "packageManager": "pnpm@10.22.0"
 }

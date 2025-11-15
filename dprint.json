@@ -8,7 +8,9 @@
   "yaml": { "quotes": "preferSingle" },
   "excludes": [
     "CHANGELOG-*.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "pnpm-lock.yaml",
+    "/packages/*/napi/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.12.wasm",

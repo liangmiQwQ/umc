@@ -1,14 +1,33 @@
 packages:
   - packages/*
-
-verifyDepsBeforeRun: install
+  - scripts
 
 catalogs:
   cli:
     dprint: ^0.50.2
+    lint-staged: ^16.2.6
     oxlint: ^1.28.0
     oxlint-tsgolint: ^0.6.0
-    vitest: ^4.0.8
+    simple-git-hooks: ^2.13.1
     taze: ^19.9.0
+    tsdown: ^0.16.4
+    vitest: ^4.0.9
+    changelogithub: ^13.16.1
+    bumpp: ^10.3.1
   types:
     typescript: ^5.9.3
+    '@types/node': ^24.10.1
+    type-fest: ^5.2.0
+  napi:
+    '@napi-rs/cli': ^3.4.1
+    '@napi-rs/wasm-runtime': ^1.0.7
+  scripts:
+    tsx: ^4.20.6
+    '@iarna/toml': ^2.2.5
+
+onlyBuiltDependencies:
+  - dprint
+  - esbuild
+  - simple-git-hooks
+
+verifyDepsBeforeRun: install
