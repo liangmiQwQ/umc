@@ -39,7 +39,7 @@ jobs:
             exit 0
           fi
 
-          ls-la
+          ls -la
           TAG_NAME=$(cat VERSION_INFO)
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
 
