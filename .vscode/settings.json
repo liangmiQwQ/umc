@@ -8,5 +8,6 @@
   "rust-analyzer.procMacro.ignored": {
     "napi-derive": ["napi"],
     "tracing": ["instrument"]
-  }
+  },
+  "git.branchProtectionPrompt": "alwaysCommit"
 }
