@@ -47,6 +47,6 @@ build:
   pnpm build
 
 bump TYPE:
-  pnpm bump --release -y {{ TYPE }}
+  pnpm bump -y
   cargo workspaces version --no-git-commit -y {{ TYPE }}
   just build

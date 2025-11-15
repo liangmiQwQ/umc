@@ -4,5 +4,4 @@ export default defineConfig({
   push: false,
   commit: false,
   tag: false,
-  noVerify: true,
 });
