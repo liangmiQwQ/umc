@@ -1,6 +1,6 @@
 [package]
 name = "umc_parser"
-version = "0.1.0"
+version.workspace = true
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true

@@ -1,5 +1,6 @@
 packages:
   - packages/*
+  - scripts
 
 catalogs:
   cli:
@@ -14,9 +15,14 @@ catalogs:
     changelogithub: ^13.16.1
   types:
     typescript: ^5.9.3
+    '@types/node': ^24.10.1
+    type-fest: ^5.2.0
   napi:
     '@napi-rs/cli': ^3.4.1
     '@napi-rs/wasm-runtime': ^1.0.7
+  scripts:
+    tsx: ^4.20.6
+    '@iarna/toml': ^2.2.5
 
 onlyBuiltDependencies:
   - dprint

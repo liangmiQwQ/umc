@@ -9,7 +9,8 @@
     "build": "tsc && pnpm -r build",
     "test": "vitest",
     "deps": "taze -r -w major && pnpm install",
-    "changelog": "changelogithub"
+    "changelog": "changelogithub",
+    "script": "pnpm -C scripts script"
   },
   "devDependencies": {
     "dprint": "catalog:cli",

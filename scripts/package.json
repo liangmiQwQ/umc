@@ -1,0 +1,14 @@
+{
+  "name": "umc-scripts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "script": "tsx"
+  },
+  "devDependencies": {
+    "tsx": "catalog:scripts",
+    "@iarna/toml": "catalog:scripts",
+    "@types/node": "catalog:types",
+    "type-fest": "catalog:types"
+  }
+}
