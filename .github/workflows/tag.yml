@@ -27,14 +27,20 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Check Version
-        run: pnpm script check-version.ts
-
-      - name: Create new tag
+      - name: Check Version and Create Tag
+        id: version_check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Run the check script, exit if no version changes
+          if ! pnpm script check-version.ts; then
+            echo "Version check failed - no new version to tag"
+            echo "skip_tag=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           TAG_NAME=$(cat VERSION_INFO)
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -42,3 +48,7 @@ jobs:
           git push origin "$TAG_NAME"
 
           echo "Created new tag: $TAG_NAME"
+
+      - name: Log Skip
+        if: steps.version_check.outputs.skip_tag == 'true'
+        run: echo "Skipped tag creation - version unchanged"
