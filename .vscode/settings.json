@@ -5,6 +5,7 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
+  "git.branchProtection": [],
   "rust-analyzer.procMacro.ignored": {
     "napi-derive": ["napi"],
     "tracing": ["instrument"]
