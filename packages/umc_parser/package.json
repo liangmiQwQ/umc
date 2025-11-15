@@ -27,7 +27,7 @@
   },
   "napi": {
     "binaryName": "umc_parser",
-    "packageName": "@umc-project/umc-parser",
+    "packageName": "@umc-project/parser",
     "targets": [
       "x86_64-pc-windows-msvc",
       "aarch64-pc-windows-msvc",
