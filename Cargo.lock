@@ -282,6 +282,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "umc_allocator"
+version = "0.0.0-alpha.14"
+
+[[package]]
 name = "umc_parser"
 version = "0.0.0-alpha.14"
 
