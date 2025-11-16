@@ -283,11 +283,11 @@ dependencies = [
 
 [[package]]
 name = "umc_parser"
-version = "0.0.0-alpha.3"
+version = "0.0.0-alpha.4"
 
 [[package]]
 name = "umc_parser_napi"
-version = "0.0.0-alpha.3"
+version = "0.0.0-alpha.4"
 dependencies = [
  "napi",
  "napi-build",
