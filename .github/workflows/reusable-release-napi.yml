@@ -195,13 +195,13 @@ jobs:
         run: |
           VERSION=$(jq -r '.version' ${package_path}/package.json)
           if [[ $VERSION == *"alpha"* ]]; then
-            TAG="--tag alpha"
+            TAG="alpha"
           elif [[ $VERSION == *"beta"* ]]; then
-            TAG="--tag beta"
+            TAG="beta"
           elif [[ $VERSION == *"rc"* ]]; then
-            TAG="--tag rc"
+            TAG="rc"
           else
-            TAG="--tag latest"
+            TAG="latest"
           fi
           echo "Using npm tag: $TAG for version $VERSION"
           pnpm config set tag "$TAG"
