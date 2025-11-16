@@ -191,9 +191,8 @@ jobs:
 
       - run: npm install -g npm@latest # For trusted publishing support
 
-      - name: Check Publish
+      - name: Set Tag
         run: |
-          # Determine npm tag based on version
           VERSION=$(jq -r '.version' ${package_path}/package.json)
           if [[ $VERSION == *"alpha"* ]]; then
             TAG="--tag alpha"
@@ -205,8 +204,12 @@ jobs:
             TAG="--tag latest"
           fi
           echo "Using npm tag: $TAG for version $VERSION"
-          pnpm config set tag $TAG
+          pnpm config set tag "$TAG"
+          npm config set tag "$TAG"
+          echo "Tag config set for both pnpm and npm"
 
+      - name: Check Publish
+        run: |
           # Check subpackages
           for package in ${npm_dir}/*
           do
