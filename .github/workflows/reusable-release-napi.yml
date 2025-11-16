@@ -193,6 +193,19 @@ jobs:
 
       - name: Check Publish
         run: |
+          # Determine npm tag based on version
+          VERSION=$(jq -r '.version' ${package_path}/package.json)
+          if [[ $VERSION == *"alpha"* ]]; then
+            TAG="--tag alpha"
+          elif [[ $VERSION == *"beta"* ]]; then
+            TAG="--tag beta"
+          elif [[ $VERSION == *"rc"* ]]; then
+            TAG="--tag rc"
+          else
+            TAG="--tag latest"
+          fi
+          echo "Using npm tag: $TAG for version $VERSION"
+
           # Check subpackages
           for package in ${npm_dir}/*
           do
@@ -206,7 +219,7 @@ jobs:
                 exit 1
               fi
             done
-            pnpm publish $package/ ${PUBLISH_FLAGS} --dry-run
+            pnpm publish $package/ ${PUBLISH_FLAGS} $TAG --dry-run
             echo ''
           done
 
@@ -221,7 +234,7 @@ jobs:
               exit 1
             fi
           done
-          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} --dry-run
+          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} $TAG --dry-run
 
       - name: Trusted Publish
         run: |
