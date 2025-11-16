@@ -4,7 +4,12 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import type { PackageJson } from 'type-fest';
 
-function getJsPackagesVersions(dir: string, results: string[] = []): string[] {
+interface Result {
+  origin: string;
+  value: string;
+}
+
+function getJsPackagesVersions(dir: string, results: Result[] = []): Result[] {
   const items = readdirSync(dir);
 
   for (const item of items) {
@@ -12,14 +17,14 @@ function getJsPackagesVersions(dir: string, results: string[] = []): string[] {
     const stat = statSync(fullPath);
 
     if (stat.isDirectory()) {
-      if (item !== 'node_modules') {
+      if (item !== 'node_modules' && item !== 'target') {
         getJsPackagesVersions(fullPath, results);
       }
     } else if (item === 'package.json') {
       const packageJson: PackageJson = JSON.parse(readFileSync(fullPath, 'utf-8'));
 
       if (!packageJson.private && packageJson.version) {
-        results.push(packageJson.version);
+        results.push({ origin: fullPath, value: packageJson.version });
       }
     }
   }
@@ -27,7 +32,7 @@ function getJsPackagesVersions(dir: string, results: string[] = []): string[] {
   return results;
 }
 
-function getRustCratesVersions(dir: string, results: string[] = []): string[] {
+function getRustCratesVersions(dir: string, results: Result[] = []): Result[] {
   const items = readdirSync(dir);
 
   for (const item of items) {
@@ -35,7 +40,7 @@ function getRustCratesVersions(dir: string, results: string[] = []): string[] {
     const stat = statSync(fullPath);
 
     if (stat.isDirectory()) {
-      if (item !== 'node_modules') {
+      if (item !== 'node_modules' && item !== 'target') {
         getRustCratesVersions(fullPath, results);
       }
     } else if (item === 'Cargo.toml') {
@@ -45,11 +50,11 @@ function getRustCratesVersions(dir: string, results: string[] = []): string[] {
       const cargoToml = parseToml(readFileSync(fullPath, 'utf-8')) as unknown as CargoToml;
 
       if (cargoToml.package && typeof cargoToml.package.version === 'string') {
-        results.push(cargoToml.package.version);
+        results.push({ origin: fullPath, value: cargoToml.package.version });
       } else if (
         cargoToml.workspace && cargoToml.workspace.package && typeof cargoToml.workspace.package.version === 'string'
       ) {
-        results.push(cargoToml.workspace.package.version);
+        results.push({ origin: fullPath, value: cargoToml.workspace.package.version });
       }
     }
   }
@@ -59,7 +64,8 @@ function getRustCratesVersions(dir: string, results: string[] = []): string[] {
 
 function main() {
   const rootDir = join(import.meta.dirname, '../');
-  const versions = [...getJsPackagesVersions(rootDir), ...getRustCratesVersions(rootDir)];
+  const versions: Result[] = [...getJsPackagesVersions(rootDir), ...getRustCratesVersions(rootDir)];
+
   if (versions.length > 0) {
     let tag: string = 'unknown';
     try {
@@ -68,8 +74,9 @@ function main() {
       console.warn(`No prev tags gotten, use the default instead. ${e}`);
     }
 
-    if (versions.every(e => e === versions[0])) {
-      const newVersion = `v${versions[0]}`;
+    const flatVersions = versions.map(e => e.value);
+    if (flatVersions.every(e => e === flatVersions[0])) {
+      const newVersion = `v${flatVersions[0]}`;
       if (tag !== newVersion) {
         console.log('Found version changed');
         console.log(`Old version: ${tag}`);
@@ -77,7 +84,8 @@ function main() {
         writeFileSync(join(rootDir, 'VERSION_INFO'), newVersion, 'utf-8');
       }
     } else {
-      console.warn(`The versions in packageJson and CargoToml is not the same, fix needed [${versions}]`);
+      console.warn(`The versions in packageJson and CargoToml is not the same, fix needed`);
+      console.dir(versions, { depth: null, colors: true });
     }
   }
   process.exit(0);
