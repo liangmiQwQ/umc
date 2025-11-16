@@ -205,7 +205,7 @@ jobs:
             TAG="--tag latest"
           fi
           echo "Using npm tag: $TAG for version $VERSION"
-          npm config set tag
+          pnpm config set tag $TAG
 
           # Check subpackages
           for package in ${npm_dir}/*
