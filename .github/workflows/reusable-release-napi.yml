@@ -205,6 +205,7 @@ jobs:
             TAG="--tag latest"
           fi
           echo "Using npm tag: $TAG for version $VERSION"
+          npm config set tag
 
           # Check subpackages
           for package in ${npm_dir}/*
@@ -219,7 +220,7 @@ jobs:
                 exit 1
               fi
             done
-            pnpm publish $package/ ${PUBLISH_FLAGS} $TAG --dry-run
+            pnpm publish $package/ ${PUBLISH_FLAGS} --dry-run
             echo ''
           done
 
@@ -234,26 +235,13 @@ jobs:
               exit 1
             fi
           done
-          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} $TAG --dry-run
+          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} --dry-run
 
       - name: Trusted Publish
         run: |
-          # Determine npm tag based on version
-          VERSION=$(jq -r '.version' ${package_path}/package.json)
-          if [[ $VERSION == *"alpha"* ]]; then
-            TAG="--tag alpha"
-          elif [[ $VERSION == *"beta"* ]]; then
-            TAG="--tag beta"
-          elif [[ $VERSION == *"rc"* ]]; then
-            TAG="--tag rc"
-          else
-            TAG="--tag latest"
-          fi
-          echo "Using npm tag: $TAG for version $VERSION"
-
           # Trusted publishing is configured, publish token is not required.
           # Publish sub-packages and adds `optionalDependencies` to `package_path`.
           pnpm napi pre-publish --no-gh-release -t npm --package-json-path ${package_path}/package.json --npm-dir ${npm_dir}
-          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} $TAG
+          pnpm publish ${package_path}/ ${PUBLISH_FLAGS}
         env:
           CI: false
