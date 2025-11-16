@@ -69,11 +69,12 @@ function main() {
     }
 
     if (versions.every(e => e === versions[0])) {
-      if (tag !== versions[0]) {
+      const newVersion = `v${versions[0]}`;
+      if (tag !== newVersion) {
         console.log('Found version changed');
         console.log(`Old version: ${tag}`);
-        console.log(`New version: ${versions[0]}`);
-        writeFileSync(join(rootDir, 'VERSION_INFO'), versions[0], 'utf-8');
+        console.log(`New version: ${newVersion}`);
+        writeFileSync(join(rootDir, 'VERSION_INFO'), newVersion, 'utf-8');
       }
     } else {
       console.warn(`The versions in packageJson and CargoToml is not the same, fix needed [${versions}]`);
