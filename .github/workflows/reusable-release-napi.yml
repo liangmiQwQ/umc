@@ -238,9 +238,22 @@ jobs:
 
       - name: Trusted Publish
         run: |
+          # Determine npm tag based on version
+          VERSION=$(jq -r '.version' ${package_path}/package.json)
+          if [[ $VERSION == *"alpha"* ]]; then
+            TAG="--tag alpha"
+          elif [[ $VERSION == *"beta"* ]]; then
+            TAG="--tag beta"
+          elif [[ $VERSION == *"rc"* ]]; then
+            TAG="--tag rc"
+          else
+            TAG="--tag latest"
+          fi
+          echo "Using npm tag: $TAG for version $VERSION"
+
           # Trusted publishing is configured, publish token is not required.
           # Publish sub-packages and adds `optionalDependencies` to `package_path`.
           pnpm napi pre-publish --no-gh-release -t npm --package-json-path ${package_path}/package.json --npm-dir ${npm_dir}
-          pnpm publish ${package_path}/ ${PUBLISH_FLAGS}
+          pnpm publish ${package_path}/ ${PUBLISH_FLAGS} $TAG
         env:
           CI: false
