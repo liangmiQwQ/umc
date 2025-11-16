@@ -69,7 +69,7 @@ function main() {
   if (versions.length > 0) {
     let tag: string = 'unknown';
     try {
-      execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+      tag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
     } catch (e) {
       console.warn(`No prev tags gotten, use the default instead. ${e}`);
     }
