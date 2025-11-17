@@ -14,18 +14,18 @@
     "bump": "bumpp -r"
   },
   "devDependencies": {
+    "@napi-rs/cli": "catalog:napi",
+    "@types/node": "catalog:types",
+    "bumpp": "catalog:cli",
+    "changelogithub": "catalog:cli",
     "dprint": "catalog:cli",
+    "lint-staged": "catalog:cli",
     "oxlint": "catalog:cli",
     "oxlint-tsgolint": "catalog:cli",
+    "simple-git-hooks": "catalog:cli",
     "taze": "catalog:cli",
     "typescript": "catalog:types",
-    "vitest": "catalog:cli",
-    "lint-staged": "catalog:cli",
-    "simple-git-hooks": "catalog:cli",
-    "changelogithub": "catalog:cli",
-    "bumpp": "catalog:cli",
-    "@types/node": "catalog:types",
-    "@napi-rs/cli": "catalog:napi"
+    "vitest": "catalog:cli"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"

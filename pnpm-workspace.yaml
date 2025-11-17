@@ -7,10 +7,10 @@ catalogs:
     dprint: ^0.50.2
     lint-staged: ^16.2.6
     oxlint: ^1.28.0
-    oxlint-tsgolint: ^0.6.0
+    oxlint-tsgolint: ^0.7.1
     simple-git-hooks: ^2.13.1
     taze: ^19.9.0
-    tsdown: ^0.16.4
+    tsdown: ^0.16.5
     vitest: ^4.0.9
     changelogithub: ^13.16.1
     bumpp: ^10.3.1
