@@ -82,13 +82,14 @@ function main() {
         console.log(`Old version: ${tag}`);
         console.log(`New version: ${newVersion}`);
         writeFileSync(join(rootDir, 'VERSION_INFO'), newVersion, 'utf-8');
+        process.exit(0);
       }
     } else {
       console.warn(`The versions in packageJson and CargoToml is not the same, fix needed`);
       console.dir(versions, { depth: null, colors: true });
     }
   }
-  process.exit(0);
+  process.exit(1);
 }
 
 main();
