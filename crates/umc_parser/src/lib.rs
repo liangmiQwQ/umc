@@ -1,11 +1,11 @@
-use crate::html::HtmlParserOption;
+use crate::html::HtmlParserOptions;
 use oxc_allocator::Allocator;
 
 mod filename;
 mod html;
 
 pub enum ParserOptions {
-  Html5(HtmlParserOption),
+  Html5(HtmlParserOptions),
 }
 
 pub struct Parser<'a> {

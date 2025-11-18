@@ -1,7 +1,13 @@
-pub struct HtmlParserOption {}
+use oxc_parser::ParseOptions;
 
-impl Default for HtmlParserOption {
+pub struct HtmlParserOptions {
+  parse_script: Option<ParseOptions>,
+}
+
+impl Default for HtmlParserOptions {
   fn default() -> Self {
-    HtmlParserOption {}
+    HtmlParserOptions {
+      parse_script: Some(ParseOptions::default()),
+    }
   }
 }
