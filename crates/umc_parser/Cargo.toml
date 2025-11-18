@@ -12,4 +12,8 @@ description.workspace = true
 
 [dependencies]
 oxc_allocator = { workspace = true }
-oxc_parser = { workspace = true }
+oxc_parser = { workspace = true, features = [] }
+
+[features]
+default = ["regular_expression"]
+regular_expression = ["oxc_parser/regular_expression"]

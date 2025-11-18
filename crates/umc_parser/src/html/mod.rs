@@ -1,6 +1,7 @@
 use oxc_parser::ParseOptions;
 
 pub struct HtmlParserOptions {
+  // If no parse
   parse_script: Option<ParseOptions>,
 }
 
