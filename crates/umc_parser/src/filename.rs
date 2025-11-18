@@ -1,11 +1,12 @@
-use crate::ParserOptions;
+use crate::{ParserOptions, html::HtmlParserOption};
 
 impl ParserOptions {
   pub fn default_from_filename(filename: &str) -> Self {
-    if filename.ends_with(".html") {
-      Self::Html5 {}
-    } else {
-      panic!("Not Support Language")
+    let ext = filename.split(".").last().unwrap_or(filename);
+
+    match ext {
+      "html" | "htm" => ParserOptions::Html5(HtmlParserOption::default()),
+      _ => panic!("Unknown file extension {} in file {}", ext, filename),
     }
   }
 }
