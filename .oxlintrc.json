@@ -6,5 +6,6 @@
     "unicorn",
     "typescript",
     "oxc"
-  ]
+  ],
+  "ignorePatterns": ["/packages/*/napi/**"]
 }

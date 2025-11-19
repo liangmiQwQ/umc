@@ -7,8 +7,6 @@
   "json": { "indentWidth": 2 },
   "yaml": { "quotes": "preferSingle" },
   "excludes": [
-    "CHANGELOG-*.md",
-    "CHANGELOG.md",
     "pnpm-lock.yaml",
     "/packages/*/napi/**"
   ],
