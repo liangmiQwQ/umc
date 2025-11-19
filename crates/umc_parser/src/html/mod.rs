@@ -1,7 +1,8 @@
+use crate::Parser;
 use oxc_parser::ParseOptions;
 
 pub struct HtmlParserOptions {
-  // If no parse
+  // If get None, the content in <script> tag will be returned without parsing
   parse_script: Option<ParseOptions>,
 }
 
@@ -12,3 +13,5 @@ impl Default for HtmlParserOptions {
     }
   }
 }
+
+pub fn parse(parser: &Parser, option: &HtmlParserOptions) {}

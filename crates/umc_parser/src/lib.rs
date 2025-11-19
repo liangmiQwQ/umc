@@ -1,4 +1,4 @@
-use crate::html::HtmlParserOptions;
+use crate::html::{HtmlParserOptions, parse};
 use oxc_allocator::Allocator;
 
 mod filename;
@@ -22,6 +22,12 @@ impl<'a> Parser<'a> {
       options,
     }
   }
+
+  pub fn parse(&self) {
+    match &self.options {
+      ParserOptions::Html5(options) => parse(self, options),
+    };
+  }
 }
 
 #[cfg(test)]
@@ -33,7 +39,19 @@ mod test {
     let allocator = Allocator::default();
     let parser = Parser::new(
       &allocator,
-      "some code there",
+      r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+</html>
+  "#,
       ParserOptions::default_from_filename("index.html"),
     );
   }
