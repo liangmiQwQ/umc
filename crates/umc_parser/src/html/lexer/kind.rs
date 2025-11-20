@@ -1,8 +1,5 @@
 use std::fmt::{self, Display};
 
-/// Lexer token kind
-///
-/// Exported for other oxc crates to use. You generally don't need to use this directly.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(u8)]
 #[non_exhaustive]
@@ -27,7 +24,6 @@ pub enum HtmlKind {
 
   // Special
   Doctype, // <!DOCTYPE ...>
-  CData,   // <![CDATA[ ... ]]>
 }
 
 use HtmlKind::*;
@@ -55,8 +51,7 @@ impl HtmlKind {
       Comment => "<!-- Comment -->",
 
       // Special
-      Doctype => "<!DOCTYPE >",
-      CData => "<![CDATA[ ... ]]>",
+      Doctype => "<!DOCTYPE doctype>",
     }
   }
 }
