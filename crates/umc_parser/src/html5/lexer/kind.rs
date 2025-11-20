@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(u8)]
 #[non_exhaustive]
-pub enum HtmlKind {
+pub enum Html5Kind {
   #[default]
   Eof = 0,
 
@@ -26,9 +26,9 @@ pub enum HtmlKind {
   Doctype, // <!DOCTYPE ...>
 }
 
-use HtmlKind::*;
+use Html5Kind::*;
 
-impl HtmlKind {
+impl Html5Kind {
   #[inline]
   pub fn is_eof(self) -> bool {
     self == Eof
@@ -56,7 +56,7 @@ impl HtmlKind {
   }
 }
 
-impl Display for HtmlKind {
+impl Display for Html5Kind {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     self.to_str().fmt(f)
   }
