@@ -25,4 +25,5 @@ napi-build = "2"
 napi-derive = "3.0.0"
 
 oxc_allocator = "0.98.0"
+oxc_diagnostics = "0.98.0"
 oxc_parser = "0.98.0"

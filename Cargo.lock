@@ -736,6 +736,7 @@ name = "umc_parser"
 version = "0.0.0-alpha.14"
 dependencies = [
  "oxc_allocator",
+ "oxc_diagnostics",
  "oxc_parser",
 ]
 
