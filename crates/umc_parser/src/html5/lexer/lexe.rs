@@ -159,7 +159,9 @@ impl<'a> Html5Lexer<'a> {
     let result = Html5Token {
       start: self.source.pointer,
       end: self.source.pointer + *diff,
-      value: Html5TokenValue::None,
+      value: Html5TokenValue::String(
+        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
+      ),
       kind: Html5Kind::Attribute,
     };
 
@@ -172,18 +174,23 @@ impl<'a> Html5Lexer<'a> {
     let mut diff = quote.len_utf8();
 
     for item in iter {
+      diff += item.len_utf8();
+
       match item {
         c if c == quote => break, // the string is ended
         _ => (),
       }
-
-      diff += item.len_utf8();
     }
 
     let result = Html5Token {
       start: self.source.pointer,
       end: self.source.pointer + diff,
-      value: Html5TokenValue::None,
+      value: Html5TokenValue::String(
+        self.source.source_text[self.source.pointer..self.source.pointer + diff]
+          .trim_start_matches(quote)
+          .trim_end_matches(quote)
+          .to_owned(),
+      ),
       kind: Html5Kind::Attribute,
     };
 
