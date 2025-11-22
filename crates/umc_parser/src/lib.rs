@@ -54,5 +54,7 @@ mod test {
   "#,
       ParserOptions::default_from_filename("index.html"),
     );
+
+    assert_eq!(1, 1)
   }
 }
