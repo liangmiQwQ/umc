@@ -10,80 +10,120 @@ impl<'a> Html5Lexer<'a> {
     from_fn(|| self.next_token())
   }
 
+  /// Get the next token, and move the pointer
   fn next_token(&mut self) -> Option<Html5Token> {
-    if self.source.pointer >= self.source.source_text.len() {
-      match self.state {
+    // the file end, but still calling this function
+    if self.is_eof() {
+      return match self.state {
         Html5LexerState::Finished => None,
-        _ => Some(Html5Token {
-          kind: Html5Kind::Eof,
+        _ => Some(self.finish()),
+      };
+    }
+
+    // match the state and do different lexing
+    match self.state {
+      Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
+      _ => None,
+    }
+  }
+
+  fn handle_after_tag_name(&mut self) -> Html5Token {
+    let mut iter = self.source.get_chars();
+
+    // safe unwarp, won't direct to this branch if pointer == file.len()
+    match iter.next().unwrap() {
+      // for whitespace
+      c if c.is_whitespace() => {
+        let mut diff: usize = c.len_utf8();
+        for item in iter {
+          if item.is_whitespace() {
+            diff += item.len_utf8();
+          } else {
+            break;
+          }
+        }
+
+        let result = Html5Token {
           start: self.source.pointer,
-          end: self.source.pointer,
+          end: self.source.pointer + diff,
           value: Html5TokenValue::None,
-        }),
+          kind: Html5Kind::Whitespace,
+        };
+
+        self.source.advance_bytes(diff);
+        result
       }
-    } else {
-      match self.source.current()? {
-        c if c.is_whitespace() => Some(self.get_whitespace_token()),
-        _ => None,
+
+      // for =
+      '=' => {
+        let diff = '='.len_utf8();
+
+        let result = Html5Token {
+          kind: Html5Kind::Eq,
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+        };
+
+        self.source.advance_bytes(diff);
+        result
       }
+
+      // for tag end (>)
+      '>' => {
+        let diff = '>'.len_utf8();
+
+        let result = Html5Token {
+          kind: Html5Kind::TagEnd,
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+        };
+
+        self.source.advance_bytes(diff);
+        result
+      }
+
+      // for self close end and attribute starts with `/`
+      '/' => {
+        let diff = '/'.len_utf8();
+
+        let result = Html5Token {
+          kind: Html5Kind::TagEnd,
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+        };
+
+        self.source.advance_bytes(diff);
+        result
+      }
+
+      // for attribute with `"`
+      '"' => todo!(),
+
+      // for attribute with `'`
+      '\'' => todo!(),
+
+      // for attribute without `"`
+      _ => todo!(),
     }
   }
 
-  fn get_whitespace_token(&mut self) -> Html5Token {
-    let iter = self.source.get_chars();
+  #[inline]
+  fn is_eof(&self) -> bool {
+    self.source.pointer >= self.source.source_text.len()
+  }
 
-    let mut diff: usize = 0;
-    for item in iter {
-      if item.is_whitespace() {
-        diff += item.len_utf8();
-      } else {
-        break;
-      }
-    }
+  #[inline]
+  fn finish(&mut self) -> Html5Token {
+    self.state = Html5LexerState::Finished; // mark as finished
 
-    let result = Html5Token {
+    Html5Token {
+      kind: Html5Kind::Eof,
       start: self.source.pointer,
-      end: self.source.pointer + diff,
+      end: self.source.pointer,
       value: Html5TokenValue::None,
-      kind: Html5Kind::Whitespace,
-    };
-
-    self.source.advance_bytes(diff);
-    result
-  }
-}
-
-#[cfg(test)]
-mod test {
-  use super::{Html5Kind, Html5Lexer, Html5Token, Html5TokenValue};
-  use oxc_allocator::Allocator;
-
-  const HTML_STRING: &str = r#"      <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  
-</body>
-</html>"#;
-
-  #[test]
-  fn get_tokens() {
-    let result: Vec<Html5Token> = Html5Lexer::new(&Allocator::default(), HTML_STRING)
-      .tokens()
-      .collect();
-
-    assert_eq!(
-      result,
-      vec![Html5Token {
-        kind: Html5Kind::Whitespace,
-        start: 0,
-        end: 6,
-        value: Html5TokenValue::None
-      }]
-    )
+    }
   }
 }

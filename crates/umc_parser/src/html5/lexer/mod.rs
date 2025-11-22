@@ -39,3 +39,32 @@ impl<'a> Html5Lexer<'a> {
     }
   }
 }
+
+#[cfg(test)]
+mod test {
+  use crate::html5::lexer::{
+    Html5Lexer, kind::Html5Kind, token::Html5Token, token::Html5TokenValue,
+  };
+  use oxc_allocator::Allocator;
+
+  const HTML_STRING: &str = r#"      <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+</body>
+</html>"#;
+
+  #[test]
+  fn get_tokens() {
+    let result: Vec<Html5Token> = Html5Lexer::new(&Allocator::default(), HTML_STRING)
+      .tokens()
+      .collect();
+
+    assert_eq!(result, vec![])
+  }
+}

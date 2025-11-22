@@ -23,7 +23,7 @@ impl<'a> Source<'a> {
     self.get_chars().next()
   }
 
-  pub fn advance_chars(&mut self, chars: usize) -> &str {
+  pub fn advance_chars(&mut self, chars: usize) {
     let mut diff: usize = 0;
     for (i, item) in self.get_chars().enumerate() {
       if i == chars {
@@ -37,12 +37,9 @@ impl<'a> Source<'a> {
   }
 
   /// Unsafe, panic expected if bytes wrong
-  pub fn advance_bytes(&mut self, bytes: usize) -> &str {
+  pub fn advance_bytes(&mut self, bytes: usize) {
     let target = self.pointer + bytes;
-    let result = &self.source_text[self.pointer..target];
     self.pointer = target;
-
-    result
   }
 
   /// Get the next char without moving the pointer
