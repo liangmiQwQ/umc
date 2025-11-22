@@ -11,6 +11,8 @@ impl<'a> Html5Lexer<'a> {
       ' ' => "",
       _ => "b",
     };
+
+    None
   }
 }
 
@@ -38,8 +40,6 @@ mod test {
       .tokens()
       .collect();
 
-    println!("{:#?}", result);
-
-    assert_eq!(1, 1)
+    assert_eq!(result, vec![])
   }
 }
