@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use super::kind::Html5Kind;
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Html5Token {
   pub kind: Html5Kind,
   pub start: usize,

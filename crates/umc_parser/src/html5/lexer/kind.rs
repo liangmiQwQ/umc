@@ -12,22 +12,19 @@ pub enum Html5Kind {
   TagEnd,        // >
   CloseTagStart, // </
   SelfCloseEnd,  // />
+  Doctype,       // <!DOCTYPE
 
   // Identifier
-  ElementName,    // div, span, html, etc.
-  AttributeName,  // class, id, src, etc.
-  AttributeValue, // like the "w-full" of class="w-full"
+  ElementName, // div, span, html, etc.
+  Attribute,   // both for attribute value and attribute name
 
   // Texts
   TextContent, // like the "Hello World" of <span>Hello World</span>
   Comment,     // <!-- ... -->
 
   // Misc
-  Eq,   // =
-  Skip, // Whitespace, line breaks
-
-  // Special
-  Doctype, // <!DOCTYPE ...>
+  Eq,         // =
+  Whitespace, // Whitespace, line breaks
 }
 
 use Html5Kind::*;
@@ -50,16 +47,15 @@ impl Html5Kind {
       SelfCloseEnd => "/>",
 
       ElementName => "element-name",
-      AttributeName => "attribute-name",
-      AttributeValue => "attribute-value",
+      Attribute => "attribute",
 
       TextContent => "text",
       Comment => "<!-- comment -->",
 
       Eq => "=",
-      Skip => "Skipped",
+      Whitespace => "Whitespace",
 
-      Doctype => "<!DOCTYPE>",
+      Doctype => "<!DOCTYPE",
     }
   }
 }

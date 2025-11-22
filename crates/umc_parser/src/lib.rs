@@ -37,7 +37,7 @@ mod test {
   #[test]
   fn test_create_parser() {
     let allocator = Allocator::default();
-    let parser = Parser::new(
+    let _parser = Parser::new(
       &allocator,
       r#"
 <!DOCTYPE html>
@@ -54,7 +54,5 @@ mod test {
   "#,
       ParserOptions::default_from_filename("index.html"),
     );
-
-    assert_eq!(1, 1)
   }
 }

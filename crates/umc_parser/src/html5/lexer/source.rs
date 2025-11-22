@@ -1,4 +1,6 @@
-pub struct Source<'a> {
+use std::str::Chars;
+
+pub(crate) struct Source<'a> {
   pub pointer: usize,
   pub source_text: &'a str,
 }
@@ -13,18 +15,38 @@ impl<'a> Source<'a> {
 }
 
 impl<'a> Source<'a> {
+  pub fn get_chars(&self) -> Chars<'a> {
+    self.source_text[self.pointer..].chars()
+  }
+
   pub fn current(&self) -> Option<char> {
-    self.source_text[self.pointer..].chars().next()
+    self.get_chars().next()
   }
 
-  pub fn next(&mut self) -> Option<char> {
-    let current = self.current()?;
-    self.pointer += current.len_utf8();
-    Some(current)
+  pub fn advance_chars(&mut self, chars: usize) -> &str {
+    let mut diff: usize = 0;
+    for (i, item) in self.get_chars().enumerate() {
+      if i == chars {
+        break;
+      } else {
+        diff += item.len_utf8();
+      }
+    }
+
+    self.advance_bytes(diff)
   }
 
-  // Get the next char without moving the pointer
+  /// Unsafe, panic expected if bytes wrong
+  pub fn advance_bytes(&mut self, bytes: usize) -> &str {
+    let target = self.pointer + bytes;
+    let result = &self.source_text[self.pointer..target];
+    self.pointer = target;
+
+    result
+  }
+
+  /// Get the next char without moving the pointer
   pub fn peek(&self) -> Option<char> {
-    self.source_text[self.pointer..].chars().nth(1)
+    self.get_chars().nth(1)
   }
 }

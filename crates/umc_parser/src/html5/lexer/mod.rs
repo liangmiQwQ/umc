@@ -7,10 +7,26 @@ mod lexe;
 mod source;
 mod token;
 
+#[repr(u8)]
+pub enum Html5LexerState {
+  /// In the element content
+  /// e.g. <p>Hello| World<p>
+  Content,
+  /// After < but before the tag name
+  /// e.g. <|a>foo</a>
+  InTag,
+  /// After tag name but before the tag end
+  /// e.g. <a|>foo</a> or <a href|="https://example.com">foo</a>
+  AfterTagName,
+  /// Finished lexing
+  Finished,
+}
+
 pub(crate) struct Html5Lexer<'a> {
   allocator: &'a Allocator,
   source: Source<'a>,
-  errors: Vec<OxcDiagnostic>,
+  state: Html5LexerState,
+  pub errors: Vec<OxcDiagnostic>,
 }
 
 impl<'a> Html5Lexer<'a> {
@@ -18,6 +34,7 @@ impl<'a> Html5Lexer<'a> {
     Html5Lexer {
       allocator,
       source: Source::new(source_text),
+      state: Html5LexerState::Content,
       errors: Vec::new(),
     }
   }
