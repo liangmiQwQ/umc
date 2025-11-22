@@ -110,25 +110,30 @@ impl<'a> Html5Lexer<'a> {
       '/' => {
         let mut diff = '/'.len_utf8();
 
-        if let Some(next) = iter.next() // don't unwrap because the file may end with `/`
-          && next == '>'
+        if let Some(next) = iter.next()
+        // don't unwrap because the file may end with `/`
         {
-          // self close
-          diff += '>'.len_utf8();
+          diff += next.len_utf8();
 
-          let result = Html5Token {
-            kind: Html5Kind::SelfCloseTagEnd,
-            start: self.source.pointer,
-            end: self.source.pointer + diff,
-            value: Html5TokenValue::None,
-          };
+          if next == '>' {
+            // self close
+            let result = Html5Token {
+              kind: Html5Kind::SelfCloseTagEnd,
+              start: self.source.pointer,
+              end: self.source.pointer + diff,
+              value: Html5TokenValue::None,
+            };
 
-          self.source.advance_bytes(diff);
-          self.state = Html5LexerState::Content; // update state
-          result
+            self.source.advance_bytes(diff);
+            self.state = Html5LexerState::Content; // update state
+            result
+          } else {
+            // the attribute starts with '/'
+            self.handle_no_quote_attribute(&mut iter, &mut diff)
+          }
         } else {
-          // the attribute starts with '/'
-          self.handle_no_quote_attribute(&mut iter, &mut diff)
+          // return an error, expected tagclose or attribute, but found EOF
+          todo!()
         }
       }
 
@@ -186,15 +191,37 @@ impl<'a> Html5Lexer<'a> {
       start: self.source.pointer,
       end: self.source.pointer + diff,
       value: Html5TokenValue::String(
-        self.source.source_text[self.source.pointer..self.source.pointer + diff]
-          .trim_start_matches(quote)
-          .trim_end_matches(quote)
-          .to_owned(),
+        // do not need to remove quote because we need it
+        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
       ),
       kind: Html5Kind::Attribute,
     };
 
     self.source.advance_bytes(diff);
     result
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::{Html5Lexer, Html5LexerState, Html5Token};
+  use crate::html5::lexer::source::Source;
+  use oxc_allocator::Allocator;
+
+  #[test]
+  fn after_tag_name_should_work() {
+    let mut lexer = Html5Lexer {
+      allocator: &Allocator::default(),
+      source: Source::new(
+        r#" class="w-full h-full" p-1
+ 复杂字段测试 /test "alpha"
+       />"#,
+      ),
+      state: Html5LexerState::AfterTagName,
+      errors: Vec::new(),
+    };
+
+    let tokens: Vec<Html5Token> = lexer.tokens().collect();
+    insta::assert_snapshot!(format!("{:?}", tokens));
   }
 }
