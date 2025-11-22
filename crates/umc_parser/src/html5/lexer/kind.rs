@@ -8,11 +8,11 @@ pub enum Html5Kind {
   Eof = 0,
 
   // Tags
-  TagStart,      // <
-  TagEnd,        // >
-  CloseTagStart, // </
-  SelfCloseEnd,  // />
-  Doctype,       // <!DOCTYPE
+  TagStart,        // <
+  TagEnd,          // >
+  CloseTagStart,   // </
+  SelfCloseTagEnd, // />
+  Doctype,         // <!DOCTYPE
 
   // Identifier
   ElementName, // div, span, html, etc.
@@ -44,7 +44,7 @@ impl Html5Kind {
       TagStart => "<",
       TagEnd => ">",
       CloseTagStart => "</",
-      SelfCloseEnd => "/>",
+      SelfCloseTagEnd => "/>",
 
       ElementName => "element-name",
       Attribute => "attribute",
