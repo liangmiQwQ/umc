@@ -299,15 +299,15 @@ impl<'a> Html5Lexer<'a> {
               if match_commement && COMMENT_START.get(i) == Some(&item) {
                 if i == COMMENT_START.len() {
                   // it's a comment
-                  todo!()
+                  return self.handle_comment(&mut iter, &mut diff);
                 }
               } else {
                 match_commement = false;
               }
 
               if !match_doctype && !match_commement {
-                // it is neither doctype nor comment, treat as fake comment (ends with > instead of -->)
-                todo!()
+                // it is neither doctype nor comment, treat as bogus comment (ends with > instead of -->)
+                return self.handle_bogus_comment(&mut iter, &mut diff);
               }
 
               i += 1
@@ -331,6 +331,83 @@ impl<'a> Html5Lexer<'a> {
         self.handle_content_text(&mut iter, &mut diff)
       }
     }
+  }
+
+  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+    let mut ended = false;
+    for item in iter {
+      *diff += item.len_utf8();
+
+      if item == '>' {
+        ended = true;
+        break;
+      }
+    }
+
+    if !ended {
+      // eof without finishing doctype or comment
+      return self.tailless_comment(*diff);
+    }
+
+    let result = Html5Token {
+      kind: Html5Kind::Comment,
+      start: self.source.pointer,
+      end: self.source.pointer + *diff,
+      value: Html5TokenValue::String({
+        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + *diff];
+        // the struct: <! something >
+        raw_text[2..raw_text.len() - 2].to_owned()
+      }),
+    };
+
+    self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<! something >| moretext
+    result
+  }
+
+  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+    let mut dash_count: u8 = 0;
+    let mut ended = false;
+
+    for item in iter {
+      *diff += item.len_utf8();
+
+      match item {
+        '-' => {
+          dash_count += 1;
+        }
+        '>' => {
+          if dash_count >= 2 {
+            // comment ended
+            ended = true;
+            break;
+          } else {
+            dash_count = 0; // reset dash count
+          }
+        }
+        _ => {
+          dash_count = 0; // reset dash count
+        }
+      }
+    }
+
+    if !ended {
+      // eof without finishing doctype or comment
+      return self.tailless_comment(*diff);
+    }
+
+    let result = Html5Token {
+      kind: Html5Kind::Comment,
+      start: self.source.pointer,
+      end: self.source.pointer + *diff,
+      value: Html5TokenValue::String({
+        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + *diff];
+        // the struct: <!-- something -->
+        raw_text[4..raw_text.len() - 3].to_owned()
+      }),
+    };
+
+    self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<!-- something -->| moretext
+    result
   }
 
   fn tailless_comment(&mut self, diff: usize) -> Html5Token {
