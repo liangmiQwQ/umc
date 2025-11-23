@@ -25,6 +25,7 @@ impl<'a> Html5Lexer<'a> {
     // match the state and do different lexing
     match self.state {
       Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
+      Html5LexerState::Content => Some(self.handle_content()),
       _ => None,
     }
   }
@@ -226,6 +227,54 @@ impl<'a> Html5Lexer<'a> {
 
     self.source.advance_bytes(diff);
     result
+  }
+}
+
+// handler for Html5LexerState::Content
+impl<'a> Html5Lexer<'a> {
+  fn handle_content(&mut self) -> Html5Token {
+    let mut iter: std::str::Chars<'_> = self.source.get_chars();
+    // safe unwarp, won't direct to this branch if pointer == file.len()
+    match iter.next().unwrap() {
+      // for <
+      '<' => {
+        // maybe comment, doctype, tag or < starting content
+        let mut diff: usize = '<'.len_utf8();
+
+        match iter.next() {
+          // for alphabetic character, as tag start
+          Some(item) if item.is_alphabetic() => {
+            todo!("tag handling")
+          }
+
+          // for / character, as closing tag
+          Some(item) if item == '/' => {
+            todo!("closing tag handling")
+          }
+
+          // for ! character, as comment or doctype
+          Some(item) if item == '!' => {
+            todo!("comment or doctype handling")
+          }
+
+          // for none and other character, as content
+          None | Some(_) => {
+            todo!("content handling")
+          }
+        }
+      }
+
+      // for content
+      c => {
+        // record until next tag start
+        todo!()
+      }
+    }
+  }
+
+  #[inline]
+  fn is_tag(item: char) -> bool {
+    item.is_alphabetic() || item == '/' || item == '!'
   }
 }
 
