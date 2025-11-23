@@ -71,6 +71,7 @@ function main() {
     try {
       tag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
     } catch (e) {
+      // oxlint-disable-next-line restrict-template-expressions
       console.warn(`No prev tags gotten, use the default instead. ${e}`);
     }
 
