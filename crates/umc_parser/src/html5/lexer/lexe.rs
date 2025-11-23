@@ -210,18 +210,20 @@ mod test {
 
   #[test]
   fn after_tag_name_should_work() {
+    let source_text = r#" class="w-full h-full" p-1
+ 复杂字段测试 /test "alpha"
+       />"#;
     let mut lexer = Html5Lexer {
       allocator: &Allocator::default(),
-      source: Source::new(
-        r#" class="w-full h-full" p-1
- 复杂字段测试 /test "alpha"
-       />"#,
-      ),
+      source: Source::new(source_text),
       state: Html5LexerState::AfterTagName,
       errors: Vec::new(),
     };
 
     let tokens: Vec<Html5Token> = lexer.tokens().collect();
-    insta::assert_snapshot!(format!("{:?}", tokens));
+    insta::assert_snapshot!(format!(
+      "Source: {:#?}; \nTokens:{:#?}",
+      source_text, tokens
+    ));
   }
 }

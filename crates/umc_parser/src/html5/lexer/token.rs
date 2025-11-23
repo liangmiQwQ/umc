@@ -21,6 +21,5 @@ impl Html5Token {
 pub enum Html5TokenValue {
   #[default]
   None,
-  Number(f64),
   String(String),
 }
