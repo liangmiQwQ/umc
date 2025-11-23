@@ -65,6 +65,6 @@ mod test {
       .tokens()
       .collect();
 
-    assert_eq!(result, vec![])
+    insta::assert_snapshot!(format!("{:#?}", result))
   }
 }

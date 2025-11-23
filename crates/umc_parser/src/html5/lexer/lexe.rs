@@ -5,7 +5,7 @@ use crate::html5::lexer::{
   kind::Html5Kind,
   token::{Html5Token, Html5TokenValue},
 };
-use std::{iter::from_fn, os::macos::raw, str::Chars};
+use std::{iter::from_fn, str::Chars};
 
 impl<'a> Html5Lexer<'a> {
   pub fn tokens(&mut self) -> impl Iterator<Item = Html5Token> {
@@ -26,7 +26,8 @@ impl<'a> Html5Lexer<'a> {
     match self.state {
       Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
       Html5LexerState::Content => Some(self.handle_content()),
-      _ => None,
+      Html5LexerState::InTag => todo!(),
+      Html5LexerState::Finished => None,
     }
   }
 
@@ -270,8 +271,10 @@ impl<'a> Html5Lexer<'a> {
             const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
             let mut match_doctype = true;
             let mut match_commement = true;
+            let mut i = 0;
 
-            for (i, item) in iter.enumerate() {
+            while let Some(item) = iter.next() {
+              // for (i, item) in iter.enumerate() {
               diff += item.len_utf8();
 
               if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
@@ -304,43 +307,13 @@ impl<'a> Html5Lexer<'a> {
 
               if !match_doctype && !match_commement {
                 // it is neither doctype nor comment, treat as fake comment (ends with > instead of -->)
+                todo!()
               }
+
+              i += 1
             }
 
-            // eof without finishing doctype or comment
-            // throw an error
-            let error_message = format!(
-              "Expected {}, but found {}",
-              Html5Kind::TagEnd,
-              Html5Kind::Eof,
-            );
-            let label = LabeledSpan::at(
-              self.source.pointer + diff - 1..self.source.pointer + diff,
-              &error_message,
-            );
-            self
-              .errors
-              .push(OxcDiagnostic::error(error_message).with_label(label));
-
-            // return as comment
-            let result = Html5Token {
-              kind: Html5Kind::Comment,
-              start: self.source.pointer,
-              end: self.source.pointer + diff,
-              value: Html5TokenValue::String({
-                let raw_text =
-                  &self.source.source_text[self.source.pointer..self.source.pointer + diff];
-                if let Some(comment) = raw_text.strip_prefix("<!--") {
-                  comment.to_owned()
-                } else {
-                  raw_text[2..].to_owned()
-                }
-              }),
-            };
-
-            self.source.advance_bytes(diff);
-            self.state = Html5LexerState::AfterTagName; // update state
-            result
+            self.tailless_comment(diff)
           }
 
           // for none and other character, as content starting with <
@@ -358,6 +331,42 @@ impl<'a> Html5Lexer<'a> {
         self.handle_content_text(&mut iter, &mut diff)
       }
     }
+  }
+
+  fn tailless_comment(&mut self, diff: usize) -> Html5Token {
+    // eof without finishing doctype or comment
+    // throw an error
+    let error_message = format!(
+      "Expected {}, but found {}",
+      Html5Kind::TagEnd,
+      Html5Kind::Eof,
+    );
+    let label = LabeledSpan::at(
+      self.source.pointer + diff - 1..self.source.pointer + diff,
+      &error_message,
+    );
+    self
+      .errors
+      .push(OxcDiagnostic::error(error_message).with_label(label));
+
+    // return as comment
+    let result = Html5Token {
+      kind: Html5Kind::Comment,
+      start: self.source.pointer,
+      end: self.source.pointer + diff,
+      value: Html5TokenValue::String({
+        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + diff];
+        if let Some(comment) = raw_text.strip_prefix("<!--") {
+          comment.to_owned()
+        } else {
+          raw_text[2..].to_owned()
+        }
+      }),
+    };
+
+    self.source.advance_bytes(diff);
+    self.state = Html5LexerState::AfterTagName; // update state
+    result
   }
 
   fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
