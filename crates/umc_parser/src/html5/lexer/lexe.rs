@@ -113,12 +113,8 @@ impl<'a> Html5Lexer<'a> {
       '/' => {
         let mut diff = '/'.len_utf8();
 
-        if let Some(next) = iter.next()
-        // don't unwrap because the file may end with `/`
-        {
-          diff += next.len_utf8();
-
-          if next == '>' {
+        match iter.next() {
+          Some('>') => {
             // self close
             let result = Html5Token {
               kind: Html5Kind::SelfCloseTagEnd,
@@ -130,21 +126,8 @@ impl<'a> Html5Lexer<'a> {
             self.source.advance_bytes(diff);
             self.state = Html5LexerState::Content; // update state
             result
-          } else {
-            // the attribute starts with '/'
-            self.handle_no_quote_attribute(&mut iter, &mut diff)
           }
-        } else {
-          // only / found, treat it as attribute
-          let result = Html5Token {
-            kind: Html5Kind::Attribute,
-            start: self.source.pointer,
-            end: self.source.pointer + diff,
-            value: Html5TokenValue::None,
-          };
-
-          self.source.advance_bytes(diff);
-          result
+          None | Some(_) => self.handle_no_quote_attribute(&mut iter, &mut diff),
         }
       }
 
