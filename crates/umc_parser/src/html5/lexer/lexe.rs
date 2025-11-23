@@ -1,3 +1,5 @@
+use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
+
 use crate::html5::lexer::{
   Html5Lexer, Html5LexerState,
   kind::Html5Kind,
@@ -6,8 +8,8 @@ use crate::html5::lexer::{
 use std::{iter::from_fn, str::Chars};
 
 impl<'a> Html5Lexer<'a> {
-  pub fn tokens(&'a mut self) -> impl Iterator<Item = Html5Token> + 'a {
-    from_fn(|| self.next_token())
+  pub fn tokens(&mut self) -> impl Iterator<Item = Html5Token> {
+    from_fn(move || self.next_token())
   }
 
   /// Get the next token, and move the pointer
@@ -132,8 +134,16 @@ impl<'a> Html5Lexer<'a> {
             self.handle_no_quote_attribute(&mut iter, &mut diff)
           }
         } else {
-          // return an error, expected tagclose or attribute, but found EOF
-          todo!()
+          // only / found, treat it as attribute
+          let result = Html5Token {
+            kind: Html5Kind::Attribute,
+            start: self.source.pointer,
+            end: self.source.pointer + diff,
+            value: Html5TokenValue::None,
+          };
+
+          self.source.advance_bytes(diff);
+          result
         }
       }
 
@@ -177,14 +187,31 @@ impl<'a> Html5Lexer<'a> {
   fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Html5Token {
     // since html don't support \ escape, we don't need to manage its state
     let mut diff = quote.len_utf8();
+    let mut ended = false;
 
     for item in iter {
       diff += item.len_utf8();
 
       match item {
-        c if c == quote => break, // the string is ended
+        c if c == quote => {
+          ended = true;
+          break;
+        } // the string is ended
         _ => (),
       }
+    }
+
+    if !ended {
+      // throw an error, expect quote, but found eof
+      let error_message = format!("Expected {}, but found {}", quote, Html5Kind::Eof.to_str(),);
+      let label = LabeledSpan::at(
+        self.source.pointer + diff - 1..self.source.pointer + diff,
+        &error_message,
+      );
+
+      self
+        .errors
+        .push(OxcDiagnostic::error(error_message).with_label(label));
     }
 
     let result = Html5Token {
@@ -207,15 +234,16 @@ mod test {
   use super::{Html5Lexer, Html5LexerState, Html5Token};
   use crate::html5::lexer::source::Source;
   use oxc_allocator::Allocator;
+  use oxc_diagnostics::GraphicalReportHandler;
 
   #[test]
   fn after_tag_name_should_work() {
-    let source_text = r#" class="w-full h-full" p-1
+    const SOURCE_TEXT: &str = r#" class="w-full h-full" p-1
  复杂字段测试 /test "alpha"
        />"#;
     let mut lexer = Html5Lexer {
       allocator: &Allocator::default(),
-      source: Source::new(source_text),
+      source: Source::new(SOURCE_TEXT),
       state: Html5LexerState::AfterTagName,
       errors: Vec::new(),
     };
@@ -223,7 +251,25 @@ mod test {
     let tokens: Vec<Html5Token> = lexer.tokens().collect();
     insta::assert_snapshot!(format!(
       "Source: {:#?}; \nTokens:{:#?}",
-      source_text, tokens
+      SOURCE_TEXT, tokens
+    ));
+  }
+
+  #[test]
+  fn after_tag_name_should_return_error() {
+    const SOURCE_TEXT: &str = r#" class="w-full"#;
+    let mut lexer = Html5Lexer {
+      allocator: &Allocator::default(),
+      source: Source::new(SOURCE_TEXT),
+      state: Html5LexerState::AfterTagName,
+      errors: Vec::new(),
+    };
+
+    let _ = lexer.tokens().collect::<Vec<Html5Token>>();
+    insta::assert_snapshot!(format!(
+      "Source: {:#?}; \nErrors:{:#?}",
+      SOURCE_TEXT,
+      lexer.errors.get(0).unwrap()
     ));
   }
 }
