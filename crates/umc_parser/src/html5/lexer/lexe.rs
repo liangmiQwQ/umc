@@ -113,7 +113,15 @@ impl<'a> Html5Lexer<'a> {
       '/' => {
         let mut diff = '/'.len_utf8();
 
-        match iter.next() {
+        let result = {
+          let result = iter.next();
+          if let Some(next) = result {
+            diff += next.len_utf8();
+          }
+          result
+        };
+
+        match result {
           Some('>') => {
             // self close
             let result = Html5Token {
@@ -147,7 +155,7 @@ impl<'a> Html5Lexer<'a> {
 
   fn handle_no_quote_attribute(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
     for item in iter {
-      if item.is_whitespace() || item == '>' || item == '=' {
+      if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
         // end of a attribute
         break;
       } else {
@@ -231,12 +239,12 @@ impl<'a> Html5Lexer<'a> {
           }
 
           // for / character, as closing tag
-          Some(item) if item == '/' => {
+          Some('/') => {
             todo!("closing tag handling")
           }
 
           // for ! character, as comment or doctype
-          Some(item) if item == '!' => {
+          Some('!') => {
             todo!("comment or doctype handling")
           }
 
@@ -253,11 +261,6 @@ impl<'a> Html5Lexer<'a> {
         todo!()
       }
     }
-  }
-
-  #[inline]
-  fn is_tag(item: char) -> bool {
-    item.is_alphabetic() || item == '/' || item == '!'
   }
 }
 
