@@ -235,22 +235,81 @@ impl<'a> Html5Lexer<'a> {
         match iter.next() {
           // for alphabetic character, as tag start
           Some(item) if item.is_alphabetic() => {
-            todo!("tag handling")
+            // do not need to add diff, because we only need the < part
+            let result = Html5Token {
+              kind: Html5Kind::TagStart,
+              start: self.source.pointer,
+              end: self.source.pointer + diff,
+              value: Html5TokenValue::None,
+            };
+
+            self.source.advance_bytes(diff);
+            self.state = Html5LexerState::InTag; // update state
+            result
           }
 
           // for / character, as closing tag
           Some('/') => {
-            todo!("closing tag handling")
+            diff += '/'.len_utf8();
+
+            let result = Html5Token {
+              kind: Html5Kind::CloseTagStart,
+              start: self.source.pointer,
+              end: self.source.pointer + diff,
+              value: Html5TokenValue::None,
+            };
+
+            self.source.advance_bytes(diff);
+            self.state = Html5LexerState::InTag; // update state
+            result
           }
 
           // for ! character, as comment or doctype
           Some('!') => {
-            todo!("comment or doctype handling")
+            const COMMENT_START: [char; 2] = ['-', '-'];
+            const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
+            let mut i: usize = 0;
+
+            for item in iter {
+              diff += item.len_utf8();
+              if COMMENT_START.get(i) == Some(&item) {
+                i += 1;
+                if i == COMMENT_START.len() {
+                  // it's a comment, need to find the end of comment
+                  todo!();
+                  break;
+                }
+              } else if DOCTYPE_START.get(i) == Some(&item) {
+                i += 1;
+                if i == DOCTYPE_START.len() {
+                  // it's a doctype
+                  let result = Html5Token {
+                    kind: Html5Kind::Doctype,
+                    start: self.source.pointer,
+                    end: self.source.pointer + diff,
+                    value: Html5TokenValue::None,
+                  };
+
+                  self.source.advance_bytes(diff);
+                  self.state = Html5LexerState::AfterTagName; // update state
+
+                  return result;
+                }
+              } else {
+                // just test content starting with !
+                break;
+              }
+              i += 1;
+            }
+
+            // for content starting with !
+            todo!("content handling")
           }
 
-          // for none and other character, as content
+          // for none and other character, as content starting with <
           None | Some(_) => {
-            todo!("content handling")
+            // record until next tag start
+            self.handle_content_text(&mut iter, &mut diff)
           }
         }
       }
@@ -258,9 +317,44 @@ impl<'a> Html5Lexer<'a> {
       // for content
       c => {
         // record until next tag start
-        todo!()
+        let mut diff: usize = c.len_utf8();
+        self.handle_content_text(&mut iter, &mut diff)
       }
     }
+  }
+
+  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+    let mut check_next = false;
+
+    for item in iter {
+      if check_next {
+        if item.is_alphabetic() || item == '/' || item == '!' {
+          break;
+        } else {
+          *diff += item.len_utf8() + '<'.len_utf8();
+          check_next = false;
+          continue;
+        }
+      }
+
+      if item == '<' {
+        check_next = true;
+      } else {
+        *diff += item.len_utf8();
+      }
+    }
+
+    let result = Html5Token {
+      kind: Html5Kind::TextContent,
+      start: self.source.pointer,
+      end: self.source.pointer + *diff,
+      value: Html5TokenValue::String(
+        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
+      ),
+    };
+
+    self.source.advance_bytes(*diff);
+    result
   }
 }
 
@@ -269,7 +363,6 @@ mod test {
   use super::{Html5Lexer, Html5LexerState, Html5Token};
   use crate::html5::lexer::source::Source;
   use oxc_allocator::Allocator;
-  use oxc_diagnostics::GraphicalReportHandler;
 
   #[test]
   fn after_tag_name_should_work() {
@@ -300,7 +393,8 @@ mod test {
       errors: Vec::new(),
     };
 
-    let _ = lexer.tokens().collect::<Vec<Html5Token>>();
+    lexer.tokens().for_each(drop);
+
     insta::assert_snapshot!(format!(
       "Source: {:#?}; \nErrors:{:#?}",
       SOURCE_TEXT,
