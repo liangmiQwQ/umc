@@ -5,7 +5,7 @@ use crate::html5::lexer::{
   kind::Html5Kind,
   token::{Html5Token, Html5TokenValue},
 };
-use std::{iter::from_fn, str::Chars};
+use std::{iter::from_fn, os::macos::raw, str::Chars};
 
 impl<'a> Html5Lexer<'a> {
   pub fn tokens(&mut self) -> impl Iterator<Item = Html5Token> {
@@ -195,7 +195,7 @@ impl<'a> Html5Lexer<'a> {
 
     if !ended {
       // throw an error, expect quote, but found eof
-      let error_message = format!("Expected {}, but found {}", quote, Html5Kind::Eof.to_str(),);
+      let error_message = format!("Expected {}, but found {}", quote, Html5Kind::Eof,);
       let label = LabeledSpan::at(
         self.source.pointer + diff - 1..self.source.pointer + diff,
         &error_message,
@@ -268,19 +268,13 @@ impl<'a> Html5Lexer<'a> {
           Some('!') => {
             const COMMENT_START: [char; 2] = ['-', '-'];
             const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
-            let mut i: usize = 0;
+            let mut match_doctype = true;
+            let mut match_commement = true;
 
-            for item in iter {
+            for (i, item) in iter.enumerate() {
               diff += item.len_utf8();
-              if COMMENT_START.get(i) == Some(&item) {
-                i += 1;
-                if i == COMMENT_START.len() {
-                  // it's a comment, need to find the end of comment
-                  todo!();
-                  break;
-                }
-              } else if DOCTYPE_START.get(i) == Some(&item) {
-                i += 1;
+
+              if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
                 if i == DOCTYPE_START.len() {
                   // it's a doctype
                   let result = Html5Token {
@@ -296,14 +290,57 @@ impl<'a> Html5Lexer<'a> {
                   return result;
                 }
               } else {
-                // just test content starting with !
-                break;
+                match_doctype = false;
               }
-              i += 1;
+
+              if match_commement && COMMENT_START.get(i) == Some(&item) {
+                if i == COMMENT_START.len() {
+                  // it's a comment
+                  todo!()
+                }
+              } else {
+                match_commement = false;
+              }
+
+              if !match_doctype && !match_commement {
+                // it is neither doctype nor comment, treat as fake comment (ends with > instead of -->)
+              }
             }
 
-            // for content starting with !
-            todo!("content handling")
+            // eof without finishing doctype or comment
+            // throw an error
+            let error_message = format!(
+              "Expected {}, but found {}",
+              Html5Kind::TagEnd,
+              Html5Kind::Eof,
+            );
+            let label = LabeledSpan::at(
+              self.source.pointer + diff - 1..self.source.pointer + diff,
+              &error_message,
+            );
+            self
+              .errors
+              .push(OxcDiagnostic::error(error_message).with_label(label));
+
+            // return as comment
+            let result = Html5Token {
+              kind: Html5Kind::Comment,
+              start: self.source.pointer,
+              end: self.source.pointer + diff,
+              value: Html5TokenValue::String({
+                let raw_text =
+                  &self.source.source_text[self.source.pointer..self.source.pointer + diff];
+                if let Some(comment) = raw_text.strip_prefix("<!--") {
+                  comment.to_owned()
+                } else {
+                  raw_text[2..].to_owned()
+                }
+              }),
+            };
+
+            self.source.advance_bytes(diff);
+            self.state = Html5LexerState::AfterTagName; // update state
+            result
           }
 
           // for none and other character, as content starting with <
