@@ -510,7 +510,7 @@ mod test {
  复杂字段测试 /test "alpha"
        />"#;
     let mut lexer = Html5Lexer {
-      allocator: &Allocator::default(),
+      _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
       state: Html5LexerState::AfterTagName,
       errors: Vec::new(),
@@ -527,7 +527,7 @@ mod test {
   fn after_tag_name_should_return_error() {
     const SOURCE_TEXT: &str = r#" class="w-full"#;
     let mut lexer = Html5Lexer {
-      allocator: &Allocator::default(),
+      _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
       state: Html5LexerState::AfterTagName,
       errors: Vec::new(),
