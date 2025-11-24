@@ -464,7 +464,10 @@ impl<'a> Html5Lexer<'a> {
     // call the handle_tag
     let mut iter = self.source.get_chars();
     let mut diff: usize = 0;
-    self.handle_tag(&mut iter, &mut diff, Html5Kind::ElementName)
+
+    let result = self.handle_tag(&mut iter, &mut diff, Html5Kind::ElementName);
+    self.state = Html5LexerState::AfterTagName; // update state
+    result
   }
 }
 

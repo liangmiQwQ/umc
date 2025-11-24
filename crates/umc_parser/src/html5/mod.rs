@@ -19,5 +19,5 @@ impl Default for Html5ParserOptions {
 pub fn parse(parser: &Parser, option: &Html5ParserOptions) {
   let mut lexer = Html5Lexer::new(parser.allocator, parser.source_text);
 
-  lexer.tokens();
+  let _: Vec<_> = lexer.tokens().collect();
 }
