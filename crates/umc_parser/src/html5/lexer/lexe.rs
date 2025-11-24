@@ -26,7 +26,7 @@ impl<'a> Html5Lexer<'a> {
     match self.state {
       Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
       Html5LexerState::Content => Some(self.handle_content()),
-      Html5LexerState::InTag => todo!(),
+      Html5LexerState::InTag => Some(self.handle_in_tag()),
       Html5LexerState::Finished => None,
     }
   }
@@ -136,7 +136,7 @@ impl<'a> Html5Lexer<'a> {
             self.state = Html5LexerState::Content; // update state
             result
           }
-          None | Some(_) => self.handle_no_quote_attribute(&mut iter, &mut diff),
+          None | Some(_) => self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute),
         }
       }
 
@@ -149,32 +149,9 @@ impl<'a> Html5Lexer<'a> {
       // for attribute without `"`
       c => {
         let mut diff = c.len_utf8();
-        self.handle_no_quote_attribute(&mut iter, &mut diff)
+        self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute)
       }
     }
-  }
-
-  fn handle_no_quote_attribute(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
-    for item in iter {
-      if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
-        // end of a attribute
-        break;
-      } else {
-        *diff += item.len_utf8();
-      }
-    }
-
-    let result = Html5Token {
-      start: self.source.pointer,
-      end: self.source.pointer + *diff,
-      value: Html5TokenValue::String(
-        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
-      ),
-      kind: Html5Kind::Attribute,
-    };
-
-    self.source.advance_bytes(*diff);
-    result
   }
 
   fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Html5Token {
@@ -474,6 +451,42 @@ impl<'a> Html5Lexer<'a> {
       value: Html5TokenValue::String(
         self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
       ),
+    };
+
+    self.source.advance_bytes(*diff);
+    result
+  }
+}
+
+// handler for Html5LexerState::InTag
+impl<'a> Html5Lexer<'a> {
+  fn handle_in_tag(&mut self) -> Html5Token {
+    // call the handle_tag
+    let mut iter = self.source.get_chars();
+    let mut diff: usize = 0;
+    self.handle_tag(&mut iter, &mut diff, Html5Kind::ElementName)
+  }
+}
+
+// some universal functions
+impl<'a> Html5Lexer<'a> {
+  fn handle_tag(&mut self, iter: &mut Chars, diff: &mut usize, kind: Html5Kind) -> Html5Token {
+    for item in iter {
+      if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
+        // end of a attribute
+        break;
+      } else {
+        *diff += item.len_utf8();
+      }
+    }
+
+    let result = Html5Token {
+      start: self.source.pointer,
+      end: self.source.pointer + *diff,
+      value: Html5TokenValue::String(
+        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
+      ),
+      kind,
     };
 
     self.source.advance_bytes(*diff);
