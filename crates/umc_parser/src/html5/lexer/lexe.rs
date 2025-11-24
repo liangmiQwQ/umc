@@ -253,7 +253,6 @@ impl<'a> Html5Lexer<'a> {
             let mut i = 0;
 
             while let Some(item) = iter.next() {
-              // for (i, item) in iter.enumerate() {
               diff += item.len_utf8();
 
               if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
