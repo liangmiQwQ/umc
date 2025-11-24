@@ -23,7 +23,7 @@ pub enum Html5LexerState {
 }
 
 pub(crate) struct Html5Lexer<'a> {
-  allocator: &'a Allocator,
+  _allocator: &'a Allocator,
   source: Source<'a>,
   state: Html5LexerState,
   pub errors: Vec<OxcDiagnostic>,
@@ -32,7 +32,7 @@ pub(crate) struct Html5Lexer<'a> {
 impl<'a> Html5Lexer<'a> {
   pub fn new(allocator: &'a Allocator, source_text: &'a str) -> Html5Lexer<'a> {
     Html5Lexer {
-      allocator,
+      _allocator: allocator,
       source: Source::new(source_text),
       state: Html5LexerState::Content,
       errors: Vec::new(),

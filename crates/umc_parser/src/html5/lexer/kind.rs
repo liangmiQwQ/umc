@@ -30,12 +30,6 @@ pub enum Html5Kind {
 use Html5Kind::*;
 
 impl Html5Kind {
-  #[inline]
-  #[must_use]
-  pub fn is_eof(self) -> bool {
-    self == Eof
-  }
-
   #[must_use]
   pub fn to_str(self) -> &'static str {
     match self {

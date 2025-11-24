@@ -4,7 +4,8 @@ use oxc_parser::ParseOptions;
 mod lexer;
 
 pub struct Html5ParserOptions {
-  // If get None, the content in <script> tag will be returned without parsing
+  /// The oxc_parser options for parsing content inside <script> tags.
+  /// If get None, the content in <script> tag will be returned without parsing
   parse_script: Option<ParseOptions>,
 }
 
