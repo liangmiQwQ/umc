@@ -244,6 +244,8 @@ impl<'a> Html5Lexer<'a> {
 
           // for ! character, as comment or doctype
           Some('!') => {
+            diff += '!'.len_utf8();
+
             const COMMENT_START: [char; 2] = ['-', '-'];
             const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
             let mut match_doctype = true;
@@ -255,7 +257,7 @@ impl<'a> Html5Lexer<'a> {
               diff += item.len_utf8();
 
               if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
-                if i == DOCTYPE_START.len() {
+                if i == DOCTYPE_START.len() - 1 {
                   // it's a doctype
                   let result = Html5Token {
                     kind: Html5Kind::Doctype,
