@@ -24,8 +24,9 @@ impl<'a> Html5Lexer<'a> {
 
     // match the state and do different lexing
     match self.state {
-      Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
       Html5LexerState::Content => Some(self.handle_content()),
+      Html5LexerState::EmbeddedContent(ending) => Some(self.handle_embedded_content()),
+      Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
       Html5LexerState::InTag => Some(self.handle_in_tag()),
       Html5LexerState::Finished => None,
     }
@@ -46,156 +47,6 @@ impl<'a> Html5Lexer<'a> {
       end: self.source.pointer,
       value: Html5TokenValue::None,
     }
-  }
-}
-
-// handler for Html5LexerState::AfterTagName
-impl<'a> Html5Lexer<'a> {
-  fn handle_after_tag_name(&mut self) -> Html5Token {
-    let mut iter: std::str::Chars<'_> = self.source.get_chars();
-
-    // safe unwarp, won't direct to this branch if pointer == file.len()
-    match iter.next().unwrap() {
-      // for whitespace
-      c if c.is_whitespace() => {
-        let mut diff: usize = c.len_utf8();
-
-        for item in iter {
-          if item.is_whitespace() {
-            diff += item.len_utf8();
-          } else {
-            break;
-          }
-        }
-
-        let result = Html5Token {
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
-          kind: Html5Kind::Whitespace,
-        };
-
-        self.source.advance_bytes(diff);
-        result
-      }
-
-      // for =
-      '=' => {
-        let diff = '='.len_utf8();
-
-        let result = Html5Token {
-          kind: Html5Kind::Eq,
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
-        };
-
-        self.source.advance_bytes(diff);
-        result
-      }
-
-      // for tag end (>)
-      '>' => {
-        let diff = '>'.len_utf8();
-
-        let result = Html5Token {
-          kind: Html5Kind::TagEnd,
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
-        };
-
-        self.source.advance_bytes(diff);
-        self.state = Html5LexerState::Content; // update state
-        result
-      }
-
-      // for self close end and attribute starts with `/`
-      '/' => {
-        let mut diff = '/'.len_utf8();
-
-        let result = {
-          let result = iter.next();
-          if let Some(next) = result {
-            diff += next.len_utf8();
-          }
-          result
-        };
-
-        match result {
-          Some('>') => {
-            // self close
-            let result = Html5Token {
-              kind: Html5Kind::SelfCloseTagEnd,
-              start: self.source.pointer,
-              end: self.source.pointer + diff,
-              value: Html5TokenValue::None,
-            };
-
-            self.source.advance_bytes(diff);
-            self.state = Html5LexerState::Content; // update state
-            result
-          }
-          None | Some(_) => self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute),
-        }
-      }
-
-      // for attribute with `"`
-      '"' => self.handle_quote_attribute(&mut iter, '"'),
-
-      // for attribute with `'`
-      '\'' => self.handle_quote_attribute(&mut iter, '\''),
-
-      // for attribute without `"`
-      c => {
-        let mut diff = c.len_utf8();
-        self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute)
-      }
-    }
-  }
-
-  fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Html5Token {
-    // since html don't support \ escape, we don't need to manage its state
-    let mut diff = quote.len_utf8();
-    let mut ended = false;
-
-    for item in iter {
-      diff += item.len_utf8();
-
-      match item {
-        c if c == quote => {
-          ended = true;
-          break;
-        } // the string is ended
-        _ => (),
-      }
-    }
-
-    if !ended {
-      // throw an error, expect quote, but found eof
-      let error_message = format!("Expected {}, but found {}", quote, Html5Kind::Eof,);
-      let label = LabeledSpan::at(
-        self.source.pointer + diff - 1..self.source.pointer + diff,
-        &error_message,
-      );
-
-      self
-        .errors
-        .push(OxcDiagnostic::error(error_message).with_label(label));
-    }
-
-    let result = Html5Token {
-      start: self.source.pointer,
-      end: self.source.pointer + diff,
-      value: Html5TokenValue::String(
-        // do not need to remove quote because we need it
-        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
-      ),
-      kind: Html5Kind::Attribute,
-    };
-
-    self.source.advance_bytes(diff);
-    result
   }
 }
 
@@ -455,6 +306,163 @@ impl<'a> Html5Lexer<'a> {
     };
 
     self.source.advance_bytes(*diff);
+    result
+  }
+}
+
+// handler for Html5LexerState::EmbeddedContent
+impl<'a> Html5Lexer<'a> {
+  fn handle_embedded_content(&mut self) -> Html5Token {
+    todo!()
+  }
+}
+
+// handler for Html5LexerState::AfterTagName
+impl<'a> Html5Lexer<'a> {
+  fn handle_after_tag_name(&mut self) -> Html5Token {
+    let mut iter: std::str::Chars<'_> = self.source.get_chars();
+
+    // safe unwarp, won't direct to this branch if pointer == file.len()
+    match iter.next().unwrap() {
+      // for whitespace
+      c if c.is_whitespace() => {
+        let mut diff: usize = c.len_utf8();
+
+        for item in iter {
+          if item.is_whitespace() {
+            diff += item.len_utf8();
+          } else {
+            break;
+          }
+        }
+
+        let result = Html5Token {
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+          kind: Html5Kind::Whitespace,
+        };
+
+        self.source.advance_bytes(diff);
+        result
+      }
+
+      // for =
+      '=' => {
+        let diff = '='.len_utf8();
+
+        let result = Html5Token {
+          kind: Html5Kind::Eq,
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+        };
+
+        self.source.advance_bytes(diff);
+        result
+      }
+
+      // for tag end (>)
+      '>' => {
+        let diff = '>'.len_utf8();
+
+        let result = Html5Token {
+          kind: Html5Kind::TagEnd,
+          start: self.source.pointer,
+          end: self.source.pointer + diff,
+          value: Html5TokenValue::None,
+        };
+
+        self.source.advance_bytes(diff);
+        self.state = Html5LexerState::Content; // update state
+        result
+      }
+
+      // for self close end and attribute starts with `/`
+      '/' => {
+        let mut diff = '/'.len_utf8();
+
+        let result = {
+          let result = iter.next();
+          if let Some(next) = result {
+            diff += next.len_utf8();
+          }
+          result
+        };
+
+        match result {
+          Some('>') => {
+            // self close
+            let result = Html5Token {
+              kind: Html5Kind::SelfCloseTagEnd,
+              start: self.source.pointer,
+              end: self.source.pointer + diff,
+              value: Html5TokenValue::None,
+            };
+
+            self.source.advance_bytes(diff);
+            self.state = Html5LexerState::Content; // update state
+            result
+          }
+          None | Some(_) => self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute),
+        }
+      }
+
+      // for attribute with `"`
+      '"' => self.handle_quote_attribute(&mut iter, '"'),
+
+      // for attribute with `'`
+      '\'' => self.handle_quote_attribute(&mut iter, '\''),
+
+      // for attribute without `"`
+      c => {
+        let mut diff = c.len_utf8();
+        self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute)
+      }
+    }
+  }
+
+  fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Html5Token {
+    // since html don't support \ escape, we don't need to manage its state
+    let mut diff = quote.len_utf8();
+    let mut ended = false;
+
+    for item in iter {
+      diff += item.len_utf8();
+
+      match item {
+        c if c == quote => {
+          ended = true;
+          break;
+        } // the string is ended
+        _ => (),
+      }
+    }
+
+    if !ended {
+      // throw an error, expect quote, but found eof
+      let error_message = format!("Expected {}, but found {}", quote, Html5Kind::Eof,);
+      let label = LabeledSpan::at(
+        self.source.pointer + diff - 1..self.source.pointer + diff,
+        &error_message,
+      );
+
+      self
+        .errors
+        .push(OxcDiagnostic::error(error_message).with_label(label));
+    }
+
+    let result = Html5Token {
+      start: self.source.pointer,
+      end: self.source.pointer + diff,
+      value: Html5TokenValue::String(
+        // do not need to remove quote because we need it
+        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
+      ),
+      kind: Html5Kind::Attribute,
+    };
+
+    self.source.advance_bytes(diff);
     result
   }
 }

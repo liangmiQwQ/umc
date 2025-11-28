@@ -12,6 +12,9 @@ pub enum Html5LexerState {
   /// In the element content
   /// e.g. <p>Hello| World<p>
   Content,
+  /// Don't treat < as tag end unless it's followed by the tag end
+  /// The parameter is the tag end, e.g. </script
+  EmbeddedContent(&'static str),
   /// After < but before the tag name
   /// e.g. <|a>foo</a>
   InTag,
