@@ -8,13 +8,13 @@ mod source;
 mod token;
 
 #[repr(u8)]
-pub enum Html5LexerState {
+pub enum Html5LexerState<'a> {
   /// In the element content
   /// e.g. <p>Hello| World<p>
   Content,
   /// Don't treat < as tag end unless it's followed by the tag end
   /// The parameter is the tag end, e.g. </script
-  EmbeddedContent(&'static str),
+  EmbeddedContent(&'a str),
   /// After < but before the tag name
   /// e.g. <|a>foo</a>
   InTag,
@@ -28,7 +28,7 @@ pub enum Html5LexerState {
 pub(crate) struct Html5Lexer<'a> {
   _allocator: &'a Allocator,
   source: Source<'a>,
-  state: Html5LexerState,
+  state: Html5LexerState<'a>,
   pub errors: Vec<OxcDiagnostic>,
 }
 

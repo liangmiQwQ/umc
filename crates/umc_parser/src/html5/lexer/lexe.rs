@@ -25,7 +25,7 @@ impl<'a> Html5Lexer<'a> {
     // match the state and do different lexing
     match self.state {
       Html5LexerState::Content => Some(self.handle_content()),
-      Html5LexerState::EmbeddedContent(ending) => Some(self.handle_embedded_content()),
+      Html5LexerState::EmbeddedContent(ending) => Some(self.handle_embedded_content(ending)),
       Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
       Html5LexerState::InTag => Some(self.handle_in_tag()),
       Html5LexerState::Finished => None,
@@ -312,7 +312,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::EmbeddedContent
 impl<'a> Html5Lexer<'a> {
-  fn handle_embedded_content(&mut self) -> Html5Token {
+  fn handle_embedded_content(&mut self, ending: &str) -> Html5Token {
     todo!()
   }
 }
