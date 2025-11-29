@@ -8,13 +8,13 @@ mod source;
 mod token;
 
 #[repr(u8)]
-pub enum Html5LexerState<'a> {
+enum LexerStateKind {
   /// In the element content
   /// e.g. <p>Hello| World<p>
   Content,
   /// Don't treat < as tag end unless it's followed by the tag end
   /// The parameter is the tag end, e.g. </script
-  EmbeddedContent(&'a str),
+  EmbeddedContent,
   /// After < but before the tag name
   /// e.g. <|a>foo</a>
   InTag,
@@ -25,10 +25,24 @@ pub enum Html5LexerState<'a> {
   Finished,
 }
 
+struct LexerState {
+  kind: LexerStateKind,
+  tag_name: Option<String>,
+}
+
+impl LexerState {
+  fn new(kind: LexerStateKind) -> Self {
+    LexerState {
+      kind,
+      tag_name: None,
+    }
+  }
+}
+
 pub(crate) struct Html5Lexer<'a> {
   _allocator: &'a Allocator,
   source: Source<'a>,
-  state: Html5LexerState<'a>,
+  state: LexerState,
   pub errors: Vec<OxcDiagnostic>,
 }
 
@@ -37,7 +51,7 @@ impl<'a> Html5Lexer<'a> {
     Html5Lexer {
       _allocator: allocator,
       source: Source::new(source_text),
-      state: Html5LexerState::Content,
+      state: LexerState::new(LexerStateKind::Content),
       errors: Vec::new(),
     }
   }

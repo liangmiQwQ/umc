@@ -1,7 +1,7 @@
 use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
 
 use crate::html5::lexer::{
-  Html5Lexer, Html5LexerState,
+  Html5Lexer, LexerStateKind,
   kind::Html5Kind,
   token::{Html5Token, Html5TokenValue},
 };
@@ -16,19 +16,19 @@ impl<'a> Html5Lexer<'a> {
   fn next_token(&mut self) -> Option<Html5Token> {
     // the file end, but still calling this function
     if self.is_eof() {
-      return match self.state {
-        Html5LexerState::Finished => None,
+      return match self.state.kind {
+        LexerStateKind::Finished => None,
         _ => Some(self.finish()),
       };
     }
 
     // match the state and do different lexing
-    match self.state {
-      Html5LexerState::Content => Some(self.handle_content()),
-      Html5LexerState::EmbeddedContent(ending) => Some(self.handle_embedded_content(ending)),
-      Html5LexerState::AfterTagName => Some(self.handle_after_tag_name()),
-      Html5LexerState::InTag => Some(self.handle_in_tag()),
-      Html5LexerState::Finished => None,
+    match self.state.kind {
+      LexerStateKind::Content => Some(self.handle_content()),
+      LexerStateKind::EmbeddedContent => Some(self.handle_embedded_content()),
+      LexerStateKind::AfterTagName => Some(self.handle_after_tag_name()),
+      LexerStateKind::InTag => Some(self.handle_in_tag()),
+      LexerStateKind::Finished => None,
     }
   }
 
@@ -39,7 +39,7 @@ impl<'a> Html5Lexer<'a> {
 
   #[inline]
   fn finish(&mut self) -> Html5Token {
-    self.state = Html5LexerState::Finished; // mark as finished
+    self.state.kind = LexerStateKind::Finished; // mark as finished
 
     Html5Token {
       kind: Html5Kind::Eof,
@@ -73,7 +73,7 @@ impl<'a> Html5Lexer<'a> {
             };
 
             self.source.advance_bytes(diff);
-            self.state = Html5LexerState::InTag; // update state
+            self.state.kind = LexerStateKind::InTag; // update state
             result
           }
 
@@ -89,7 +89,7 @@ impl<'a> Html5Lexer<'a> {
             };
 
             self.source.advance_bytes(diff);
-            self.state = Html5LexerState::InTag; // update state
+            self.state.kind = LexerStateKind::InTag; // update state
             result
           }
 
@@ -117,7 +117,7 @@ impl<'a> Html5Lexer<'a> {
                   };
 
                   self.source.advance_bytes(diff);
-                  self.state = Html5LexerState::AfterTagName; // update state
+                  self.state.kind = LexerStateKind::AfterTagName; // update state
 
                   return result;
                 }
@@ -271,7 +271,7 @@ impl<'a> Html5Lexer<'a> {
     };
 
     self.source.advance_bytes(diff);
-    self.state = Html5LexerState::AfterTagName; // update state
+    self.state.kind = LexerStateKind::AfterTagName; // update state
     result
   }
 
@@ -312,7 +312,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::EmbeddedContent
 impl<'a> Html5Lexer<'a> {
-  fn handle_embedded_content(&mut self, ending: &str) -> Html5Token {
+  fn handle_embedded_content(&mut self) -> Html5Token {
     todo!()
   }
 }
@@ -374,7 +374,7 @@ impl<'a> Html5Lexer<'a> {
         };
 
         self.source.advance_bytes(diff);
-        self.state = Html5LexerState::Content; // update state
+        self.state.kind = LexerStateKind::Content; // update state
         result
       }
 
@@ -401,7 +401,7 @@ impl<'a> Html5Lexer<'a> {
             };
 
             self.source.advance_bytes(diff);
-            self.state = Html5LexerState::Content; // update state
+            self.state.kind = LexerStateKind::Content; // update state
             result
           }
           None | Some(_) => self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute),
@@ -475,7 +475,7 @@ impl<'a> Html5Lexer<'a> {
     let mut diff: usize = 0;
 
     let result = self.handle_tag(&mut iter, &mut diff, Html5Kind::ElementName);
-    self.state = Html5LexerState::AfterTagName; // update state
+    self.state.kind = LexerStateKind::AfterTagName; // update state
     result
   }
 }
@@ -508,7 +508,7 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use super::{Html5Lexer, Html5LexerState, Html5Token};
+  use super::{Html5Lexer, Html5Token, LexerStateKind};
   use crate::html5::lexer::source::Source;
   use oxc_allocator::Allocator;
 
@@ -520,7 +520,7 @@ mod test {
     let mut lexer = Html5Lexer {
       _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
-      state: Html5LexerState::AfterTagName,
+      state: LexerStateKind::AfterTagName,
       errors: Vec::new(),
     };
 
@@ -537,7 +537,7 @@ mod test {
     let mut lexer = Html5Lexer {
       _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
-      state: Html5LexerState::AfterTagName,
+      state: LexerStateKind::AfterTagName,
       errors: Vec::new(),
     };
 
