@@ -374,7 +374,7 @@ impl<'a> Html5Lexer<'a> {
         };
 
         self.source.advance_bytes(diff);
-        self.state.kind = LexerStateKind::Content; // update state
+        self.update_lexer_state(); // update state
         result
       }
 
@@ -401,7 +401,7 @@ impl<'a> Html5Lexer<'a> {
             };
 
             self.source.advance_bytes(diff);
-            self.state.kind = LexerStateKind::Content; // update state
+            self.update_lexer_state(); // update state
             result
           }
           None | Some(_) => self.handle_tag(&mut iter, &mut diff, Html5Kind::Attribute),
@@ -465,6 +465,19 @@ impl<'a> Html5Lexer<'a> {
     self.source.advance_bytes(diff);
     result
   }
+
+  fn update_lexer_state(&mut self) {
+    // if the tag is a void element, we need to update the state to Content
+    const EMBEDDED_LANGUAGE_TAG: [&str; 2] = ["script", "style"];
+
+    if let Some(tag_name) = &self.state.tag_name
+      && EMBEDDED_LANGUAGE_TAG.contains(&tag_name.as_str())
+    {
+      self.state.kind = LexerStateKind::EmbeddedContent;
+    } else {
+      self.state.kind = LexerStateKind::Content;
+    }
+  }
 }
 
 // handler for Html5LexerState::InTag
@@ -476,6 +489,7 @@ impl<'a> Html5Lexer<'a> {
 
     let result = self.handle_tag(&mut iter, &mut diff, Html5Kind::ElementName);
     self.state.kind = LexerStateKind::AfterTagName; // update state
+    self.state.tag_name = Some(self.source.source_text[result.range()].to_owned());
     result
   }
 }
