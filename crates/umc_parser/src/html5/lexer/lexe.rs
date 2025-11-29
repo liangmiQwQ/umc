@@ -1,10 +1,6 @@
 use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
 
-use crate::html5::lexer::{
-  Html5Lexer, LexerStateKind,
-  kind::Html5Kind,
-  token::{Html5Token, Html5TokenValue},
-};
+use crate::html5::lexer::{Html5Lexer, LexerStateKind, kind::Html5Kind, token::Html5Token};
 use std::{iter::from_fn, str::Chars};
 
 impl<'a> Html5Lexer<'a> {
@@ -45,7 +41,6 @@ impl<'a> Html5Lexer<'a> {
       kind: Html5Kind::Eof,
       start: self.source.pointer,
       end: self.source.pointer,
-      value: Html5TokenValue::None,
     }
   }
 }
@@ -69,7 +64,6 @@ impl<'a> Html5Lexer<'a> {
               kind: Html5Kind::TagStart,
               start: self.source.pointer,
               end: self.source.pointer + diff,
-              value: Html5TokenValue::None,
             };
 
             self.source.advance_bytes(diff);
@@ -86,7 +80,6 @@ impl<'a> Html5Lexer<'a> {
               kind: Html5Kind::CloseTagStart,
               start: self.source.pointer,
               end: self.source.pointer + diff,
-              value: Html5TokenValue::None,
             };
 
             self.source.advance_bytes(diff);
@@ -114,7 +107,6 @@ impl<'a> Html5Lexer<'a> {
                     kind: Html5Kind::Doctype,
                     start: self.source.pointer,
                     end: self.source.pointer + diff,
-                    value: Html5TokenValue::None,
                   };
 
                   self.source.advance_bytes(diff);
@@ -183,11 +175,6 @@ impl<'a> Html5Lexer<'a> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
-      value: Html5TokenValue::String({
-        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + *diff];
-        // the struct: <! something >
-        raw_text[2..raw_text.len() - 2].to_owned()
-      }),
     };
 
     self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<! something >| moretext
@@ -229,11 +216,6 @@ impl<'a> Html5Lexer<'a> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
-      value: Html5TokenValue::String({
-        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + *diff];
-        // the struct: <!-- something -->
-        raw_text[4..raw_text.len() - 3].to_owned()
-      }),
     };
 
     self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<!-- something -->| moretext
@@ -261,14 +243,6 @@ impl<'a> Html5Lexer<'a> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + diff,
-      value: Html5TokenValue::String({
-        let raw_text = &self.source.source_text[self.source.pointer..self.source.pointer + diff];
-        if let Some(comment) = raw_text.strip_prefix("<!--") {
-          comment.to_owned()
-        } else {
-          raw_text[2..].to_owned()
-        }
-      }),
     };
 
     self.source.advance_bytes(diff);
@@ -301,9 +275,6 @@ impl<'a> Html5Lexer<'a> {
       kind: Html5Kind::TextContent,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
-      value: Html5TokenValue::String(
-        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
-      ),
     };
 
     self.source.advance_bytes(*diff);
@@ -343,9 +314,6 @@ impl<'a> Html5Lexer<'a> {
     let result = Html5Token {
       start: self.source.pointer,
       end: self.source.pointer + diff,
-      value: Html5TokenValue::String(
-        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
-      ),
       kind: Html5Kind::TextContent,
     };
     self.source.advance_bytes(diff);
@@ -376,7 +344,6 @@ impl<'a> Html5Lexer<'a> {
         let result = Html5Token {
           start: self.source.pointer,
           end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
           kind: Html5Kind::Whitespace,
         };
 
@@ -392,7 +359,6 @@ impl<'a> Html5Lexer<'a> {
           kind: Html5Kind::Eq,
           start: self.source.pointer,
           end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
         };
 
         self.source.advance_bytes(diff);
@@ -407,7 +373,6 @@ impl<'a> Html5Lexer<'a> {
           kind: Html5Kind::TagEnd,
           start: self.source.pointer,
           end: self.source.pointer + diff,
-          value: Html5TokenValue::None,
         };
 
         self.source.advance_bytes(diff);
@@ -444,7 +409,6 @@ impl<'a> Html5Lexer<'a> {
               kind: Html5Kind::SelfCloseTagEnd,
               start: self.source.pointer,
               end: self.source.pointer + diff,
-              value: Html5TokenValue::None,
             };
 
             self.source.advance_bytes(diff);
@@ -503,10 +467,6 @@ impl<'a> Html5Lexer<'a> {
     let result = Html5Token {
       start: self.source.pointer,
       end: self.source.pointer + diff,
-      value: Html5TokenValue::String(
-        // do not need to remove quote because we need it
-        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
-      ),
       kind: Html5Kind::Attribute,
     };
 
@@ -546,9 +506,6 @@ impl<'a> Html5Lexer<'a> {
     let result = Html5Token {
       start: self.source.pointer,
       end: self.source.pointer + *diff,
-      value: Html5TokenValue::String(
-        self.source.source_text[self.source.pointer..self.source.pointer + *diff].to_owned(),
-      ),
       kind,
     };
 
