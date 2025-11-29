@@ -558,8 +558,8 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use super::{Html5Lexer, Html5Token, LexerStateKind};
-  use crate::html5::lexer::source::Source;
+  use super::*;
+  use crate::html5::lexer::{LexerState, source::Source};
   use oxc_allocator::Allocator;
 
   #[test]
@@ -570,7 +570,7 @@ mod test {
     let mut lexer = Html5Lexer {
       _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
-      state: LexerStateKind::AfterTagName,
+      state: LexerState::new(LexerStateKind::AfterTagName),
       errors: Vec::new(),
     };
 
@@ -587,7 +587,7 @@ mod test {
     let mut lexer = Html5Lexer {
       _allocator: &Allocator::default(),
       source: Source::new(SOURCE_TEXT),
-      state: LexerStateKind::AfterTagName,
+      state: LexerState::new(LexerStateKind::AfterTagName),
       errors: Vec::new(),
     };
 
