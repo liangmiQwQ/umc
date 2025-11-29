@@ -53,7 +53,7 @@ impl<'a> Html5Lexer<'a> {
 // handler for Html5LexerState::Content
 impl<'a> Html5Lexer<'a> {
   fn handle_content(&mut self) -> Html5Token {
-    let mut iter: std::str::Chars<'_> = self.source.get_chars();
+    let mut iter: Chars<'_> = self.source.get_chars();
     // safe unwarp, won't direct to this branch if pointer == file.len()
     match iter.next().unwrap() {
       // for <
@@ -313,14 +313,50 @@ impl<'a> Html5Lexer<'a> {
 // handler for Html5LexerState::EmbeddedContent
 impl<'a> Html5Lexer<'a> {
   fn handle_embedded_content(&mut self) -> Html5Token {
-    todo!()
+    let mut diff: usize = 0;
+    let closing_tag = format!("</{}", self.state.tag_name.take().unwrap());
+    let mut ended = false;
+
+    for item in self.source.get_chars() {
+      diff += item.len_utf8();
+
+      if self.source.source_text[self.source.pointer + diff..].starts_with(&closing_tag) {
+        ended = true;
+        break;
+      }
+    }
+
+    if !ended {
+      // throw an error, expect closing tag, but found eof
+      let error_message = format!("Expected {}, but found {}", closing_tag, Html5Kind::Eof,);
+      let label = LabeledSpan::at(
+        self.source.pointer + diff - 1..self.source.pointer + diff,
+        &error_message,
+      );
+
+      self
+        .errors
+        .push(OxcDiagnostic::error(error_message).with_label(label));
+    }
+
+    let result = Html5Token {
+      start: self.source.pointer,
+      end: self.source.pointer + diff,
+      value: Html5TokenValue::String(
+        self.source.source_text[self.source.pointer..self.source.pointer + diff].to_owned(),
+      ),
+      kind: Html5Kind::TextContent,
+    };
+    self.source.advance_bytes(diff);
+    self.state.kind = LexerStateKind::Content; // update state
+    result
   }
 }
 
 // handler for Html5LexerState::AfterTagName
 impl<'a> Html5Lexer<'a> {
   fn handle_after_tag_name(&mut self) -> Html5Token {
-    let mut iter: std::str::Chars<'_> = self.source.get_chars();
+    let mut iter: Chars<'_> = self.source.get_chars();
 
     // safe unwarp, won't direct to this branch if pointer == file.len()
     match iter.next().unwrap() {
