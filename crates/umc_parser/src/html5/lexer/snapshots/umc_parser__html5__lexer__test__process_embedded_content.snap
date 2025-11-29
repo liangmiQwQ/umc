@@ -376,23 +376,23 @@ expression: test(HTML_STRING)
     Html5Token {
         kind: TextContent,
         start: 184,
-        end: 188,
+        end: 187,
         value: String(
-            "\n  \n",
+            "\n  ",
         ),
     },
     Html5Token {
-        kind: CloseTagStart,
-        start: 188,
-        end: 190,
+        kind: TagStart,
+        start: 187,
+        end: 188,
         value: None,
     },
     Html5Token {
         kind: ElementName,
-        start: 190,
+        start: 188,
         end: 194,
         value: String(
-            "body",
+            "script",
         ),
     },
     Html5Token {
@@ -404,35 +404,91 @@ expression: test(HTML_STRING)
     Html5Token {
         kind: TextContent,
         start: 195,
-        end: 196,
+        end: 254,
+        value: String(
+            "\n    const a = 1;\n    const b = 2;\n    console.log(a<b);\n  ",
+        ),
+    },
+    Html5Token {
+        kind: CloseTagStart,
+        start: 254,
+        end: 256,
+        value: None,
+    },
+    Html5Token {
+        kind: ElementName,
+        start: 256,
+        end: 262,
+        value: String(
+            "script",
+        ),
+    },
+    Html5Token {
+        kind: TagEnd,
+        start: 262,
+        end: 263,
+        value: None,
+    },
+    Html5Token {
+        kind: TextContent,
+        start: 263,
+        end: 264,
         value: String(
             "\n",
         ),
     },
     Html5Token {
         kind: CloseTagStart,
-        start: 196,
-        end: 198,
+        start: 264,
+        end: 266,
         value: None,
     },
     Html5Token {
         kind: ElementName,
-        start: 198,
-        end: 202,
+        start: 266,
+        end: 270,
+        value: String(
+            "body",
+        ),
+    },
+    Html5Token {
+        kind: TagEnd,
+        start: 270,
+        end: 271,
+        value: None,
+    },
+    Html5Token {
+        kind: TextContent,
+        start: 271,
+        end: 272,
+        value: String(
+            "\n",
+        ),
+    },
+    Html5Token {
+        kind: CloseTagStart,
+        start: 272,
+        end: 274,
+        value: None,
+    },
+    Html5Token {
+        kind: ElementName,
+        start: 274,
+        end: 278,
         value: String(
             "html",
         ),
     },
     Html5Token {
         kind: TagEnd,
-        start: 202,
-        end: 203,
+        start: 278,
+        end: 279,
         value: None,
     },
     Html5Token {
         kind: Eof,
-        start: 203,
-        end: 203,
+        start: 279,
+        end: 279,
         value: None,
     },
 ]
