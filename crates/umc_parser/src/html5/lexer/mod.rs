@@ -1,43 +1,15 @@
-use crate::html5::lexer::source::Source;
+use crate::html5::lexer::{
+  source::Source,
+  state::{LexerState, LexerStateKind},
+};
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
 mod kind;
 mod lexe;
 mod source;
+mod state;
 mod token;
-
-#[repr(u8)]
-enum LexerStateKind {
-  /// In the element content
-  /// e.g. <p>Hello| World<p>
-  Content,
-  /// Don't treat < as tag end unless it's followed by the tag end
-  /// The parameter is the tag end, e.g. </script
-  EmbeddedContent,
-  /// After < but before the tag name
-  /// e.g. <|a>foo</a>
-  InTag,
-  /// After tag name but before the tag end
-  /// e.g. <a|>foo</a> or <a href|="https://example.com">foo</a>
-  AfterTagName,
-  /// Finished lexing
-  Finished,
-}
-
-struct LexerState {
-  kind: LexerStateKind,
-  tag_name: Option<String>,
-}
-
-impl LexerState {
-  fn new(kind: LexerStateKind) -> Self {
-    LexerState {
-      kind,
-      tag_name: None,
-    }
-  }
-}
 
 pub(crate) struct Html5Lexer<'a> {
   _allocator: &'a Allocator,

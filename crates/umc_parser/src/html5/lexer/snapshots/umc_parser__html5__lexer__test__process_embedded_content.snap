@@ -432,10 +432,58 @@ expression: test(HTML_STRING)
     Html5Token {
         kind: TextContent,
         start: 263,
-        end: 279,
+        end: 264,
         value: String(
-            "\n</body>\n</html>",
+            "\n",
         ),
+    },
+    Html5Token {
+        kind: CloseTagStart,
+        start: 264,
+        end: 266,
+        value: None,
+    },
+    Html5Token {
+        kind: ElementName,
+        start: 266,
+        end: 270,
+        value: String(
+            "body",
+        ),
+    },
+    Html5Token {
+        kind: TagEnd,
+        start: 270,
+        end: 271,
+        value: None,
+    },
+    Html5Token {
+        kind: TextContent,
+        start: 271,
+        end: 272,
+        value: String(
+            "\n",
+        ),
+    },
+    Html5Token {
+        kind: CloseTagStart,
+        start: 272,
+        end: 274,
+        value: None,
+    },
+    Html5Token {
+        kind: ElementName,
+        start: 274,
+        end: 278,
+        value: String(
+            "html",
+        ),
+    },
+    Html5Token {
+        kind: TagEnd,
+        start: 278,
+        end: 279,
+        value: None,
     },
     Html5Token {
         kind: Eof,
