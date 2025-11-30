@@ -1,58 +1,62 @@
-use crate::html5::{Html5ParserOptions, parse};
 use oxc_allocator::Allocator;
+use oxc_diagnostics::OxcDiagnostic;
 
-mod filename;
-mod html5;
+// mod filename;
+pub mod html5;
 
-pub enum ParserOptions {
-  Html5(Html5ParserOptions),
+pub trait Language {
+  type Result;
+  type Option: Default;
 }
 
-pub struct Parser<'a> {
+pub struct Parser<'a, T: Language> {
   allocator: &'a Allocator,
   source_text: &'a str,
-  options: ParserOptions,
+  options: T::Option,
 }
 
-impl<'a> Parser<'a> {
-  pub fn new(allocator: &'a Allocator, source_text: &'a str, options: ParserOptions) -> Self {
+pub struct ParseResult<T> {
+  pub program: Program<T>,
+  pub errors: Vec<OxcDiagnostic>,
+  pub panicked: bool,
+}
+
+pub struct Program<T> {
+  pub body: Vec<T>,
+}
+
+impl<'a, T: Language> Parser<'a, T> {
+  /// Creat the umc parser
+  ///
+  /// # Parameters
+  /// - `allocator`: [Memory arena](oxc_allocator::Allocator) for allocating AST nodes
+  /// - `source_text`: Source code to parse
+  ///
+  /// # Examples
+  /// ```rust
+  /// use oxc_allocator::Allocator;
+  /// use umc_parser::Parser;
+  /// use umc_parser::html5::Html5;
+  ///
+  /// let allocator = Allocator::default();
+  /// let parser = Parser::<Html5>::new(&allocator, "<html> Hello World </html>");
+  /// ```
+  pub fn new(allocator: &'a Allocator, source_text: &'a str) -> Self {
     Self {
       allocator,
       source_text,
-      options,
+      options: T::Option::default(),
     }
   }
 
-  pub fn parse(&self) {
-    match &self.options {
-      ParserOptions::Html5(options) => parse(self, options),
-    };
+  /// Override the parser option
+  pub fn with_options(mut self, options: T::Option) -> Self {
+    self.options = options;
+    self
   }
-}
 
-#[cfg(test)]
-mod test {
-  use super::*;
-
-  #[test]
-  fn test_create_parser() {
-    let allocator = Allocator::default();
-    let _parser = Parser::new(
-      &allocator,
-      r#"
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
-<body>
-  
-</body>
-</html>
-  "#,
-      ParserOptions::default_from_filename("index.html"),
-    );
+  pub fn parse(&self) -> ParseResult<T::Result> {
+    let _ = &self.options;
+    todo!();
   }
 }
