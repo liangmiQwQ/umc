@@ -1,4 +1,4 @@
-use crate::{Language, Parser, html5::lexer::Html5Lexer};
+use crate::{Language, Parser, ParserImpl, html5::lexer::Html5Lexer};
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
 
@@ -9,6 +9,7 @@ pub struct Html5;
 impl Language for Html5 {
   type Result = Html5Ast;
   type Option = Html5Option;
+  type Parser = Html5Parser;
 }
 
 pub struct Html5Option {
@@ -17,7 +18,19 @@ pub struct Html5Option {
   pub parse_script: Option<ParseOptions>,
 }
 
-pub struct Html5Ast {/* TODO */}
+pub struct Html5Ast; // TODO
+
+pub struct Html5Parser; // TODO
+
+impl ParserImpl<Html5> for Html5Parser {
+  fn new(allocator: &Allocator, source_text: &str, options: &<Html5 as Language>::Option) -> Self {
+    todo!()
+  }
+
+  fn parse(self) -> <Html5 as Language>::Result {
+    todo!()
+  }
+}
 
 impl Default for Html5Option {
   fn default() -> Self {
