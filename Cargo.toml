@@ -29,3 +29,5 @@ oxc_diagnostics = "0.98.0"
 oxc_parser = "0.98.0"
 
 insta = "1.44.1"
+
+umc_parser = { version = "0.0.0-alpha.14", path = "crates/umc_parser" }

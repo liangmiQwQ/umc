@@ -779,6 +779,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "umc_html"
+version = "0.0.0-alpha.14"
+dependencies = [
+ "insta",
+ "oxc_allocator",
+ "oxc_diagnostics",
+ "oxc_parser",
+ "umc_parser",
+]
+
+[[package]]
 name = "umc_parser"
 version = "0.0.0-alpha.14"
 dependencies = [

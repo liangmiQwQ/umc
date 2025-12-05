@@ -1,7 +1,7 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
-pub mod html5;
+pub mod lexer;
 
 pub trait Language: Sized {
   type Result;
@@ -15,9 +15,9 @@ pub trait ParserImpl<T: Language> {
 }
 
 pub struct Parser<'a, T: Language> {
-  allocator: &'a Allocator,
-  source_text: &'a str,
-  options: T::Option,
+  pub allocator: &'a Allocator,
+  pub source_text: &'a str,
+  pub options: T::Option,
 }
 
 pub struct ParseResult<T> {
@@ -62,6 +62,7 @@ impl<'a, T: Language> Parser<'a, T> {
 
   pub fn parse(&self) -> ParseResult<T::Result> {
     let parser = T::Parser::new(self.allocator, self.source_text, &self.options);
-    parser.parse()
+
+    todo!("{:p}", &parser.parse())
   }
 }
