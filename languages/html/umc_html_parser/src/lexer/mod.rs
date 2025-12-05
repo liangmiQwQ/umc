@@ -7,16 +7,16 @@ mod kind;
 mod lexe;
 mod state;
 
-pub(crate) struct Html5Lexer<'a> {
+pub(crate) struct HtmlLexer<'a> {
   _allocator: &'a Allocator,
   source: Source<'a>,
   state: LexerState,
   pub errors: Vec<OxcDiagnostic>,
 }
 
-impl<'a> Html5Lexer<'a> {
-  pub fn new(allocator: &'a Allocator, source_text: &'a str) -> Html5Lexer<'a> {
-    Html5Lexer {
+impl<'a> HtmlLexer<'a> {
+  pub fn new(allocator: &'a Allocator, source_text: &'a str) -> HtmlLexer<'a> {
+    HtmlLexer {
       _allocator: allocator,
       source: Source::new(source_text),
       state: LexerState::new(LexerStateKind::Content),
@@ -27,13 +27,13 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use crate::lexer::{Html5Lexer, kind::Html5Kind};
+  use crate::lexer::{HtmlLexer, kind::HtmlKind};
   use insta::assert_snapshot;
   use oxc_allocator::Allocator;
   use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
-    let result: Vec<Token<Html5Kind>> = Html5Lexer::new(&Allocator::default(), source_text)
+    let result: Vec<Token<HtmlKind>> = HtmlLexer::new(&Allocator::default(), source_text)
       .tokens()
       .collect();
 

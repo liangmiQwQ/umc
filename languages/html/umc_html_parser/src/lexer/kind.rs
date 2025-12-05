@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(u8)]
 #[non_exhaustive]
-pub enum Html5Kind {
+pub enum HtmlKind {
   #[default]
   Eof = 0,
 
@@ -27,9 +27,9 @@ pub enum Html5Kind {
   Whitespace, // Whitespace, line breaks
 }
 
-use Html5Kind::*;
+use HtmlKind::*;
 
-impl Html5Kind {
+impl HtmlKind {
   #[must_use]
   pub fn to_str(self) -> &'static str {
     match self {
@@ -54,7 +54,7 @@ impl Html5Kind {
   }
 }
 
-impl Display for Html5Kind {
+impl Display for HtmlKind {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     self.to_str().fmt(f)
   }
