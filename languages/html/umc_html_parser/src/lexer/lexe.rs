@@ -1,15 +1,16 @@
 use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
 use std::{iter::from_fn, str::Chars};
+use umc_parser::token::Token;
 
-use crate::lexer::{Html5Lexer, kind::Html5Kind, state::LexerStateKind, token::Html5Token};
+use crate::lexer::{Html5Lexer, kind::Html5Kind, state::LexerStateKind};
 
 impl<'a> Html5Lexer<'a> {
-  pub fn tokens(&mut self) -> impl Iterator<Item = Html5Token> {
+  pub fn tokens(&mut self) -> impl Iterator<Item = Token<Html5Kind>> {
     from_fn(move || self.next_token())
   }
 
   /// Get the next token, and move the pointer
-  fn next_token(&mut self) -> Option<Html5Token> {
+  fn next_token(&mut self) -> Option<Token<Html5Kind>> {
     // the file end, but still calling this function
     if self.is_eof() {
       return match self.state.kind {
@@ -34,10 +35,10 @@ impl<'a> Html5Lexer<'a> {
   }
 
   #[inline]
-  fn finish(&mut self) -> Html5Token {
+  fn finish(&mut self) -> Token<Html5Kind> {
     self.state.kind = LexerStateKind::Finished; // mark as finished
 
-    Html5Token {
+    Token::<Html5Kind> {
       kind: Html5Kind::Eof,
       start: self.source.pointer,
       end: self.source.pointer,
@@ -47,7 +48,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::Content
 impl<'a> Html5Lexer<'a> {
-  fn handle_content(&mut self) -> Html5Token {
+  fn handle_content(&mut self) -> Token<Html5Kind> {
     let mut iter: Chars<'_> = self.source.get_chars();
     // safe unwarp, won't direct to this branch if pointer == file.len()
     match iter.next().unwrap() {
@@ -60,7 +61,7 @@ impl<'a> Html5Lexer<'a> {
           // for alphabetic character, as tag start
           Some(item) if item.is_alphabetic() => {
             // do not need to add diff, because we only need the < part
-            let result = Html5Token {
+            let result = Token::<Html5Kind> {
               kind: Html5Kind::TagStart,
               start: self.source.pointer,
               end: self.source.pointer + diff,
@@ -76,7 +77,7 @@ impl<'a> Html5Lexer<'a> {
           Some('/') => {
             diff += '/'.len_utf8();
 
-            let result = Html5Token {
+            let result = Token::<Html5Kind> {
               kind: Html5Kind::CloseTagStart,
               start: self.source.pointer,
               end: self.source.pointer + diff,
@@ -103,7 +104,7 @@ impl<'a> Html5Lexer<'a> {
               if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
                 if i == DOCTYPE_START.len() - 1 {
                   // it's a doctype
-                  let result = Html5Token {
+                  let result = Token::<Html5Kind> {
                     kind: Html5Kind::Doctype,
                     start: self.source.pointer,
                     end: self.source.pointer + diff,
@@ -155,7 +156,7 @@ impl<'a> Html5Lexer<'a> {
     }
   }
 
-  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<Html5Kind> {
     let mut ended = false;
     for item in iter {
       *diff += item.len_utf8();
@@ -171,7 +172,7 @@ impl<'a> Html5Lexer<'a> {
       return self.tailless_comment(*diff);
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
@@ -181,7 +182,7 @@ impl<'a> Html5Lexer<'a> {
     result
   }
 
-  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<Html5Kind> {
     let mut dash_count: u8 = 0;
     let mut ended = false;
 
@@ -212,7 +213,7 @@ impl<'a> Html5Lexer<'a> {
       return self.tailless_comment(*diff);
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
@@ -222,7 +223,7 @@ impl<'a> Html5Lexer<'a> {
     result
   }
 
-  fn tailless_comment(&mut self, diff: usize) -> Html5Token {
+  fn tailless_comment(&mut self, diff: usize) -> Token<Html5Kind> {
     // eof without finishing doctype or comment
     // throw an error
     let error_message = format!(
@@ -239,7 +240,7 @@ impl<'a> Html5Lexer<'a> {
       .push(OxcDiagnostic::error(error_message).with_label(label));
 
     // return as comment
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       kind: Html5Kind::Comment,
       start: self.source.pointer,
       end: self.source.pointer + diff,
@@ -250,7 +251,7 @@ impl<'a> Html5Lexer<'a> {
     result
   }
 
-  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut usize) -> Html5Token {
+  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<Html5Kind> {
     let mut check_next = false;
 
     for item in iter {
@@ -271,7 +272,7 @@ impl<'a> Html5Lexer<'a> {
       }
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       kind: Html5Kind::TextContent,
       start: self.source.pointer,
       end: self.source.pointer + *diff,
@@ -284,7 +285,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::EmbeddedContent
 impl<'a> Html5Lexer<'a> {
-  fn handle_embedded_content(&mut self) -> Html5Token {
+  fn handle_embedded_content(&mut self) -> Token<Html5Kind> {
     let mut diff: usize = 0;
     let closing_tag = format!("</{}", self.state.take_tag_name().unwrap()); // safe unwrap because only script/style can enter this state
     let mut ended = false;
@@ -311,7 +312,7 @@ impl<'a> Html5Lexer<'a> {
         .push(OxcDiagnostic::error(error_message).with_label(label));
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       start: self.source.pointer,
       end: self.source.pointer + diff,
       kind: Html5Kind::TextContent,
@@ -324,7 +325,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::AfterTagName
 impl<'a> Html5Lexer<'a> {
-  fn handle_after_tag_name(&mut self) -> Html5Token {
+  fn handle_after_tag_name(&mut self) -> Token<Html5Kind> {
     let mut iter: Chars<'_> = self.source.get_chars();
 
     // safe unwarp, won't direct to this branch if pointer == file.len()
@@ -341,7 +342,7 @@ impl<'a> Html5Lexer<'a> {
           }
         }
 
-        let result = Html5Token {
+        let result = Token::<Html5Kind> {
           start: self.source.pointer,
           end: self.source.pointer + diff,
           kind: Html5Kind::Whitespace,
@@ -355,7 +356,7 @@ impl<'a> Html5Lexer<'a> {
       '=' => {
         let diff = '='.len_utf8();
 
-        let result = Html5Token {
+        let result = Token::<Html5Kind> {
           kind: Html5Kind::Eq,
           start: self.source.pointer,
           end: self.source.pointer + diff,
@@ -369,7 +370,7 @@ impl<'a> Html5Lexer<'a> {
       '>' => {
         let diff = '>'.len_utf8();
 
-        let result = Html5Token {
+        let result = Token::<Html5Kind> {
           kind: Html5Kind::TagEnd,
           start: self.source.pointer,
           end: self.source.pointer + diff,
@@ -405,7 +406,7 @@ impl<'a> Html5Lexer<'a> {
         match result {
           Some('>') => {
             // self close
-            let result = Html5Token {
+            let result = Token::<Html5Kind> {
               kind: Html5Kind::SelfCloseTagEnd,
               start: self.source.pointer,
               end: self.source.pointer + diff,
@@ -434,7 +435,7 @@ impl<'a> Html5Lexer<'a> {
     }
   }
 
-  fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Html5Token {
+  fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Token<Html5Kind> {
     // since html don't support \ escape, we don't need to manage its state
     let mut diff = quote.len_utf8();
     let mut ended = false;
@@ -464,7 +465,7 @@ impl<'a> Html5Lexer<'a> {
         .push(OxcDiagnostic::error(error_message).with_label(label));
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       start: self.source.pointer,
       end: self.source.pointer + diff,
       kind: Html5Kind::Attribute,
@@ -477,7 +478,7 @@ impl<'a> Html5Lexer<'a> {
 
 // handler for Html5LexerState::InTag
 impl<'a> Html5Lexer<'a> {
-  fn handle_in_tag(&mut self) -> Html5Token {
+  fn handle_in_tag(&mut self) -> Token<Html5Kind> {
     // call the handle_tag
     let mut iter = self.source.get_chars();
     let mut diff: usize = 0;
@@ -493,7 +494,12 @@ impl<'a> Html5Lexer<'a> {
 
 // some universal functions
 impl<'a> Html5Lexer<'a> {
-  fn handle_tag(&mut self, iter: &mut Chars, diff: &mut usize, kind: Html5Kind) -> Html5Token {
+  fn handle_tag(
+    &mut self,
+    iter: &mut Chars,
+    diff: &mut usize,
+    kind: Html5Kind,
+  ) -> Token<Html5Kind> {
     for item in iter {
       if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
         // end of a attribute
@@ -503,7 +509,7 @@ impl<'a> Html5Lexer<'a> {
       }
     }
 
-    let result = Html5Token {
+    let result = Token::<Html5Kind> {
       start: self.source.pointer,
       end: self.source.pointer + *diff,
       kind,
@@ -517,8 +523,9 @@ impl<'a> Html5Lexer<'a> {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::lexer::{LexerState, source::Source};
+  use crate::lexer::LexerState;
   use oxc_allocator::Allocator;
+  use umc_parser::source::Source;
 
   #[test]
   fn after_tag_name_should_work() {
@@ -532,7 +539,7 @@ mod test {
       errors: Vec::new(),
     };
 
-    let tokens: Vec<Html5Token> = lexer.tokens().collect();
+    let tokens: Vec<Token<Html5Kind>> = lexer.tokens().collect();
     insta::assert_snapshot!(format!(
       "Source: {:#?}; \nTokens:{:#?}",
       SOURCE_TEXT, tokens

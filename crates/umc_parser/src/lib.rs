@@ -2,6 +2,7 @@ use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
 pub mod source;
+pub mod token;
 
 pub trait Language: Sized {
   type Result;
@@ -36,16 +37,6 @@ impl<'a, T: Language> Parser<'a, T> {
   /// # Parameters
   /// - `allocator`: [Memory arena](oxc_allocator::Allocator) for allocating AST nodes
   /// - `source_text`: Source code to parse
-  ///
-  /// # Examples
-  /// ```rust
-  /// use oxc_allocator::Allocator;
-  /// use umc_parser::Parser;
-  /// use umc_parser::html5::Html5;
-  ///
-  /// let allocator = Allocator::default();
-  /// let parser = Parser::<Html5>::new(&allocator, "<html> Hello World </html>");
-  /// ```
   pub fn new(allocator: &'a Allocator, source_text: &'a str) -> Self {
     Self {
       allocator,

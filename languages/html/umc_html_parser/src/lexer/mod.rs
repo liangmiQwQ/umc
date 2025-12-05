@@ -6,7 +6,6 @@ use umc_parser::source::Source;
 mod kind;
 mod lexe;
 mod state;
-mod token;
 
 pub(crate) struct Html5Lexer<'a> {
   _allocator: &'a Allocator,
@@ -28,12 +27,13 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use crate::lexer::{Html5Lexer, token::Html5Token};
+  use crate::lexer::{Html5Lexer, kind::Html5Kind};
   use insta::assert_snapshot;
   use oxc_allocator::Allocator;
+  use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
-    let result: Vec<Html5Token> = Html5Lexer::new(&Allocator::default(), source_text)
+    let result: Vec<Token<Html5Kind>> = Html5Lexer::new(&Allocator::default(), source_text)
       .tokens()
       .collect();
 
