@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "packages/*"]
+members = ["crates/*", "languages/*/*", "packages/*"]
 
 [workspace.package]
 version = "0.0.0-alpha.14" # Unified packages version

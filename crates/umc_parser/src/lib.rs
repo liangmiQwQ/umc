@@ -62,7 +62,6 @@ impl<'a, T: Language> Parser<'a, T> {
 
   pub fn parse(&self) -> ParseResult<T::Result> {
     let parser = T::Parser::new(self.allocator, self.source_text, &self.options);
-
-    todo!("{:p}", &parser.parse())
+    parser.parse()
   }
 }

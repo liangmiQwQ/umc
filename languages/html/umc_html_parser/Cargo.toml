@@ -1,0 +1,23 @@
+[package]
+name = "umc_html"
+version.workspace = true
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description.workspace = true
+
+[dependencies]
+oxc_allocator = { workspace = true }
+oxc_diagnostics = { workspace = true }
+oxc_parser = { workspace = true, features = [] }
+
+[dev-dependencies]
+insta = { workspace = true }
+
+[features]
+default = ["regular_expression"]
+regular_expression = ["oxc_parser/regular_expression"]
