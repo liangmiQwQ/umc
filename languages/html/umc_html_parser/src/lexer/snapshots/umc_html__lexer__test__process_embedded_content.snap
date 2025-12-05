@@ -1,5 +1,5 @@
 ---
-source: crates/umc_parser/src/html5/lexer/mod.rs
+source: languages/html/umc_html_parser/src/lexer/mod.rs
 expression: test(HTML_STRING)
 ---
 [
@@ -284,58 +284,73 @@ expression: test(HTML_STRING)
         end: 194,
     },
     Html5Token {
-        kind: Whitespace,
+        kind: TagEnd,
         start: 194,
         end: 195,
     },
     Html5Token {
-        kind: SelfCloseTagEnd,
+        kind: TextContent,
         start: 195,
-        end: 197,
-    },
-    Html5Token {
-        kind: TextContent,
-        start: 197,
-        end: 198,
+        end: 254,
     },
     Html5Token {
         kind: CloseTagStart,
-        start: 198,
-        end: 200,
+        start: 254,
+        end: 256,
     },
     Html5Token {
         kind: ElementName,
-        start: 200,
-        end: 204,
+        start: 256,
+        end: 262,
     },
     Html5Token {
         kind: TagEnd,
-        start: 204,
-        end: 205,
+        start: 262,
+        end: 263,
     },
     Html5Token {
         kind: TextContent,
-        start: 205,
-        end: 206,
+        start: 263,
+        end: 264,
     },
     Html5Token {
         kind: CloseTagStart,
-        start: 206,
-        end: 208,
+        start: 264,
+        end: 266,
     },
     Html5Token {
         kind: ElementName,
-        start: 208,
-        end: 212,
+        start: 266,
+        end: 270,
     },
     Html5Token {
         kind: TagEnd,
-        start: 212,
-        end: 213,
+        start: 270,
+        end: 271,
+    },
+    Html5Token {
+        kind: TextContent,
+        start: 271,
+        end: 272,
+    },
+    Html5Token {
+        kind: CloseTagStart,
+        start: 272,
+        end: 274,
+    },
+    Html5Token {
+        kind: ElementName,
+        start: 274,
+        end: 278,
+    },
+    Html5Token {
+        kind: TagEnd,
+        start: 278,
+        end: 279,
     },
     Html5Token {
         kind: Eof,
-        start: 213,
-        end: 213,
+        start: 279,
+        end: 279,
     },
 ]

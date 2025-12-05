@@ -517,7 +517,7 @@ impl<'a> Html5Lexer<'a> {
 #[cfg(test)]
 mod test {
   use super::*;
-  use crate::html5::lexer::{LexerState, source::Source};
+  use crate::lexer::{LexerState, source::Source};
   use oxc_allocator::Allocator;
 
   #[test]

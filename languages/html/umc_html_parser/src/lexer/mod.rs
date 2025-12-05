@@ -31,7 +31,7 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use crate::html5::lexer::{Html5Lexer, token::Html5Token};
+  use crate::lexer::{Html5Lexer, token::Html5Token};
   use insta::assert_snapshot;
   use oxc_allocator::Allocator;
 

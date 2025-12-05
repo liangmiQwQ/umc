@@ -1,5 +1,5 @@
 ---
-source: crates/umc_parser/src/html5/lexer/mod.rs
+source: languages/html/umc_html_parser/src/lexer/mod.rs
 expression: test(HTML_STRING)
 ---
 [
