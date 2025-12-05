@@ -1,13 +1,10 @@
-use crate::lexer::{
-  source::Source,
-  state::{LexerState, LexerStateKind},
-};
+use crate::lexer::state::{LexerState, LexerStateKind};
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
+use umc_parser::source::Source;
 
 mod kind;
 mod lexe;
-mod source;
 mod state;
 mod token;
 

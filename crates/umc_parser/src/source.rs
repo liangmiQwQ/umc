@@ -1,6 +1,6 @@
 use std::str::Chars;
 
-pub(crate) struct Source<'a> {
+pub struct Source<'a> {
   pub pointer: usize,
   pub source_text: &'a str,
 }

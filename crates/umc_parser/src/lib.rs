@@ -1,7 +1,7 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
-pub mod lexer;
+pub mod source;
 
 pub trait Language: Sized {
   type Result;
