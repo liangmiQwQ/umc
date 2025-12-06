@@ -1,0 +1,44 @@
+---
+source: languages/html/umc_html_parser/src/lexer/mod.rs
+expression: test(HTML_STRING)
+---
+Tokens: [
+    Token {
+        kind: Comment,
+        start: 0,
+        end: 8,
+    },
+    Token {
+        kind: Eof,
+        start: 8,
+        end: 8,
+    },
+]
+Errors: [
+    OxcDiagnostic {
+        inner: OxcDiagnosticInner {
+            message: "Expected >, but found EOF",
+            labels: Some(
+                [
+                    LabeledSpan {
+                        label: None,
+                        span: SourceSpan {
+                            offset: SourceOffset(
+                                8,
+                            ),
+                            length: 0,
+                        },
+                        primary: false,
+                    },
+                ],
+            ),
+            help: None,
+            severity: Error,
+            code: OxcCode {
+                scope: None,
+                number: None,
+            },
+            url: None,
+        },
+    },
+]

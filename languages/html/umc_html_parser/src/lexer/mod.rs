@@ -46,22 +46,22 @@ mod test {
   use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
-    let result: Vec<Token<HtmlKind>> = HtmlLexer::new(
-      &Allocator::default(),
+    let allocator = Allocator::default();
+    let mut embedded_language_tags = HashSet::new();
+    embedded_language_tags.insert("script".to_string());
+    embedded_language_tags.insert("style".to_string());
+
+    let mut lexer = HtmlLexer::new(
+      &allocator,
       source_text,
       HtmlLexerOption {
-        embedded_language_tags: &{
-          let mut set: HashSet<String> = HashSet::new();
-          set.insert("script".to_string());
-          set.insert("style".to_string());
-          set
-        },
+        embedded_language_tags: &embedded_language_tags,
       },
-    )
-    .tokens()
-    .collect();
+    );
 
-    format!("{:#?}", result)
+    let result: Vec<Token<HtmlKind>> = lexer.tokens().collect();
+
+    format!("Tokens: {:#?}\nErrors: {:#?}", result, lexer.errors)
   }
 
   #[test]
@@ -83,13 +83,8 @@ mod test {
 
   #[test]
   fn process_embedded_content() {
-    const HTML_STRING: &str = r#"      <!DOCTYPE html>
+    const HTML_STRING: &str = r#"
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
 <body>
   <script>
     const a = 1;
@@ -104,17 +99,41 @@ mod test {
 
   #[test]
   fn self_close_script_tag() {
-    const HTML_STRING: &str = r#"      <!DOCTYPE html>
+    const HTML_STRING: &str = r#"
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
 <body>
   <script />
 </body>
 </html>"#;
+
+    assert_snapshot!(test(HTML_STRING));
+  }
+
+  // errors
+  #[test]
+  fn no_complete_doctype() {
+    const HTML_STRING: &str = r#"<!DOCTYP"#;
+
+    assert_snapshot!(test(HTML_STRING));
+  }
+
+  #[test]
+  fn no_complete_comment() {
+    const HTML_STRING: &str = r#"<!-"#;
+
+    assert_snapshot!(test(HTML_STRING));
+  }
+
+  #[test]
+  fn no_string_end() {
+    const HTML_STRING: &str = r#"<p href="https://www.google.com"#;
+
+    assert_snapshot!(test(HTML_STRING));
+  }
+
+  #[test]
+  fn no_closing_tag_for_embedded_content() {
+    const HTML_STRING: &str = "<script> const a = 1; ";
 
     assert_snapshot!(test(HTML_STRING));
   }
