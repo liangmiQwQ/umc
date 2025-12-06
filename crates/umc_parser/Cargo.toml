@@ -13,4 +13,3 @@ description.workspace = true
 [dependencies]
 oxc_allocator = { workspace = true }
 oxc_diagnostics = { workspace = true }
-umc_ast = { workspace = true }
