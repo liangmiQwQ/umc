@@ -552,7 +552,7 @@ mod test {
     insta::assert_snapshot!(format!(
       "Source: {:#?}; \nErrors:{:#?}",
       SOURCE_TEXT,
-      lexer.errors.get(0).unwrap()
+      lexer.errors.first().unwrap()
     ));
   }
 }

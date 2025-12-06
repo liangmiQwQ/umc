@@ -26,7 +26,7 @@ pub struct HtmlParser; // TODO
 
 impl ParserImpl<Html> for HtmlParser {
   fn new(allocator: &Allocator, source_text: &str, options: &<Html as Language>::Option) -> Self {
-    todo!()
+    todo!("{:p}, {:p}, {:p}", &allocator, &source_text, &options)
   }
 
   fn parse(self) -> <Html as Language>::Result {

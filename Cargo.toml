@@ -19,6 +19,9 @@ lto = true
 codegen-units = 1
 strip = "symbols"
 
+[workspace.metadata.cargo-shear]
+ignored = ["napi"]
+
 [workspace.dependencies]
 napi = "3.0.0"
 napi-build = "2"
