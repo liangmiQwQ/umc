@@ -12,9 +12,9 @@ Errors:OxcDiagnostic {
                     label: None,
                     span: SourceSpan {
                         offset: SourceOffset(
-                            13,
+                            14,
                         ),
-                        length: 1,
+                        length: 0,
                     },
                     primary: false,
                 },
