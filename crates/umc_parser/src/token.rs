@@ -1,14 +1,14 @@
-use std::ops::Range;
+use umc_span::Span;
 
 #[derive(Debug, PartialEq)]
 pub struct Token<T> {
   pub kind: T,
-  pub start: usize,
-  pub end: usize,
+  pub start: u32,
+  pub end: u32,
 }
 
 impl<T> Token<T> {
-  pub fn range(&self) -> Range<usize> {
-    self.start..self.end
+  pub fn span(&self) -> Span {
+    Span::new(self.start, self.end)
   }
 }

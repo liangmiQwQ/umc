@@ -792,6 +792,7 @@ dependencies = [
  "oxc_parser",
  "umc_html_ast",
  "umc_parser",
+ "umc_span",
 ]
 
 [[package]]
@@ -807,6 +808,7 @@ version = "0.0.0-alpha.14"
 dependencies = [
  "oxc_allocator",
  "oxc_diagnostics",
+ "umc_span",
 ]
 
 [[package]]

@@ -1,6 +1,7 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
+pub mod char;
 pub mod source;
 pub mod token;
 

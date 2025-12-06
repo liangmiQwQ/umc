@@ -17,6 +17,7 @@ oxc_parser = { workspace = true, features = [] }
 
 umc_html_ast = { workspace = true }
 umc_parser = { workspace = true }
+umc_span = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }

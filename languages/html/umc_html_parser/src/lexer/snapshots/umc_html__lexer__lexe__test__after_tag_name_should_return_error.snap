@@ -1,6 +1,6 @@
 ---
 source: languages/html/umc_html_parser/src/lexer/lexe.rs
-expression: "format!(\"Source: {:#?}; \\nErrors:{:#?}\", SOURCE_TEXT,\nlexer.errors.get(0).unwrap())"
+expression: "format!(\"Source: {:#?}; \\nErrors:{:#?}\", SOURCE_TEXT,\nlexer.errors.first().unwrap())"
 ---
 Source: " class=\"w-full"; 
 Errors:OxcDiagnostic {
@@ -9,9 +9,7 @@ Errors:OxcDiagnostic {
         labels: Some(
             [
                 LabeledSpan {
-                    label: Some(
-                        "Expected \", but found EOF",
-                    ),
+                    label: None,
                     span: SourceSpan {
                         offset: SourceOffset(
                             13,

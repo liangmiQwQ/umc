@@ -1,6 +1,7 @@
-use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
+use oxc_diagnostics::OxcDiagnostic;
 use std::{iter::from_fn, str::Chars};
-use umc_parser::token::Token;
+use umc_parser::{char::len_utf8_u32, token::Token};
+use umc_span::Span;
 
 use crate::lexer::{HtmlLexer, kind::HtmlKind, state::LexerStateKind};
 
@@ -31,7 +32,7 @@ impl<'a> HtmlLexer<'a> {
 
   #[inline]
   fn is_eof(&self) -> bool {
-    self.source.pointer >= self.source.source_text.len()
+    self.source.pointer as usize >= self.source.source_text.len()
   }
 
   #[inline]
@@ -55,7 +56,7 @@ impl<'a> HtmlLexer<'a> {
       // for <
       '<' => {
         // maybe comment, doctype, tag or < starting content
-        let mut diff: usize = '<'.len_utf8();
+        let mut diff: u32 = len_utf8_u32('<');
 
         match iter.next() {
           // for alphabetic character, as tag start
@@ -75,7 +76,7 @@ impl<'a> HtmlLexer<'a> {
 
           // for / character, as closing tag
           Some('/') => {
-            diff += '/'.len_utf8();
+            diff += len_utf8_u32('/');
 
             let result = Token::<HtmlKind> {
               kind: HtmlKind::CloseTagStart,
@@ -90,7 +91,7 @@ impl<'a> HtmlLexer<'a> {
 
           // for ! character, as comment or doctype
           Some('!') => {
-            diff += '!'.len_utf8();
+            diff += len_utf8_u32('!');
 
             const COMMENT_START: [char; 2] = ['-', '-'];
             const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
@@ -99,7 +100,7 @@ impl<'a> HtmlLexer<'a> {
             let mut i = 0;
 
             while let Some(item) = iter.next() {
-              diff += item.len_utf8();
+              diff += len_utf8_u32(item);
 
               if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
                 if i == DOCTYPE_START.len() - 1 {
@@ -150,16 +151,16 @@ impl<'a> HtmlLexer<'a> {
       // for content
       c => {
         // record until next tag start
-        let mut diff: usize = c.len_utf8();
+        let mut diff: u32 = len_utf8_u32(c);
         self.handle_content_text(&mut iter, &mut diff)
       }
     }
   }
 
-  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<HtmlKind> {
+  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
     let mut ended = false;
     for item in iter {
-      *diff += item.len_utf8();
+      *diff += len_utf8_u32(item);
 
       if item == '>' {
         ended = true;
@@ -182,12 +183,12 @@ impl<'a> HtmlLexer<'a> {
     result
   }
 
-  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<HtmlKind> {
+  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
     let mut dash_count: u8 = 0;
     let mut ended = false;
 
     for item in iter {
-      *diff += item.len_utf8();
+      *diff += len_utf8_u32(item);
 
       match item {
         '-' => {
@@ -223,17 +224,20 @@ impl<'a> HtmlLexer<'a> {
     result
   }
 
-  fn tailless_comment(&mut self, diff: usize) -> Token<HtmlKind> {
+  fn tailless_comment(&mut self, diff: u32) -> Token<HtmlKind> {
     // eof without finishing doctype or comment
     // throw an error
-    let error_message = format!("Expected {}, but found {}", HtmlKind::TagEnd, HtmlKind::Eof,);
-    let label = LabeledSpan::at(
-      self.source.pointer + diff - 1..self.source.pointer + diff,
-      &error_message,
+    self.errors.push(
+      OxcDiagnostic::error(format!(
+        "Expected {}, but found {}",
+        HtmlKind::TagEnd,
+        HtmlKind::Eof
+      ))
+      .with_label(Span::new(
+        self.source.pointer + diff,
+        self.source.pointer + diff,
+      )),
     );
-    self
-      .errors
-      .push(OxcDiagnostic::error(error_message).with_label(label));
 
     // return as comment
     let result = Token::<HtmlKind> {
@@ -247,7 +251,7 @@ impl<'a> HtmlLexer<'a> {
     result
   }
 
-  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut usize) -> Token<HtmlKind> {
+  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
     let mut check_next = false;
 
     for item in iter {
@@ -255,7 +259,7 @@ impl<'a> HtmlLexer<'a> {
         if item.is_alphabetic() || item == '/' || item == '!' {
           break;
         } else {
-          *diff += item.len_utf8() + '<'.len_utf8();
+          *diff += len_utf8_u32(item) + len_utf8_u32('<');
           check_next = false;
           continue;
         }
@@ -264,7 +268,7 @@ impl<'a> HtmlLexer<'a> {
       if item == '<' {
         check_next = true;
       } else {
-        *diff += item.len_utf8();
+        *diff += len_utf8_u32(item);
       }
     }
 
@@ -282,14 +286,15 @@ impl<'a> HtmlLexer<'a> {
 // handler for HtmlLexerState::EmbeddedContent
 impl<'a> HtmlLexer<'a> {
   fn handle_embedded_content(&mut self) -> Token<HtmlKind> {
-    let mut diff: usize = 0;
+    let mut diff: u32 = 0;
     let closing_tag = format!("</{}", self.state.take_tag_name().unwrap()); // safe unwrap because only script/style can enter this state
     let mut ended = false;
 
     for item in self.source.get_chars() {
-      diff += item.len_utf8();
+      diff += len_utf8_u32(item);
 
-      if self.source.source_text[self.source.pointer + diff..].starts_with(&closing_tag) {
+      if self.source.source_text[(self.source.pointer + diff) as usize..].starts_with(&closing_tag)
+      {
         ended = true;
         break;
       }
@@ -297,15 +302,17 @@ impl<'a> HtmlLexer<'a> {
 
     if !ended {
       // throw an error, expect closing tag, but found eof
-      let error_message = format!("Expected {}, but found {}", closing_tag, HtmlKind::Eof,);
-      let label = LabeledSpan::at(
-        self.source.pointer + diff - 1..self.source.pointer + diff,
-        &error_message,
+      self.errors.push(
+        OxcDiagnostic::error(format!(
+          "Expected {}, but found {}",
+          closing_tag,
+          HtmlKind::Eof
+        ))
+        .with_label(Span::new(
+          self.source.pointer + diff,
+          self.source.pointer + diff,
+        )),
       );
-
-      self
-        .errors
-        .push(OxcDiagnostic::error(error_message).with_label(label));
     }
 
     let result = Token::<HtmlKind> {
@@ -328,11 +335,11 @@ impl<'a> HtmlLexer<'a> {
     match iter.next().unwrap() {
       // for whitespace
       c if c.is_whitespace() => {
-        let mut diff: usize = c.len_utf8();
+        let mut diff: u32 = len_utf8_u32(c);
 
         for item in iter {
           if item.is_whitespace() {
-            diff += item.len_utf8();
+            diff += len_utf8_u32(item);
           } else {
             break;
           }
@@ -350,7 +357,7 @@ impl<'a> HtmlLexer<'a> {
 
       // for =
       '=' => {
-        let diff = '='.len_utf8();
+        let diff = len_utf8_u32('=');
 
         let result = Token::<HtmlKind> {
           kind: HtmlKind::Eq,
@@ -364,7 +371,7 @@ impl<'a> HtmlLexer<'a> {
 
       // for tag end (>)
       '>' => {
-        let diff = '>'.len_utf8();
+        let diff = len_utf8_u32('>');
 
         let result = Token::<HtmlKind> {
           kind: HtmlKind::TagEnd,
@@ -389,12 +396,12 @@ impl<'a> HtmlLexer<'a> {
 
       // for self close end and attribute starts with `/`
       '/' => {
-        let mut diff = '/'.len_utf8();
+        let mut diff = len_utf8_u32('/');
 
         let result = {
           let result = iter.next();
           if let Some(next) = result {
-            diff += next.len_utf8();
+            diff += len_utf8_u32(next);
           }
           result
         };
@@ -425,7 +432,7 @@ impl<'a> HtmlLexer<'a> {
 
       // for attribute without `"`
       c => {
-        let mut diff = c.len_utf8();
+        let mut diff = len_utf8_u32(c);
         self.handle_tag(&mut iter, &mut diff, HtmlKind::Attribute)
       }
     }
@@ -433,11 +440,11 @@ impl<'a> HtmlLexer<'a> {
 
   fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Token<HtmlKind> {
     // since html don't support \ escape, we don't need to manage its state
-    let mut diff = quote.len_utf8();
+    let mut diff = len_utf8_u32(quote);
     let mut ended = false;
 
     for item in iter {
-      diff += item.len_utf8();
+      diff += len_utf8_u32(item);
 
       match item {
         c if c == quote => {
@@ -450,15 +457,13 @@ impl<'a> HtmlLexer<'a> {
 
     if !ended {
       // throw an error, expect quote, but found eof
-      let error_message = format!("Expected {}, but found {}", quote, HtmlKind::Eof,);
-      let label = LabeledSpan::at(
-        self.source.pointer + diff - 1..self.source.pointer + diff,
-        &error_message,
+      self.errors.push(
+        OxcDiagnostic::error(format!("Expected {}, but found {}", quote, HtmlKind::Eof))
+          .with_label(Span::new(
+            self.source.pointer + diff,
+            self.source.pointer + diff,
+          )),
       );
-
-      self
-        .errors
-        .push(OxcDiagnostic::error(error_message).with_label(label));
     }
 
     let result = Token::<HtmlKind> {
@@ -477,26 +482,26 @@ impl<'a> HtmlLexer<'a> {
   fn handle_in_tag(&mut self) -> Token<HtmlKind> {
     // call the handle_tag
     let mut iter = self.source.get_chars();
-    let mut diff: usize = 0;
+    let mut diff: u32 = 0;
 
     let result = self.handle_tag(&mut iter, &mut diff, HtmlKind::ElementName);
     self.state.kind = LexerStateKind::AfterTagName; // update state
     self
       .state
-      .set_tag_name(self.source.source_text[result.range()].to_owned());
+      .set_tag_name(self.source.source_text[result.start as usize..result.end as usize].to_owned());
     result
   }
 }
 
 // some universal functions
 impl<'a> HtmlLexer<'a> {
-  fn handle_tag(&mut self, iter: &mut Chars, diff: &mut usize, kind: HtmlKind) -> Token<HtmlKind> {
+  fn handle_tag(&mut self, iter: &mut Chars, diff: &mut u32, kind: HtmlKind) -> Token<HtmlKind> {
     for item in iter {
       if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
         // end of a attribute
         break;
       } else {
-        *diff += item.len_utf8();
+        *diff += len_utf8_u32(item);
       }
     }
 
