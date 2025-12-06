@@ -7,7 +7,7 @@ _default:
 
 init:
   cargo install cargo-binstall
-  cargo binstall cargo-insta cargo-shear cargo-workspaces -y
+  cargo binstall cargo-insta cargo-shear cargo-workspaces cargo-edit -y
   corepack enable
   pnpm install
   
@@ -22,6 +22,7 @@ fix:
   pnpm lint --fix
 
 update:
+  cargo upgrade
   cargo update
   pnpm deps
 
