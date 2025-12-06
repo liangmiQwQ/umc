@@ -1,37 +1,33 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
+use umc_ast::Ast;
 
 pub mod source;
 pub mod token;
 
-pub trait Language: Sized {
-  type Result;
+pub trait LanguageParser: Sized {
+  type Ast: Ast;
   type Option: Default;
   type Parser: ParserImpl<Self>;
 }
 
-pub trait ParserImpl<T: Language> {
+pub trait ParserImpl<T: LanguageParser> {
   fn new(allocator: &Allocator, source_text: &str, options: &T::Option) -> Self;
-  fn parse(self) -> T::Result;
+  fn parse(self) -> ParseResult<T::Ast>;
 }
 
-pub struct Parser<'a, T: Language> {
+pub struct Parser<'a, T: LanguageParser> {
   pub allocator: &'a Allocator,
   pub source_text: &'a str,
   pub options: T::Option,
 }
 
 pub struct ParseResult<T> {
-  pub program: Program<T>,
+  pub program: T,
   pub errors: Vec<OxcDiagnostic>,
-  pub panicked: bool,
 }
 
-pub struct Program<T> {
-  pub body: Vec<T>,
-}
-
-impl<'a, T: Language> Parser<'a, T> {
+impl<'a, T: LanguageParser> Parser<'a, T> {
   /// Creat the umc parser
   ///
   /// # Parameters
@@ -51,9 +47,10 @@ impl<'a, T: Language> Parser<'a, T> {
     self
   }
 
-  pub fn parse(&self) -> ParseResult<T::Result> {
+  /// Get the parse result
+  pub fn parse(&self) -> ParseResult<T::Ast> {
     let parser = T::Parser::new(self.allocator, self.source_text, &self.options);
 
-    todo!("{:p}", &parser.parse())
+    parser.parse()
   }
 }

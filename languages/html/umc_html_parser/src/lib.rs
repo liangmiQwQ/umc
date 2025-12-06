@@ -1,6 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
-use umc_parser::{Language, Parser, ParserImpl};
+use umc_parser::{LanguageParser, ParseResult, Parser, ParserImpl};
 
 use crate::lexer::HtmlLexer;
 
@@ -8,8 +8,8 @@ mod lexer;
 
 pub struct Html;
 
-impl Language for Html {
-  type Result = HtmlAst;
+impl LanguageParser for Html {
+  type Ast = HtmlAst;
   type Option = HtmlOption;
   type Parser = HtmlParser;
 }
@@ -20,16 +20,18 @@ pub struct HtmlOption {
   pub parse_script: Option<ParseOptions>,
 }
 
-pub struct HtmlAst; // TODO
-
 pub struct HtmlParser; // TODO
 
 impl ParserImpl<Html> for HtmlParser {
-  fn new(allocator: &Allocator, source_text: &str, options: &<Html as Language>::Option) -> Self {
+  fn new(
+    allocator: &Allocator,
+    source_text: &str,
+    options: &<Html as LanguageParser>::Option,
+  ) -> Self {
     todo!("{:p}, {:p}, {:p}", &allocator, &source_text, &options)
   }
 
-  fn parse(self) -> <Html as Language>::Result {
+  fn parse(self) -> ParseResult<HtmlAst> {
     todo!()
   }
 }
@@ -53,7 +55,7 @@ impl<'a> CreateHtml<'a> for Parser<'a, Html> {
   }
 }
 
-pub fn parse<T: Language>(parser: &Parser<T>, _option: &HtmlOption) {
+pub fn parse<T: LanguageParser>(parser: &Parser<T>, _option: &HtmlOption) {
   let mut lexer = HtmlLexer::new(parser.allocator, parser.source_text);
 
   let _: Vec<_> = lexer.tokens().collect();
