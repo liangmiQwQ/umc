@@ -1,30 +1,47 @@
 use std::fmt::{self, Display};
 
+/// HTML token kinds used by the lexer.
+///
+/// Represents the different types of tokens that can be encountered when
+/// lexing HTML source code. Each variant corresponds to a specific syntactic
+/// element in HTML.
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq)]
 #[repr(u8)]
 #[non_exhaustive]
 pub enum HtmlKind {
+  /// End of file marker
   #[default]
   Eof = 0,
 
   // Tags
-  TagStart,        // <
-  TagEnd,          // >
-  CloseTagStart,   // </
-  SelfCloseTagEnd, // />
-  Doctype,         // <!DOCTYPE
+  /// Opening tag start: `<`
+  TagStart,
+  /// Tag end: `>`
+  TagEnd,
+  /// Closing tag start: `</`
+  CloseTagStart,
+  /// Self-closing tag end: `/>`
+  SelfCloseTagEnd,
+  /// DOCTYPE declaration: `<!DOCTYPE`
+  Doctype,
 
   // Identifier
-  ElementName, // div, span, html, etc.
-  Attribute,   // both for attribute value and attribute name
+  /// HTML element name (e.g., div, span, html)
+  ElementName,
+  /// Attribute name or value
+  Attribute,
 
   // Texts
-  TextContent, // like the "Hello World" of <span>Hello World</span>
-  Comment,     // <!-- ... -->
+  /// Text content within elements
+  TextContent,
+  /// HTML comment: `<!-- ... -->`
+  Comment,
 
   // Misc
-  Eq,         // =
-  Whitespace, // Whitespace, line breaks
+  /// Equals sign in attributes: `=`
+  Eq,
+  /// Whitespace and line breaks
+  Whitespace,
 }
 
 use HtmlKind::*;

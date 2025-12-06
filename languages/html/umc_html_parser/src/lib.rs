@@ -1,3 +1,21 @@
+//! HTML parser implementation for the Universal Markup-language Compiler.
+//!
+//! This crate provides a complete HTML parser that can tokenize and parse HTML
+//! documents into an Abstract Syntax Tree (AST). It supports embedded languages
+//! like JavaScript (in `<script>` tags) and CSS (in `<style>` tags).
+//!
+//! # Example
+//!
+//! ```ignore
+//! use umc_html_parser::CreateHtml;
+//! use umc_parser::Parser;
+//! use oxc_allocator::Allocator;
+//!
+//! let allocator = Allocator::default();
+//! let parser = Parser::html(&allocator, "<html><body>Hello</body></html>");
+//! let result = parser.parse();
+//! ```
+
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
 use std::collections::HashSet;
@@ -12,6 +30,10 @@ use crate::{
 
 mod lexer;
 
+/// HTML language parser marker type.
+///
+/// This zero-sized type implements [`LanguageParser`] for HTML parsing.
+/// Use [`Parser::html()`](CreateHtml::html) to create an HTML parser instance.
 pub struct Html;
 
 impl LanguageParser for Html {
@@ -20,7 +42,26 @@ impl LanguageParser for Html {
   type Parser<'a> = HtmlParserImpl<'a>;
 }
 
+/// Convenience trait for creating HTML parsers.
+///
+/// This trait provides a more ergonomic API for creating HTML parser instances.
+///
+/// # Example
+///
+/// ```ignore
+/// use umc_parser::Parser;
+/// use umc_html_parser::CreateHtml;
+/// use oxc_allocator::Allocator;
+///
+/// let allocator = Allocator::default();
+/// let parser = Parser::html(&allocator, "<html></html>");
+/// ```
 pub trait CreateHtml<'a> {
+  /// Create a parser for HTML parsing.
+  ///
+  /// # Parameters
+  /// - `allocator`: Memory arena for allocating AST nodes
+  /// - `source_text`: HTML source code to parse
   fn html(allocator: &'a Allocator, source_text: &'a str) -> Self;
 }
 
@@ -31,13 +72,21 @@ impl<'a> CreateHtml<'a> for Parser<'a, Html> {
   }
 }
 
+/// HTML parser configuration options.
+///
+/// This module contains the [`HtmlParserOption`] struct for configuring
+/// how the HTML parser handles embedded languages and special content.
 pub mod option {
   use super::*;
 
+  /// HTML parser configuration options.
+  ///
+  /// Configures how the HTML parser handles embedded languages like JavaScript and CSS.
   pub struct HtmlParserOption {
     /// The oxc_parser options for parsing content inside <script> tags.
     /// If get None, the content in <script> tag will be returned without parsing
     pub parse_script: Option<ParseOptions>,
+    /// Set of tag names that contain embedded language content (e.g., "script", "style")
     pub embedded_language_tags: HashSet<String>,
   }
 
