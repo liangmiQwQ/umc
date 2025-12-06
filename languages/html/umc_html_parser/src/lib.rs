@@ -11,7 +11,7 @@ mod lexer;
 pub struct Html;
 
 impl LanguageParser for Html {
-  type Ast = Vec<Node>;
+  type Result = Vec<Node>;
   type Option = HtmlParserOption;
   type Parser<'a> = HtmlParserImpl<'a>;
 }

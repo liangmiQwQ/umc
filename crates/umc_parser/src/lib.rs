@@ -6,14 +6,14 @@ pub mod source;
 pub mod token;
 
 pub trait LanguageParser: Sized {
-  type Ast;
+  type Result;
   type Option: Default;
   type Parser<'a>: ParserImpl<'a, Self>;
 }
 
 pub trait ParserImpl<'a, T: LanguageParser> {
   fn new(allocator: &'a Allocator, source_text: &'a str, options: &'a T::Option) -> Self;
-  fn parse(self) -> ParseResult<T::Ast>;
+  fn parse(self) -> ParseResult<T::Result>;
 }
 
 pub struct Parser<'a, T: LanguageParser> {
@@ -48,7 +48,7 @@ impl<'a, T: LanguageParser> Parser<'a, T> {
   }
 
   /// Get the parse result
-  pub fn parse(&self) -> ParseResult<T::Ast> {
+  pub fn parse(&self) -> ParseResult<T::Result> {
     let parser = T::Parser::new(self.allocator, self.source_text, &self.options);
 
     parser.parse()
