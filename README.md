@@ -5,7 +5,7 @@
 
 _/ˌju: em 'si:/_
 
-UMC is a collection of tools to parse structured and markup languages code into AST (Abstract Syntax Tree), written in Rust.
+UMC is a toolkit for analyzing, transforming, and generating markup and structured languages code by generating AST (Abstract Syntax Tree), written in Rust and built top on [oxc](https://github.com/oxc-project/oxc).
 
 ## License
 
