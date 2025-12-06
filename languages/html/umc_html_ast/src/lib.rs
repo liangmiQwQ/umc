@@ -25,6 +25,7 @@ pub struct Text {
 }
 
 pub struct Comment {
+  pub span: Span,
   pub bogus: bool,
   pub value: String,
 }

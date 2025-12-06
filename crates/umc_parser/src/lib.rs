@@ -28,7 +28,7 @@ pub struct ParseResult<T> {
 }
 
 impl<'a, T: LanguageParser> Parser<'a, T> {
-  /// Creat the umc parser
+  /// Create the umc parser
   ///
   /// # Parameters
   /// - `allocator`: [Memory arena](oxc_allocator::Allocator) for allocating AST nodes
