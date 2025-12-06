@@ -20,7 +20,7 @@ pub const SPAN: Span = Span::new(0, 0);
 /// It is a logical error for `end` to be less than `start`.
 ///
 /// ```
-/// # use oxc_span::Span;
+/// # use umc_span::Span;
 /// let text = "foo bar baz";
 /// let span = Span::new(4, 7);
 /// assert_eq!(&text[span], "bar");
@@ -38,7 +38,7 @@ pub const SPAN: Span = Span::new(0, 0);
 /// length, you can use [`Span::sized`].
 ///
 /// ```
-/// # use oxc_span::Span;
+/// # use umc_span::Span;
 /// let a = Span::new(5, 10);  // Start and end offsets
 /// let b = Span::sized(5, 5); // Start offset and size
 /// assert_eq!(a, b);
@@ -50,7 +50,7 @@ pub const SPAN: Span = Span::new(0, 0);
 /// without modifying the original.
 ///
 /// ```
-/// # use oxc_span::Span;
+/// # use umc_span::Span;
 /// let s = Span::new(5, 10);
 /// assert_eq!(s.shrink(2), Span::new(7, 8));
 /// assert_eq!(s.shrink(2), s.shrink_left(2).shrink_right(2));
@@ -103,7 +103,7 @@ impl Span {
   ///
   /// # Examples
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let fifth = Span::empty(5);
   /// assert!(fifth.is_empty());
@@ -118,7 +118,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let span = Span::sized(2, 4);
   /// assert_eq!(span.size(), 4);
@@ -132,7 +132,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// assert_eq!(Span::new(1, 1).size(), 0);
   /// assert_eq!(Span::new(0, 5).size(), 5);
@@ -147,7 +147,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// assert!(Span::new(0, 0).is_empty());
   /// assert!(Span::new(5, 5).is_empty());
@@ -163,7 +163,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::{Span, SPAN};
+  /// use umc_span::{Span, SPAN};
   ///
   /// assert!(SPAN.is_unspanned());
   /// assert!(!Span::new(0, 5).is_unspanned());
@@ -182,7 +182,7 @@ impl Span {
   /// # Examples
   ///
   /// ```rust
-  /// # use oxc_span::Span;
+  /// # use umc_span::Span;
   /// let span = Span::new(5, 10);
   ///
   /// assert!(span.contains_inclusive(span)); // always true for itself
@@ -202,7 +202,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let span1 = Span::new(0, 5);
   /// let span2 = Span::new(3, 8);
@@ -218,7 +218,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let span1 = Span::new(0, 3);
   /// let span2 = Span::new(3, 8);
@@ -247,7 +247,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let span = Span::new(3, 5);
   /// assert_eq!(span.expand(1), Span::new(2, 6));
@@ -276,7 +276,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   /// let span = Span::new(5, 10);
   /// assert_eq!(span.shrink(2), Span::new(7, 8));
   /// ```
@@ -297,7 +297,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// assert_eq!(a.expand_left(5), Span::new(0, 10));
@@ -309,7 +309,7 @@ impl Span {
   /// method with a value larger than the start position.
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(0, 5);
   /// assert_eq!(a.expand_left(5), Span::new(0, 5));
@@ -328,7 +328,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// let shrunk = a.shrink_left(5);
@@ -354,7 +354,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// assert_eq!(a.expand_right(5), Span::new(5, 15));
@@ -366,7 +366,7 @@ impl Span {
   /// call this method with a value larger than the end position.
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(0, u32::MAX);
   /// assert_eq!(a.expand_right(5), Span::new(0, u32::MAX));
@@ -385,7 +385,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// let shrunk = a.shrink_right(5);
@@ -410,7 +410,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// let moved = a.move_left(5);
@@ -437,7 +437,7 @@ impl Span {
   /// # Example
   ///
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let a = Span::new(5, 10);
   /// let moved = a.move_right(5);
@@ -465,7 +465,7 @@ impl Span {
   ///
   /// # Example
   /// ```
-  /// use oxc_span::Span;
+  /// use umc_span::Span;
   ///
   /// let source = "function add (a, b) { return a + b; }";
   /// let name_span = Span::new(9, 12);

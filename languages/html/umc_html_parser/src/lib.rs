@@ -1,5 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
+use umc_html_ast::Node;
 use umc_parser::{LanguageParser, ParseResult, Parser, ParserImpl};
 
 use crate::lexer::HtmlLexer;
@@ -9,7 +10,7 @@ mod lexer;
 pub struct Html;
 
 impl LanguageParser for Html {
-  type Ast = HtmlAst;
+  type Ast = Vec<Node>;
   type Option = HtmlOption;
   type Parser = HtmlParser;
 }
@@ -31,7 +32,7 @@ impl ParserImpl<Html> for HtmlParser {
     todo!("{:p}, {:p}, {:p}", &allocator, &source_text, &options)
   }
 
-  fn parse(self) -> ParseResult<HtmlAst> {
+  fn parse(self) -> ParseResult<Vec<Node>> {
     todo!()
   }
 }

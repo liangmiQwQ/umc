@@ -1,12 +1,11 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
-use umc_ast::Ast;
 
 pub mod source;
 pub mod token;
 
 pub trait LanguageParser: Sized {
-  type Ast: Ast;
+  type Ast;
   type Option: Default;
   type Parser: ParserImpl<Self>;
 }

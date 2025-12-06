@@ -14,6 +14,8 @@ description.workspace = true
 oxc_allocator = { workspace = true }
 oxc_diagnostics = { workspace = true }
 oxc_parser = { workspace = true, features = [] }
+
+umc_html_ast = { workspace = true }
 umc_parser = { workspace = true }
 
 [dev-dependencies]

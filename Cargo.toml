@@ -38,3 +38,5 @@ insta = "1.44.1"
 umc_ast = { version = "0.0.0-alpha.14", path = "crates/umc_ast" }
 umc_parser = { version = "0.0.0-alpha.14", path = "crates/umc_parser" }
 umc_span = { version = "0.0.0-alpha.14", path = "crates/umc_span" }
+
+umc_html_ast = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_ast" }
