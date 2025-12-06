@@ -8,11 +8,11 @@ pub mod token;
 pub trait LanguageParser: Sized {
   type Ast;
   type Option: Default;
-  type Parser: ParserImpl<Self>;
+  type Parser<'a>: ParserImpl<'a, Self>;
 }
 
-pub trait ParserImpl<T: LanguageParser> {
-  fn new(allocator: &Allocator, source_text: &str, options: &T::Option) -> Self;
+pub trait ParserImpl<'a, T: LanguageParser> {
+  fn new(allocator: &'a Allocator, source_text: &'a str, options: &'a T::Option) -> Self;
   fn parse(self) -> ParseResult<T::Ast>;
 }
 

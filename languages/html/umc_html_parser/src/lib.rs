@@ -1,9 +1,10 @@
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
+use std::collections::HashSet;
 use umc_html_ast::Node;
 use umc_parser::{LanguageParser, ParseResult, Parser, ParserImpl};
 
-use crate::lexer::HtmlLexer;
+use crate::lexer::{HtmlLexer, HtmlLexerOption};
 
 mod lexer;
 
@@ -11,37 +12,60 @@ pub struct Html;
 
 impl LanguageParser for Html {
   type Ast = Vec<Node>;
-  type Option = HtmlOption;
-  type Parser = HtmlParser;
+  type Option = HtmlParserOption;
+  type Parser<'a> = HtmlParserImpl<'a>;
 }
 
-pub struct HtmlOption {
+pub struct HtmlParserOption {
   /// The oxc_parser options for parsing content inside <script> tags.
   /// If get None, the content in <script> tag will be returned without parsing
   pub parse_script: Option<ParseOptions>,
+  pub embedded_language_tags: HashSet<String>,
 }
 
-pub struct HtmlParser; // TODO
+impl Default for HtmlParserOption {
+  fn default() -> Self {
+    HtmlParserOption {
+      parse_script: Some(ParseOptions::default()),
+      embedded_language_tags: {
+        let mut set: HashSet<String> = HashSet::new();
+        set.insert("script".to_string());
+        set.insert("style".to_string());
+        set
+      },
+    }
+  }
+}
 
-impl ParserImpl<Html> for HtmlParser {
+pub struct HtmlParserImpl<'a> {
+  allocator: &'a Allocator,
+  source_text: &'a str,
+  options: &'a HtmlParserOption,
+}
+
+impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
   fn new(
-    allocator: &Allocator,
-    source_text: &str,
-    options: &<Html as LanguageParser>::Option,
+    allocator: &'a Allocator,
+    source_text: &'a str,
+    options: &'a <Html as LanguageParser>::Option,
   ) -> Self {
-    todo!("{:p}, {:p}, {:p}", &allocator, &source_text, &options)
+    HtmlParserImpl {
+      allocator,
+      source_text,
+      options,
+    }
   }
 
   fn parse(self) -> ParseResult<Vec<Node>> {
+    let mut lexer = HtmlLexer::new(
+      self.allocator,
+      self.source_text,
+      HtmlLexerOption {
+        embedded_language_tags: &self.options.embedded_language_tags,
+      },
+    );
+    let _: Vec<_> = lexer.tokens().collect();
     todo!()
-  }
-}
-
-impl Default for HtmlOption {
-  fn default() -> Self {
-    HtmlOption {
-      parse_script: Some(ParseOptions::default()),
-    }
   }
 }
 
@@ -54,10 +78,4 @@ impl<'a> CreateHtml<'a> for Parser<'a, Html> {
   fn html(allocator: &'a Allocator, source_text: &'a str) -> Self {
     Parser::<Html>::new(allocator, source_text)
   }
-}
-
-pub fn parse<T: LanguageParser>(parser: &Parser<T>, _option: &HtmlOption) {
-  let mut lexer = HtmlLexer::new(parser.allocator, parser.source_text);
-
-  let _: Vec<_> = lexer.tokens().collect();
 }

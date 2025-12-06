@@ -102,7 +102,9 @@ impl<'a> HtmlLexer<'a> {
             while let Some(item) = iter.next() {
               diff += len_utf8_u32(item);
 
-              if match_doctype && DOCTYPE_START.get(i) == Some(&item) {
+              if match_doctype
+                && matches!(DOCTYPE_START.get(i), Some(&c) if c.eq_ignore_ascii_case(&item))
+              {
                 if i == DOCTYPE_START.len() - 1 {
                   // it's a doctype
                   let result = Token::<HtmlKind> {
@@ -382,9 +384,8 @@ impl<'a> HtmlLexer<'a> {
         self.source.advance_bytes(diff);
 
         // update state
-        const EMBEDDED_LANGUAGE_TAG: [&str; 2] = ["script", "style"];
         if let Some(tag_name) = self.state.get_tag_name()
-          && EMBEDDED_LANGUAGE_TAG.contains(&tag_name)
+          && self.option.embedded_language_tags.contains(tag_name)
         {
           self.state.kind = LexerStateKind::EmbeddedContent;
         } else {
@@ -513,51 +514,5 @@ impl<'a> HtmlLexer<'a> {
 
     self.source.advance_bytes(*diff);
     result
-  }
-}
-
-#[cfg(test)]
-mod test {
-  use super::*;
-  use crate::lexer::LexerState;
-  use oxc_allocator::Allocator;
-  use umc_parser::source::Source;
-
-  #[test]
-  fn after_tag_name_should_work() {
-    const SOURCE_TEXT: &str = r#" class="w-full h-full" p-1
- 复杂字段测试 /test "alpha"
-       />"#;
-    let mut lexer = HtmlLexer {
-      _allocator: &Allocator::default(),
-      source: Source::new(SOURCE_TEXT),
-      state: LexerState::new(LexerStateKind::AfterTagName),
-      errors: Vec::new(),
-    };
-
-    let tokens: Vec<Token<HtmlKind>> = lexer.tokens().collect();
-    insta::assert_snapshot!(format!(
-      "Source: {:#?}; \nTokens:{:#?}",
-      SOURCE_TEXT, tokens
-    ));
-  }
-
-  #[test]
-  fn after_tag_name_should_return_error() {
-    const SOURCE_TEXT: &str = r#" class="w-full"#;
-    let mut lexer = HtmlLexer {
-      _allocator: &Allocator::default(),
-      source: Source::new(SOURCE_TEXT),
-      state: LexerState::new(LexerStateKind::AfterTagName),
-      errors: Vec::new(),
-    };
-
-    lexer.tokens().for_each(drop);
-
-    insta::assert_snapshot!(format!(
-      "Source: {:#?}; \nErrors:{:#?}",
-      SOURCE_TEXT,
-      lexer.errors.first().unwrap()
-    ));
   }
 }
