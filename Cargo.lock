@@ -779,13 +779,36 @@ dependencies = [
 ]
 
 [[package]]
-name = "umc_parser"
+name = "umc_ast"
+version = "0.0.0-alpha.14"
+
+[[package]]
+name = "umc_html"
 version = "0.0.0-alpha.14"
 dependencies = [
  "insta",
  "oxc_allocator",
  "oxc_diagnostics",
  "oxc_parser",
+ "umc_html_ast",
+ "umc_parser",
+ "umc_span",
+]
+
+[[package]]
+name = "umc_html_ast"
+version = "0.0.0-alpha.14"
+dependencies = [
+ "umc_span",
+]
+
+[[package]]
+name = "umc_parser"
+version = "0.0.0-alpha.14"
+dependencies = [
+ "oxc_allocator",
+ "oxc_diagnostics",
+ "umc_span",
 ]
 
 [[package]]
@@ -795,6 +818,14 @@ dependencies = [
  "napi",
  "napi-build",
  "napi-derive",
+]
+
+[[package]]
+name = "umc_span"
+version = "0.0.0-alpha.14"
+dependencies = [
+ "oxc-miette",
+ "oxc_allocator",
 ]
 
 [[package]]

@@ -1,7 +1,7 @@
 use std::str::Chars;
 
-pub(crate) struct Source<'a> {
-  pub pointer: usize,
+pub struct Source<'a> {
+  pub pointer: u32,
   pub source_text: &'a str,
 }
 
@@ -16,11 +16,11 @@ impl<'a> Source<'a> {
 
 impl<'a> Source<'a> {
   pub fn get_chars(&self) -> Chars<'a> {
-    self.source_text[self.pointer..].chars()
+    self.source_text[(self.pointer as usize)..].chars()
   }
 
   /// Unsafe, panic expected if bytes wrong
-  pub fn advance_bytes(&mut self, bytes: usize) {
+  pub fn advance_bytes(&mut self, bytes: u32) {
     let target = self.pointer + bytes;
     self.pointer = target;
   }

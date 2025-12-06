@@ -1,5 +1,5 @@
 [package]
-name = "umc_parser"
+name = "umc_html_ast"
 version.workspace = true
 authors.workspace = true
 categories.workspace = true
@@ -11,7 +11,4 @@ rust-version.workspace = true
 description.workspace = true
 
 [dependencies]
-oxc_allocator = { workspace = true }
-oxc_diagnostics = { workspace = true }
-
 umc_span = { workspace = true }

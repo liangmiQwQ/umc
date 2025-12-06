@@ -1,29 +1,37 @@
-use crate::html5::lexer::{
-  source::Source,
-  state::{LexerState, LexerStateKind},
-};
+use std::collections::HashSet;
+
+use crate::lexer::state::{LexerState, LexerStateKind};
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
+use umc_parser::source::Source;
 
 mod kind;
 mod lexe;
-mod source;
 mod state;
-mod token;
 
-pub(crate) struct Html5Lexer<'a> {
+pub(crate) struct HtmlLexerOption<'a> {
+  pub embedded_language_tags: &'a HashSet<String>,
+}
+
+pub(crate) struct HtmlLexer<'a> {
   _allocator: &'a Allocator,
   source: Source<'a>,
   state: LexerState,
+  option: HtmlLexerOption<'a>,
   pub errors: Vec<OxcDiagnostic>,
 }
 
-impl<'a> Html5Lexer<'a> {
-  pub fn new(allocator: &'a Allocator, source_text: &'a str) -> Html5Lexer<'a> {
-    Html5Lexer {
+impl<'a> HtmlLexer<'a> {
+  pub fn new(
+    allocator: &'a Allocator,
+    source_text: &'a str,
+    option: HtmlLexerOption<'a>,
+  ) -> HtmlLexer<'a> {
+    HtmlLexer {
       _allocator: allocator,
       source: Source::new(source_text),
       state: LexerState::new(LexerStateKind::Content),
+      option,
       errors: Vec::new(),
     }
   }
@@ -31,14 +39,27 @@ impl<'a> Html5Lexer<'a> {
 
 #[cfg(test)]
 mod test {
-  use crate::html5::lexer::{Html5Lexer, token::Html5Token};
+  use crate::lexer::{HtmlLexer, HtmlLexerOption, kind::HtmlKind};
   use insta::assert_snapshot;
   use oxc_allocator::Allocator;
+  use std::collections::HashSet;
+  use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
-    let result: Vec<Html5Token> = Html5Lexer::new(&Allocator::default(), source_text)
-      .tokens()
-      .collect();
+    let result: Vec<Token<HtmlKind>> = HtmlLexer::new(
+      &Allocator::default(),
+      source_text,
+      HtmlLexerOption {
+        embedded_language_tags: &{
+          let mut set: HashSet<String> = HashSet::new();
+          set.insert("script".to_string());
+          set.insert("style".to_string());
+          set
+        },
+      },
+    )
+    .tokens()
+    .collect();
 
     format!("{:#?}", result)
   }

@@ -1,494 +1,356 @@
 ---
-source: crates/umc_parser/src/html5/lexer/mod.rs
+source: languages/html/umc_html_parser/src/lexer/mod.rs
 expression: test(HTML_STRING)
 ---
 [
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 0,
         end: 6,
-        value: String(
-            "      ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Doctype,
         start: 6,
         end: 15,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Whitespace,
         start: 15,
         end: 16,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 16,
         end: 20,
-        value: String(
-            "html",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 20,
         end: 21,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 21,
         end: 22,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 22,
         end: 23,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 23,
         end: 27,
-        value: String(
-            "html",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Whitespace,
         start: 27,
         end: 28,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 28,
         end: 32,
-        value: String(
-            "lang",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Eq,
         start: 32,
         end: 33,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 33,
         end: 37,
-        value: String(
-            "\"en\"",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 37,
         end: 38,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 38,
         end: 39,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 39,
         end: 40,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 40,
         end: 44,
-        value: String(
-            "head",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 44,
         end: 45,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 45,
         end: 48,
-        value: String(
-            "\n  ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 48,
         end: 49,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 49,
         end: 53,
-        value: String(
-            "meta",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Whitespace,
         start: 53,
         end: 54,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 54,
         end: 61,
-        value: String(
-            "charset",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Eq,
         start: 61,
         end: 62,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 62,
         end: 69,
-        value: String(
-            "\"UTF-8\"",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 69,
         end: 70,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 70,
         end: 73,
-        value: String(
-            "\n  ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 73,
         end: 74,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 74,
         end: 78,
-        value: String(
-            "meta",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Whitespace,
         start: 78,
         end: 79,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 79,
         end: 83,
-        value: String(
-            "name",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Eq,
         start: 83,
         end: 84,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 84,
         end: 94,
-        value: String(
-            "\"viewport\"",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Whitespace,
         start: 94,
         end: 95,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 95,
         end: 102,
-        value: String(
-            "content",
-        ),
     },
-    Html5Token {
+    Token {
         kind: Eq,
         start: 102,
         end: 103,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Attribute,
         start: 103,
         end: 142,
-        value: String(
-            "\"width=device-width, initial-scale=1.0\"",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 142,
         end: 143,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 143,
         end: 146,
-        value: String(
-            "\n  ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 146,
         end: 147,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 147,
         end: 152,
-        value: String(
-            "title",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 152,
         end: 153,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 153,
         end: 161,
-        value: String(
-            "Document",
-        ),
     },
-    Html5Token {
+    Token {
         kind: CloseTagStart,
         start: 161,
         end: 163,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 163,
         end: 168,
-        value: String(
-            "title",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 168,
         end: 169,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 169,
         end: 170,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: CloseTagStart,
         start: 170,
         end: 172,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 172,
         end: 176,
-        value: String(
-            "head",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 176,
         end: 177,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 177,
         end: 178,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 178,
         end: 179,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 179,
         end: 183,
-        value: String(
-            "body",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 183,
         end: 184,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 184,
         end: 187,
-        value: String(
-            "\n  ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagStart,
         start: 187,
         end: 188,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 188,
         end: 194,
-        value: String(
-            "script",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 194,
         end: 195,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 195,
         end: 254,
-        value: String(
-            "\n    const a = 1;\n    const b = 2;\n    console.log(a<b);\n  ",
-        ),
     },
-    Html5Token {
+    Token {
         kind: CloseTagStart,
         start: 254,
         end: 256,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 256,
         end: 262,
-        value: String(
-            "script",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 262,
         end: 263,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 263,
         end: 264,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: CloseTagStart,
         start: 264,
         end: 266,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 266,
         end: 270,
-        value: String(
-            "body",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 270,
         end: 271,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: TextContent,
         start: 271,
         end: 272,
-        value: String(
-            "\n",
-        ),
     },
-    Html5Token {
+    Token {
         kind: CloseTagStart,
         start: 272,
         end: 274,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: ElementName,
         start: 274,
         end: 278,
-        value: String(
-            "html",
-        ),
     },
-    Html5Token {
+    Token {
         kind: TagEnd,
         start: 278,
         end: 279,
-        value: None,
     },
-    Html5Token {
+    Token {
         kind: Eof,
         start: 279,
         end: 279,
-        value: None,
     },
 ]

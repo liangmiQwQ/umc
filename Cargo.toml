@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "packages/*"]
+members = ["crates/*", "languages/*/*", "packages/*"]
 
 [workspace.package]
 version = "0.0.0-alpha.14" # Unified packages version
@@ -19,6 +19,9 @@ lto = true
 codegen-units = 1
 strip = "symbols"
 
+[workspace.metadata.cargo-shear]
+ignored = ["napi"]
+
 [workspace.dependencies]
 napi = "3.0.0"
 napi-build = "2"
@@ -28,4 +31,12 @@ oxc_allocator = "0.98.0"
 oxc_diagnostics = "0.98.0"
 oxc_parser = "0.98.0"
 
+miette = { package = "oxc-miette", version = "2.6.0", features = ["fancy-no-syscall"] }
+
 insta = "1.44.1"
+
+# umc_ast = { version = "0.0.0-alpha.14", path = "crates/umc_ast" }
+umc_parser = { version = "0.0.0-alpha.14", path = "crates/umc_parser" }
+umc_span = { version = "0.0.0-alpha.14", path = "crates/umc_span" }
+
+umc_html_ast = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_ast" }

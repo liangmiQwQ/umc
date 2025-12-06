@@ -1,5 +1,5 @@
 [package]
-name = "umc_parser"
+name = "umc_html"
 version.workspace = true
 authors.workspace = true
 categories.workspace = true
@@ -13,5 +13,15 @@ description.workspace = true
 [dependencies]
 oxc_allocator = { workspace = true }
 oxc_diagnostics = { workspace = true }
+oxc_parser = { workspace = true, features = [] }
 
+umc_html_ast = { workspace = true }
+umc_parser = { workspace = true }
 umc_span = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
+
+[features]
+default = ["regular_expression"]
+regular_expression = ["oxc_parser/regular_expression"]
