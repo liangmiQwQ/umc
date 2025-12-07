@@ -385,7 +385,7 @@ impl<'a> HtmlLexer<'a> {
 
         // update state
         if let Some(tag_name) = self.state.get_tag_name()
-          && self.option.embedded_language_tags.contains(tag_name)
+          && (self.option.is_embedded_language_tag)(tag_name)
         {
           self.state.kind = LexerStateKind::EmbeddedContent;
         } else {

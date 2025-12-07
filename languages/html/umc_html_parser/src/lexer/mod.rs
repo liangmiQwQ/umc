@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::lexer::state::{LexerState, LexerStateKind};
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
@@ -10,7 +8,7 @@ mod lexe;
 mod state;
 
 pub(crate) struct HtmlLexerOption<'a> {
-  pub embedded_language_tags: &'a HashSet<String>,
+  pub is_embedded_language_tag: &'a Box<dyn Fn(&str) -> bool>,
 }
 
 pub(crate) struct HtmlLexer<'a> {
@@ -47,15 +45,14 @@ mod test {
 
   fn test(source_text: &str) -> String {
     let allocator = Allocator::default();
-    let mut embedded_language_tags = HashSet::new();
-    embedded_language_tags.insert("script".to_string());
-    embedded_language_tags.insert("style".to_string());
 
     let mut lexer = HtmlLexer::new(
       &allocator,
       source_text,
       HtmlLexerOption {
-        embedded_language_tags: &embedded_language_tags,
+        is_embedded_language_tag: Box::new(|tag_name: &str| {
+          matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style")
+        }),
       },
     );
 

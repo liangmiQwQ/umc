@@ -42,7 +42,7 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
       self.allocator,
       self.source_text,
       HtmlLexerOption {
-        embedded_language_tags: &self.options.embedded_language_tags,
+        is_embedded_language_tag: &self.options.is_embedded_language_tag,
       },
     );
 
@@ -54,9 +54,11 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
     // Parse tokens into AST
     let nodes = self.parse_tokens(iter);
 
+    let Self { errors, .. } = self;
+
     ParseResult {
       program: nodes,
-      errors: std::mem::take(&mut self.errors),
+      errors,
     }
   }
 }
@@ -280,9 +282,7 @@ impl<'a> HtmlParserImpl<'a> {
     }
 
     // Check for void elements (self-closing by nature)
-    let is_void = Self::is_void_element(&tag_name);
-
-    if is_self_closing || is_void {
+    if is_self_closing || (self.options.is_void_tag)(&tag_name) {
       // Self-closing elements don't go on the stack
       let end = iter
         .peek()
@@ -485,26 +485,6 @@ impl<'a> HtmlParserImpl<'a> {
       Node::Text(t) => t.span.end,
       Node::Comment(c) => c.span.end,
     }
-  }
-
-  /// Check if an element is a void element (self-closing by nature).
-  fn is_void_element(tag_name: &str) -> bool {
-    matches!(
-      tag_name.to_ascii_lowercase().as_str(),
-      "area"
-        | "base"
-        | "br"
-        | "col"
-        | "embed"
-        | "hr"
-        | "img"
-        | "input"
-        | "link"
-        | "meta"
-        | "source"
-        | "track"
-        | "wbr"
-    )
   }
 }
 

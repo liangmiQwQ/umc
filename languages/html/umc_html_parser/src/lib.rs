@@ -18,7 +18,6 @@
 
 use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
-use std::collections::HashSet;
 use umc_html_ast::Node;
 use umc_parser::{LanguageParser, Parser};
 
@@ -81,22 +80,57 @@ pub mod option {
   /// Configures how the HTML parser handles embedded languages like JavaScript and CSS.
   pub struct HtmlParserOption {
     /// The oxc_parser options for parsing content inside <script> tags.
-    /// If get None, the content in <script> tag will be returned without parsing
+    /// If get None, the content in <script> tag will be regared as [Text](umc_html_ast::Text)
     pub parse_script: Option<ParseOptions>,
-    /// Set of tag names that contain embedded language content (e.g., "script", "style")
-    pub embedded_language_tags: HashSet<String>,
+    /// A function that returns true if the given tag name is an embedded language tag (e.g., "script", "style")
+    ///
+    /// # Examples
+    /// ```ignore
+    /// let option = HtmlParserOption {
+    ///   is_embedded_language_tag: Box::new(|tag_name: &str| matches!(tag_name, "script" | "style")),
+    ///   // some other options
+    /// }
+    /// ```
+    pub is_embedded_language_tag: Box<dyn Fn(&str) -> bool>,
+    /// A function that returns true if the given tag name is a void tag (e.g., "br", "hr", "img")
+    ///
+    /// # Examples
+    /// ```ignore
+    /// let option = HtmlParserOption {
+    ///   is_void_tag: Box::new(|tag_name: &str| matches!(tag_name, "br" | "hr" | "img")),
+    ///   // some other options
+    /// }
+    /// ```
+    pub is_void_tag: Box<dyn Fn(&str) -> bool>,
   }
 
   impl Default for HtmlParserOption {
     fn default() -> Self {
       HtmlParserOption {
         parse_script: Some(ParseOptions::default()),
-        embedded_language_tags: {
-          let mut set: HashSet<String> = HashSet::new();
-          set.insert("script".to_string());
-          set.insert("style".to_string());
-          set
-        },
+        is_embedded_language_tag: Box::new(|tag_name: &str| {
+          matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style")
+        }),
+        is_void_tag: Box::new(|tag_name: &str| {
+          matches!(
+            tag_name.to_ascii_lowercase().as_str(),
+            "area"
+              | "base"
+              | "br"
+              | "col"
+              | "embed"
+              | "hr"
+              | "img"
+              | "input"
+              | "keygen"
+              | "link"
+              | "meta"
+              | "param"
+              | "source"
+              | "track"
+              | "wbr"
+          )
+        }),
       }
     }
   }
