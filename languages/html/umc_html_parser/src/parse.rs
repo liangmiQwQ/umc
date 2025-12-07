@@ -581,6 +581,17 @@ mod test {
   }
 
   #[test]
+  fn void_elements() {
+    const HTML: &str = r#"<div>
+  <br>
+  <img src="test.jpg" alt="Test">
+  <input type="text" />
+</div>"#;
+
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
   fn no_closing_tag() {
     const HTML: &str = r#"<div>
   <p>Unclosed paragraph
