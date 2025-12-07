@@ -5,7 +5,7 @@ use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 use umc_parser::source::Source;
 
-mod kind;
+pub(crate) mod kind;
 mod lexe;
 mod state;
 

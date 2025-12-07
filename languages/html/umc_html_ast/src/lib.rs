@@ -28,6 +28,7 @@ use umc_span::Span;
 ///
 /// Represents the different kinds of nodes that can appear in an HTML document.
 /// Each variant wraps a specific node type with its associated data.
+#[derive(Debug)]
 pub enum Node {
   /// HTML DOCTYPE declaration
   Doctype(Doctype),
@@ -43,6 +44,7 @@ pub enum Node {
 ///
 /// Represents the `<!DOCTYPE ...>` declaration at the beginning of HTML documents.
 /// For example: `<!DOCTYPE html>`
+#[derive(Debug)]
 pub struct Doctype {
   /// Source location of this DOCTYPE declaration
   pub span: Span,
@@ -54,6 +56,7 @@ pub struct Doctype {
 ///
 /// Represents an HTML element with its tag name, attributes, and child nodes.
 /// For example: `<div class="container"><p>Hello</p></div>`
+#[derive(Debug)]
 pub struct Element {
   /// Source location of this element
   pub span: Span,
@@ -69,6 +72,7 @@ pub struct Element {
 ///
 /// Represents plain text content within HTML elements.
 /// For example, the "Hello World" in `<span>Hello World</span>`
+#[derive(Debug)]
 pub struct Text {
   /// Source location of this text node
   pub span: Span,
@@ -79,6 +83,7 @@ pub struct Text {
 /// HTML comment node.
 ///
 /// Represents an HTML comment. For example: `<!-- This is a comment -->`
+#[derive(Debug)]
 pub struct Comment {
   /// Source location of this comment
   pub span: Span,
@@ -95,6 +100,7 @@ pub struct Comment {
 ///
 /// The value will be empty if no attribute value got after `=`
 /// like `<div class>` will get ```Attribute { key: "class", value: "" }```
+#[derive(Debug)]
 pub struct Attribute {
   /// Attribute name (e.g., "class", "id", "href")
   pub key: String,
