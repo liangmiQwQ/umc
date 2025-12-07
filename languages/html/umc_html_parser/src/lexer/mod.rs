@@ -8,7 +8,7 @@ mod lexe;
 mod state;
 
 pub(crate) struct HtmlLexerOption<'a> {
-  pub is_embedded_language_tag: &'a Box<dyn Fn(&str) -> bool>,
+  pub is_embedded_language_tag: &'a dyn Fn(&str) -> bool,
 }
 
 pub(crate) struct HtmlLexer<'a> {
@@ -40,19 +40,18 @@ mod test {
   use crate::lexer::{HtmlLexer, HtmlLexerOption, kind::HtmlKind};
   use insta::assert_snapshot;
   use oxc_allocator::Allocator;
-  use std::collections::HashSet;
   use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
     let allocator = Allocator::default();
+    let func =
+      |tag_name: &str| matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style");
 
     let mut lexer = HtmlLexer::new(
       &allocator,
       source_text,
       HtmlLexerOption {
-        is_embedded_language_tag: Box::new(|tag_name: &str| {
-          matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style")
-        }),
+        is_embedded_language_tag: &func,
       },
     );
 
