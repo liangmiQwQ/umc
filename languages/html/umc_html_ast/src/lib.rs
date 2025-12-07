@@ -130,9 +130,17 @@ pub struct Comment<'a> {
 /// The lifetime `'a` is tied to the allocator that owns the memory.
 #[derive(Debug)]
 pub struct Attribute<'a> {
+  /// Source location of this attribute
+  pub span: Span,
   /// Attribute name (e.g., "class", "id", "href").
-  /// References the original source text (zero-copy).
-  pub key: &'a str,
-  /// Attribute value. References the original source text (zero-copy).
+  /// References the original source text.
+  pub key: AttributeIdentifier<'a>,
+  /// Attribute value. References the original source text.
+  pub value: Option<AttributeIdentifier<'a>>,
+}
+
+#[derive(Debug)]
+pub struct AttributeIdentifier<'a> {
+  pub span: Span,
   pub value: &'a str,
 }
