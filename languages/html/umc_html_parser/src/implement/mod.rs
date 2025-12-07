@@ -328,13 +328,13 @@ impl<'a> HtmlParserImpl<'a> {
   /// Parse closing tag and pop matching element from stack.
   fn parse_closing_tag(
     &mut self,
-    _close_tag_token: &Token<HtmlKind>,
+    close_tag_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
     nodes: &mut Vec<Node>,
     element_stack: &mut Vec<ElementBuilder>,
   ) {
     let mut tag_name = String::new();
-    let mut end = _close_tag_token.end;
+    let mut end = close_tag_token.end;
 
     // Parse element name
     if let Some(token) = iter.peek()
@@ -409,7 +409,7 @@ impl<'a> HtmlParserImpl<'a> {
       // No matching opening tag - this is an orphan closing tag
       self.errors.push(
         OxcDiagnostic::error(format!("Unexpected closing tag: </{}>", tag_name))
-          .with_label(Span::new(_close_tag_token.start, end)),
+          .with_label(Span::new(close_tag_token.start, end)),
       );
     }
   }
