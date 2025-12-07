@@ -115,8 +115,10 @@ impl<'a> HtmlParserImpl<'a> {
           self.push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
         }
 
+        // Other kind will be process in the fn above
+
         // Ignore other tokens at content level (whitespace, etc.)
-        _ => {}
+        _ => (),
       }
     }
 
@@ -179,21 +181,6 @@ impl<'a> HtmlParserImpl<'a> {
             value: "",
           });
           end = attr_token.end;
-        }
-        HtmlKind::Eq => {
-          iter.next();
-          // Next token should be attribute value
-          if let Some(value_token) = iter.peek()
-            && value_token.kind == HtmlKind::Attribute
-          {
-            let value_token = iter.next().unwrap();
-            let value_text = self.get_token_text(&value_token);
-            // Update last attribute's value
-            if let Some(attr) = attributes.last_mut() {
-              attr.value = self.unquote_attribute(value_text);
-            }
-            end = value_token.end;
-          }
         }
         HtmlKind::Whitespace => {
           iter.next();
@@ -262,6 +249,14 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Eq => {
           iter.next();
+
+          // skip possible whitespace
+          if let Some(token) = iter.peek()
+            && token.kind == HtmlKind::Whitespace
+          {
+            iter.next();
+          }
+
           // Next token should be attribute value
           if let Some(value_token) = iter.peek()
             && value_token.kind == HtmlKind::Attribute
@@ -458,7 +453,10 @@ impl<'a> HtmlParserImpl<'a> {
       value,
     }
   }
+}
 
+// Some common function and utils
+impl<'a> HtmlParserImpl<'a> {
   /// Push a node to the appropriate location (parent element or root).
   fn push_node(
     &self,
@@ -560,13 +558,30 @@ mod test {
   fn comments() {
     const HTML: &str = r#"<!-- This is a comment -->
 <div>Content</div>
-<!-- Another comment -->"#;
+<!-- Another comment -->
+<! This is a bogus comment >
+<!Bogus Comment Too>
+"#;
 
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
-  fn error_recovery_unclosed() {
+  fn attribute_with_whitespaces() {
+    const HTML: &str = r#"<div class = "test" a= "b">Content</div>"#;
+
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn multiple_no_value_attributes() {
+    const HTML: &str = r#"<input checked disabled readonly>"#;
+
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn no_closing_tag() {
     const HTML: &str = r#"<div>
   <p>Unclosed paragraph
 </div>"#;
@@ -575,7 +590,7 @@ mod test {
   }
 
   #[test]
-  fn error_recovery_orphan_closing() {
+  fn orphan_closing_tag() {
     const HTML: &str = r#"<div>Content</div>
 </span>
 <p>More content</p>"#;

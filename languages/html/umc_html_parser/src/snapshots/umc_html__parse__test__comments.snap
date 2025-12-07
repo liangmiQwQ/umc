@@ -67,6 +67,53 @@ Nodes: Vec(
                 value: " Another comment ",
             },
         ),
+        Text(
+            Text {
+                span: Span {
+                    start: 70,
+                    end: 71,
+                },
+                value: "\n",
+            },
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 71,
+                    end: 99,
+                },
+                bogus: true,
+                value: " This is a bogus comment ",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 99,
+                    end: 100,
+                },
+                value: "\n",
+            },
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 100,
+                    end: 120,
+                },
+                bogus: true,
+                value: "Bogus Comment Too",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 120,
+                    end: 121,
+                },
+                value: "\n",
+            },
+        ),
     ],
 )
 Errors: []

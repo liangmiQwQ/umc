@@ -1,0 +1,37 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 33,
+                },
+                tag_name: "input",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            key: "checked",
+                            value: "",
+                        },
+                        Attribute {
+                            key: "disabled",
+                            value: "",
+                        },
+                        Attribute {
+                            key: "readonly",
+                            value: "",
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []

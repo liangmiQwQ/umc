@@ -1,0 +1,43 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 40,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            key: "class",
+                            value: "test",
+                        },
+                        Attribute {
+                            key: "a",
+                            value: "b",
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 27,
+                                    end: 34,
+                                },
+                                value: "Content",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []
