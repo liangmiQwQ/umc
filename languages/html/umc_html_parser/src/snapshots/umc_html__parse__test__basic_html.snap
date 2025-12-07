@@ -13,8 +13,18 @@ Nodes: Vec(
                 attributes: Vec(
                     [
                         Attribute {
-                            key: "html",
-                            value: "",
+                            span: Span {
+                                start: 10,
+                                end: 14,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 10,
+                                    end: 14,
+                                },
+                                value: "html",
+                            },
+                            value: None,
                         },
                     ],
                 ),
@@ -39,8 +49,27 @@ Nodes: Vec(
                 attributes: Vec(
                     [
                         Attribute {
-                            key: "lang",
-                            value: "en",
+                            span: Span {
+                                start: 22,
+                                end: 31,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 22,
+                                    end: 26,
+                                },
+                                value: "lang",
+                            },
+                            value: Some(
+                                AttributeValue {
+                                    span: Span {
+                                        start: 27,
+                                        end: 31,
+                                    },
+                                    value: "en",
+                                    raw: "\"en\"",
+                                },
+                            ),
                         },
                     ],
                 ),
@@ -86,8 +115,27 @@ Nodes: Vec(
                                                 attributes: Vec(
                                                     [
                                                         Attribute {
-                                                            key: "charset",
-                                                            value: "UTF-8",
+                                                            span: Span {
+                                                                start: 48,
+                                                                end: 63,
+                                                            },
+                                                            key: AttributeKey {
+                                                                span: Span {
+                                                                    start: 48,
+                                                                    end: 55,
+                                                                },
+                                                                value: "charset",
+                                                            },
+                                                            value: Some(
+                                                                AttributeValue {
+                                                                    span: Span {
+                                                                        start: 56,
+                                                                        end: 63,
+                                                                    },
+                                                                    value: "UTF-8",
+                                                                    raw: "\"UTF-8\"",
+                                                                },
+                                                            ),
                                                         },
                                                     ],
                                                 ),

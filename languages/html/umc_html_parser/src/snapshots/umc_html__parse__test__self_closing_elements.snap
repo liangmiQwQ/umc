@@ -59,12 +59,50 @@ Nodes: Vec(
                                 attributes: Vec(
                                     [
                                         Attribute {
-                                            key: "src",
-                                            value: "test.jpg",
+                                            span: Span {
+                                                start: 20,
+                                                end: 34,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 20,
+                                                    end: 23,
+                                                },
+                                                value: "src",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 24,
+                                                        end: 34,
+                                                    },
+                                                    value: "test.jpg",
+                                                    raw: "\"test.jpg\"",
+                                                },
+                                            ),
                                         },
                                         Attribute {
-                                            key: "alt",
-                                            value: "Test",
+                                            span: Span {
+                                                start: 35,
+                                                end: 45,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 35,
+                                                    end: 38,
+                                                },
+                                                value: "alt",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 39,
+                                                        end: 45,
+                                                    },
+                                                    value: "Test",
+                                                    raw: "\"Test\"",
+                                                },
+                                            ),
                                         },
                                     ],
                                 ),
@@ -92,8 +130,27 @@ Nodes: Vec(
                                 attributes: Vec(
                                     [
                                         Attribute {
-                                            key: "type",
-                                            value: "text",
+                                            span: Span {
+                                                start: 56,
+                                                end: 67,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 56,
+                                                    end: 60,
+                                                },
+                                                value: "type",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 61,
+                                                        end: 67,
+                                                    },
+                                                    value: "text",
+                                                    raw: "\"text\"",
+                                                },
+                                            ),
                                         },
                                     ],
                                 ),

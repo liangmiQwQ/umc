@@ -14,12 +14,50 @@ Nodes: Vec(
                 attributes: Vec(
                     [
                         Attribute {
-                            key: "class",
-                            value: "test",
+                            span: Span {
+                                start: 5,
+                                end: 19,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 5,
+                                    end: 10,
+                                },
+                                value: "class",
+                            },
+                            value: Some(
+                                AttributeValue {
+                                    span: Span {
+                                        start: 13,
+                                        end: 19,
+                                    },
+                                    value: "test",
+                                    raw: "\"test\"",
+                                },
+                            ),
                         },
                         Attribute {
-                            key: "a",
-                            value: "b",
+                            span: Span {
+                                start: 20,
+                                end: 26,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 20,
+                                    end: 21,
+                                },
+                                value: "a",
+                            },
+                            value: Some(
+                                AttributeValue {
+                                    span: Span {
+                                        start: 23,
+                                        end: 26,
+                                    },
+                                    value: "b",
+                                    raw: "\"b\"",
+                                },
+                            ),
                         },
                     ],
                 ),

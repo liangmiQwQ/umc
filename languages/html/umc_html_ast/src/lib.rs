@@ -134,13 +134,20 @@ pub struct Attribute<'a> {
   pub span: Span,
   /// Attribute name (e.g., "class", "id", "href").
   /// References the original source text.
-  pub key: AttributeIdentifier<'a>,
+  pub key: AttributeKey<'a>,
   /// Attribute value. References the original source text.
-  pub value: Option<AttributeIdentifier<'a>>,
+  pub value: Option<AttributeValue<'a>>,
 }
 
 #[derive(Debug)]
-pub struct AttributeIdentifier<'a> {
+pub struct AttributeKey<'a> {
   pub span: Span,
   pub value: &'a str,
+}
+
+#[derive(Debug)]
+pub struct AttributeValue<'a> {
+  pub span: Span,
+  pub value: &'a str,
+  pub raw: &'a str,
 }

@@ -2,7 +2,9 @@ use std::iter::Peekable;
 
 use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
-use umc_html_ast::{Attribute, Comment, Doctype, Element, Node, Text};
+use umc_html_ast::{
+  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Text,
+};
 use umc_parser::{LanguageParser, ParseResult, ParserImpl, token::Token};
 use umc_span::Span;
 
@@ -174,11 +176,15 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
-          // Zero-copy: reference source text directly instead of allocating String
           let attr_text = self.get_token_text(&attr_token);
+          // Eq is not expected, all attributes are without value
           attributes.push(Attribute {
-            key: attr_text,
-            value: "",
+            key: AttributeKey {
+              span: attr_token.span(),
+              value: attr_text,
+            },
+            value: None,
+            span: attr_token.span(),
           });
           end = attr_token.end;
         }
@@ -222,7 +228,7 @@ impl<'a> HtmlParserImpl<'a> {
     }
 
     // Parse attributes until TagEnd or SelfCloseTagEnd
-    let mut current_attr_key: Option<&'a str> = None;
+    let mut current_attr_key: Option<AttributeKey<'a>> = None;
 
     while let Some(token) = iter.peek() {
       match token.kind {
@@ -237,15 +243,22 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
-          // Zero-copy: reference source text directly
           let attr_text = self.get_token_text(&attr_token);
 
           // If we have a pending attribute key without value, stop storing it because a new attribute is coming
           if let Some(key) = current_attr_key.take() {
-            attributes.push(Attribute { key, value: "" });
+            let span = key.span;
+            attributes.push(Attribute {
+              span,
+              key,
+              value: None,
+            });
           }
 
-          current_attr_key = Some(attr_text);
+          current_attr_key = Some(AttributeKey {
+            span: attr_token.span(),
+            value: attr_text,
+          });
         }
         HtmlKind::Eq => {
           iter.next();
@@ -262,12 +275,13 @@ impl<'a> HtmlParserImpl<'a> {
             && value_token.kind == HtmlKind::Attribute
           {
             let value_token = iter.next().unwrap();
-            let value_text = self.get_token_text(&value_token);
-
             if let Some(key) = current_attr_key.take() {
+              let value = self.unquote_attribute(&value_token);
+              let span = Span::new(key.span.start, value.span.end);
               attributes.push(Attribute {
+                span,
                 key,
-                value: self.unquote_attribute(value_text),
+                value: Some(value),
               });
             }
           }
@@ -284,7 +298,12 @@ impl<'a> HtmlParserImpl<'a> {
 
     // Add any remaining attribute without value
     if let Some(key) = current_attr_key.take() {
-      attributes.push(Attribute { key, value: "" });
+      let span = key.span;
+      attributes.push(Attribute {
+        span,
+        key,
+        value: None,
+      });
     }
 
     // Check for void elements (self-closing by nature)
@@ -341,7 +360,6 @@ impl<'a> HtmlParserImpl<'a> {
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
-      // Zero-copy: reference source text directly
       tag_name = self.get_token_text(&name_token);
       end = name_token.end;
     }
@@ -419,7 +437,6 @@ impl<'a> HtmlParserImpl<'a> {
   fn parse_text(&self, token: &Token<HtmlKind>) -> Text<'a> {
     Text {
       span: token.span(),
-      // Zero-copy: reference source text directly instead of allocating String
       value: self.get_token_text(token),
     }
   }
@@ -472,7 +489,6 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Get the text content of a token.
-  /// Returns a reference to the source text (zero-copy).
   fn get_token_text(&self, token: &Token<HtmlKind>) -> &'a str {
     // SAFETY: The source_text has lifetime 'a, and we return a slice of it.
     // This slice is valid as long as the allocator and source text are alive.
@@ -480,15 +496,24 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Remove quotes from attribute value.
-  /// Returns a reference to the unquoted portion of the source text (zero-copy).
-  fn unquote_attribute(&self, value: &'a str) -> &'a str {
+  fn unquote_attribute(&self, value: &Token<HtmlKind>) -> AttributeValue<'a> {
+    let span = value.span();
+    let value = self.get_token_text(value);
+
     if (value.starts_with('"') && value.ends_with('"'))
       || (value.starts_with('\'') && value.ends_with('\''))
     {
-      // Return slice without quotes - still zero-copy
-      &value[1..value.len() - 1]
+      AttributeValue {
+        value: &value[1..value.len() - 1],
+        raw: value,
+        span,
+      }
     } else {
-      value
+      AttributeValue {
+        value,
+        raw: value,
+        span,
+      }
     }
   }
 

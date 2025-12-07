@@ -14,16 +14,46 @@ Nodes: Vec(
                 attributes: Vec(
                     [
                         Attribute {
-                            key: "checked",
-                            value: "",
+                            span: Span {
+                                start: 7,
+                                end: 14,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 7,
+                                    end: 14,
+                                },
+                                value: "checked",
+                            },
+                            value: None,
                         },
                         Attribute {
-                            key: "disabled",
-                            value: "",
+                            span: Span {
+                                start: 15,
+                                end: 23,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 15,
+                                    end: 23,
+                                },
+                                value: "disabled",
+                            },
+                            value: None,
                         },
                         Attribute {
-                            key: "readonly",
-                            value: "",
+                            span: Span {
+                                start: 24,
+                                end: 32,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 24,
+                                    end: 32,
+                                },
+                                value: "readonly",
+                            },
+                            value: None,
                         },
                     ],
                 ),
