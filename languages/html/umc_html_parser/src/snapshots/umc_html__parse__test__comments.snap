@@ -2,65 +2,71 @@
 source: languages/html/umc_html_parser/src/parse.rs
 expression: parse(HTML)
 ---
-Nodes: [
-    Comment(
-        Comment {
-            span: Span {
-                start: 0,
-                end: 26,
+Nodes: Vec(
+    [
+        Comment(
+            Comment {
+                span: Span {
+                    start: 0,
+                    end: 26,
+                },
+                bogus: false,
+                value: " This is a comment ",
             },
-            bogus: false,
-            value: " This is a comment ",
-        },
-    ),
-    Text(
-        Text {
-            span: Span {
-                start: 26,
-                end: 27,
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 26,
+                    end: 27,
+                },
+                value: "\n",
             },
-            value: "\n",
-        },
-    ),
-    Element(
-        Element {
-            span: Span {
-                start: 27,
-                end: 45,
-            },
-            tag_name: "div",
-            attributes: [],
-            children: [
-                Text(
-                    Text {
-                        span: Span {
-                            start: 32,
-                            end: 39,
-                        },
-                        value: "Content",
-                    },
+        ),
+        Element(
+            Element {
+                span: Span {
+                    start: 27,
+                    end: 45,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
                 ),
-            ],
-        },
-    ),
-    Text(
-        Text {
-            span: Span {
-                start: 45,
-                end: 46,
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 32,
+                                    end: 39,
+                                },
+                                value: "Content",
+                            },
+                        ),
+                    ],
+                ),
             },
-            value: "\n",
-        },
-    ),
-    Comment(
-        Comment {
-            span: Span {
-                start: 46,
-                end: 70,
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 45,
+                    end: 46,
+                },
+                value: "\n",
             },
-            bogus: false,
-            value: " Another comment ",
-        },
-    ),
-]
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 46,
+                    end: 70,
+                },
+                bogus: false,
+                value: " Another comment ",
+            },
+        ),
+    ],
+)
 Errors: []

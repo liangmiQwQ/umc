@@ -2,68 +2,78 @@
 source: languages/html/umc_html_parser/src/parse.rs
 expression: parse(HTML)
 ---
-Nodes: [
-    Element(
-        Element {
-            span: Span {
-                start: 0,
-                end: 18,
-            },
-            tag_name: "div",
-            attributes: [],
-            children: [
-                Text(
-                    Text {
-                        span: Span {
-                            start: 5,
-                            end: 12,
-                        },
-                        value: "Content",
-                    },
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 18,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
                 ),
-            ],
-        },
-    ),
-    Text(
-        Text {
-            span: Span {
-                start: 18,
-                end: 19,
-            },
-            value: "\n",
-        },
-    ),
-    Text(
-        Text {
-            span: Span {
-                start: 26,
-                end: 27,
-            },
-            value: "\n",
-        },
-    ),
-    Element(
-        Element {
-            span: Span {
-                start: 27,
-                end: 46,
-            },
-            tag_name: "p",
-            attributes: [],
-            children: [
-                Text(
-                    Text {
-                        span: Span {
-                            start: 30,
-                            end: 42,
-                        },
-                        value: "More content",
-                    },
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 5,
+                                    end: 12,
+                                },
+                                value: "Content",
+                            },
+                        ),
+                    ],
                 ),
-            ],
-        },
-    ),
-]
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 18,
+                    end: 19,
+                },
+                value: "\n",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 26,
+                    end: 27,
+                },
+                value: "\n",
+            },
+        ),
+        Element(
+            Element {
+                span: Span {
+                    start: 27,
+                    end: 46,
+                },
+                tag_name: "p",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 30,
+                                    end: 42,
+                                },
+                                value: "More content",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
 Errors: [
     OxcDiagnostic {
         inner: OxcDiagnosticInner {

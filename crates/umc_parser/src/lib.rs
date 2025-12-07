@@ -31,20 +31,25 @@ pub mod token;
 /// This trait defines the contract for creating parsers for different markup languages.
 /// Each language implementation must specify its result type, options, and parser implementation.
 ///
+/// The `Result` type uses a Generic Associated Type (GAT) with lifetime `'a` to support
+/// arena-allocated AST nodes. This allows the parsed result to reference data in the
+/// allocator's memory arena.
+///
 /// # Example
 ///
 /// ```ignore
 /// struct Html;
 ///
 /// impl LanguageParser for Html {
-///   type Result = Vec<Node>;
+///   type Result<'a> = oxc_allocator::Vec<'a, Node<'a>>;
 ///   type Option = HtmlParserOption;
 ///   type Parser<'a> = HtmlParserImpl<'a>;
 /// }
 /// ```
 pub trait LanguageParser: Sized {
-  /// The type of the parsed result (e.g., AST root node or node collection)
-  type Result;
+  /// The type of the parsed result (e.g., AST root node or node collection).
+  /// Uses a lifetime parameter to support arena-allocated data.
+  type Result<'a>;
   /// Parser configuration options, must have a default implementation
   type Option: Default;
   /// The concrete parser implementation for this language
@@ -68,7 +73,7 @@ pub trait ParserImpl<'a, T: LanguageParser> {
   ///
   /// Consumes the parser and returns a [`ParseResult`] containing the parsed program
   /// and any errors encountered during parsing.
-  fn parse(self) -> ParseResult<T::Result>;
+  fn parse(self) -> ParseResult<T::Result<'a>>;
 }
 
 /// Generic parser wrapper for any language implementing [`LanguageParser`].
@@ -116,8 +121,11 @@ impl<'a, T: LanguageParser> Parser<'a, T> {
     self
   }
 
-  /// Get the parse result
-  pub fn parse(&self) -> ParseResult<T::Result> {
+  /// Get the parse result.
+  ///
+  /// Takes `&'a self` to ensure the options reference has the same lifetime
+  /// as the allocator and source text, which is required for arena allocation.
+  pub fn parse(&'a self) -> ParseResult<T::Result<'a>> {
     let parser = T::Parser::new(self.allocator, self.source_text, &self.options);
 
     parser.parse()

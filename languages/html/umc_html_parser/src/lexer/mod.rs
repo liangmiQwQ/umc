@@ -1,5 +1,4 @@
 use crate::lexer::state::{LexerState, LexerStateKind};
-use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 use umc_parser::source::Source;
 
@@ -12,7 +11,6 @@ pub(crate) struct HtmlLexerOption<'a> {
 }
 
 pub(crate) struct HtmlLexer<'a> {
-  _allocator: &'a Allocator,
   source: Source<'a>,
   state: LexerState,
   option: HtmlLexerOption<'a>,
@@ -20,13 +18,8 @@ pub(crate) struct HtmlLexer<'a> {
 }
 
 impl<'a> HtmlLexer<'a> {
-  pub fn new(
-    allocator: &'a Allocator,
-    source_text: &'a str,
-    option: HtmlLexerOption<'a>,
-  ) -> HtmlLexer<'a> {
+  pub fn new(source_text: &'a str, option: HtmlLexerOption<'a>) -> HtmlLexer<'a> {
     HtmlLexer {
-      _allocator: allocator,
       source: Source::new(source_text),
       state: LexerState::new(LexerStateKind::Content),
       option,
@@ -39,16 +32,13 @@ impl<'a> HtmlLexer<'a> {
 mod test {
   use crate::lexer::{HtmlLexer, HtmlLexerOption, kind::HtmlKind};
   use insta::assert_snapshot;
-  use oxc_allocator::Allocator;
   use umc_parser::token::Token;
 
   fn test(source_text: &str) -> String {
-    let allocator = Allocator::default();
     let func =
       |tag_name: &str| matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style");
 
     let mut lexer = HtmlLexer::new(
-      &allocator,
       source_text,
       HtmlLexerOption {
         is_embedded_language_tag: &func,

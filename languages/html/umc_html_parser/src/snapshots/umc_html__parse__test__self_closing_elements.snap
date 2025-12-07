@@ -2,101 +2,119 @@
 source: languages/html/umc_html_parser/src/parse.rs
 expression: parse(HTML)
 ---
-Nodes: [
-    Element(
-        Element {
-            span: Span {
-                start: 0,
-                end: 77,
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 77,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 5,
+                                    end: 8,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 8,
+                                    end: 12,
+                                },
+                                tag_name: "br",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 12,
+                                    end: 15,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 15,
+                                    end: 46,
+                                },
+                                tag_name: "img",
+                                attributes: Vec(
+                                    [
+                                        Attribute {
+                                            key: "src",
+                                            value: "test.jpg",
+                                        },
+                                        Attribute {
+                                            key: "alt",
+                                            value: "Test",
+                                        },
+                                    ],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 46,
+                                    end: 49,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 49,
+                                    end: 70,
+                                },
+                                tag_name: "input",
+                                attributes: Vec(
+                                    [
+                                        Attribute {
+                                            key: "type",
+                                            value: "text",
+                                        },
+                                    ],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 70,
+                                    end: 71,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                    ],
+                ),
             },
-            tag_name: "div",
-            attributes: [],
-            children: [
-                Text(
-                    Text {
-                        span: Span {
-                            start: 5,
-                            end: 8,
-                        },
-                        value: "\n  ",
-                    },
-                ),
-                Element(
-                    Element {
-                        span: Span {
-                            start: 8,
-                            end: 12,
-                        },
-                        tag_name: "br",
-                        attributes: [],
-                        children: [],
-                    },
-                ),
-                Text(
-                    Text {
-                        span: Span {
-                            start: 12,
-                            end: 15,
-                        },
-                        value: "\n  ",
-                    },
-                ),
-                Element(
-                    Element {
-                        span: Span {
-                            start: 15,
-                            end: 46,
-                        },
-                        tag_name: "img",
-                        attributes: [
-                            Attribute {
-                                key: "src",
-                                value: "test.jpg",
-                            },
-                            Attribute {
-                                key: "alt",
-                                value: "Test",
-                            },
-                        ],
-                        children: [],
-                    },
-                ),
-                Text(
-                    Text {
-                        span: Span {
-                            start: 46,
-                            end: 49,
-                        },
-                        value: "\n  ",
-                    },
-                ),
-                Element(
-                    Element {
-                        span: Span {
-                            start: 49,
-                            end: 70,
-                        },
-                        tag_name: "input",
-                        attributes: [
-                            Attribute {
-                                key: "type",
-                                value: "text",
-                            },
-                        ],
-                        children: [],
-                    },
-                ),
-                Text(
-                    Text {
-                        span: Span {
-                            start: 70,
-                            end: 71,
-                        },
-                        value: "\n",
-                    },
-                ),
-            ],
-        },
-    ),
-]
+        ),
+    ],
+)
 Errors: []

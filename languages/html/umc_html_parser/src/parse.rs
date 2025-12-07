@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
 use umc_html_ast::{Attribute, Comment, Doctype, Element, Node, Text};
 use umc_parser::{LanguageParser, ParseResult, ParserImpl, token::Token};
@@ -15,8 +15,14 @@ use crate::{
 /// HTML parser implementation.
 ///
 /// Converts tokens from the lexer into an AST (Abstract Syntax Tree).
-/// Uses oxc_allocator for high-performance memory allocation.
+/// Uses oxc_allocator for high-performance memory allocation:
+/// - All AST nodes are allocated in a bump-based memory arena
+/// - String data references the source text directly (zero-copy)
+/// - Collections use arena-allocated vectors for cache-friendly traversal
 pub struct HtmlParserImpl<'a> {
+  /// Arena allocator for AST node allocation.
+  /// All Vec and Box types in the AST are allocated from this arena,
+  /// providing O(1) allocation and bulk deallocation.
   allocator: &'a Allocator,
   source_text: &'a str,
   options: &'a HtmlParserOption,
@@ -37,9 +43,8 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
     }
   }
 
-  fn parse(mut self) -> ParseResult<Vec<Node>> {
+  fn parse(mut self) -> ParseResult<ArenaVec<'a, Node<'a>>> {
     let mut lexer = HtmlLexer::new(
-      self.allocator,
       self.source_text,
       HtmlLexerOption {
         is_embedded_language_tag: &self.options.is_embedded_language_tag,
@@ -64,17 +69,23 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
 }
 
 /// Represents an element being built during parsing.
-struct ElementBuilder {
-  tag_name: String,
-  attributes: Vec<Attribute>,
-  children: Vec<Node>,
+/// Uses arena-allocated vectors for children and attributes.
+struct ElementBuilder<'a> {
+  tag_name: &'a str,
+  attributes: ArenaVec<'a, Attribute<'a>>,
+  children: ArenaVec<'a, Node<'a>>,
   start: u32,
 }
 
 impl<'a> HtmlParserImpl<'a> {
-  fn parse_tokens(&mut self, iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>) -> Vec<Node> {
-    let mut nodes = Vec::new();
-    let mut element_stack: Vec<ElementBuilder> = Vec::new();
+  fn parse_tokens(
+    &mut self,
+    iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>,
+  ) -> ArenaVec<'a, Node<'a>> {
+    // Create arena-allocated vector for root nodes
+    // Uses bump allocation: O(1) push operations, cache-friendly traversal
+    let mut nodes: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
+    let mut element_stack: Vec<ElementBuilder<'a>> = Vec::new();
     let mut iter = iter;
 
     while let Some(token) = iter.next() {
@@ -87,7 +98,7 @@ impl<'a> HtmlParserImpl<'a> {
         }
 
         HtmlKind::TagStart => {
-          self.parse_opening_tag(&token, &mut iter, &mut element_stack);
+          self.parse_opening_tag(&token, &mut iter, &mut nodes, &mut element_stack);
         }
 
         HtmlKind::CloseTagStart => {
@@ -145,10 +156,11 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     doctype_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-  ) -> Doctype {
+  ) -> Doctype<'a> {
     let start = doctype_token.start;
     let mut end = doctype_token.end;
-    let mut attributes = Vec::new();
+    // Create arena-allocated vector for DOCTYPE attributes
+    let mut attributes: ArenaVec<'a, Attribute<'a>> = ArenaVec::new_in(self.allocator);
 
     // Parse DOCTYPE attributes until TagEnd
     while let Some(token) = iter.peek() {
@@ -160,10 +172,11 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
+          // Zero-copy: reference source text directly instead of allocating String
           let attr_text = self.get_token_text(&attr_token);
           attributes.push(Attribute {
-            key: attr_text.to_string(),
-            value: String::new(),
+            key: attr_text,
+            value: "",
           });
           end = attr_token.end;
         }
@@ -203,11 +216,13 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     tag_start_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-    element_stack: &mut Vec<ElementBuilder>,
+    nodes: &mut ArenaVec<'a, Node<'a>>,
+    element_stack: &mut Vec<ElementBuilder<'a>>,
   ) {
     let start = tag_start_token.start;
-    let mut tag_name = String::new();
-    let mut attributes = Vec::new();
+    let mut tag_name: &'a str = "";
+    // Create arena-allocated vector for element attributes
+    let mut attributes: ArenaVec<'a, Attribute<'a>> = ArenaVec::new_in(self.allocator);
     let mut is_self_closing = false;
 
     // Parse element name
@@ -215,11 +230,12 @@ impl<'a> HtmlParserImpl<'a> {
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
-      tag_name = self.get_token_text(&name_token).to_string();
+      // Zero-copy: reference source text directly
+      tag_name = self.get_token_text(&name_token);
     }
 
     // Parse attributes until TagEnd or SelfCloseTagEnd
-    let mut current_attr_key: Option<String> = None;
+    let mut current_attr_key: Option<&'a str> = None;
 
     while let Some(token) = iter.peek() {
       match token.kind {
@@ -234,17 +250,15 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
+          // Zero-copy: reference source text directly
           let attr_text = self.get_token_text(&attr_token);
 
           // If we have a pending attribute key without value, add it
           if let Some(key) = current_attr_key.take() {
-            attributes.push(Attribute {
-              key,
-              value: String::new(),
-            });
+            attributes.push(Attribute { key, value: "" });
           }
 
-          current_attr_key = Some(attr_text.to_string());
+          current_attr_key = Some(attr_text);
         }
         HtmlKind::Eq => {
           iter.next();
@@ -275,51 +289,42 @@ impl<'a> HtmlParserImpl<'a> {
 
     // Add any remaining attribute without value
     if let Some(key) = current_attr_key.take() {
-      attributes.push(Attribute {
-        key,
-        value: String::new(),
-      });
+      attributes.push(Attribute { key, value: "" });
     }
 
     // Check for void elements (self-closing by nature)
-    if is_self_closing || (self.options.is_void_tag)(&tag_name) {
+    if is_self_closing || (self.options.is_void_tag)(tag_name) {
       // Self-closing elements don't go on the stack
       let end = iter
         .peek()
         .map(|t| t.start)
         .unwrap_or(self.source_text.len() as u32);
 
+      // Create arena-allocated empty vector for children
+      let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
+
       let element = Element {
         span: Span::new(start, end),
         tag_name,
         attributes,
-        children: Vec::new(),
+        children,
       };
 
-      // Push to parent or root (will be handled in push_node via element_stack)
+      // Push to parent or root
       if let Some(parent) = element_stack.last_mut() {
         parent.children.push(Node::Element(element));
       } else {
-        // This is a root-level element, but we don't have nodes here
-        // We need to push it to the stack and immediately pop it
-        element_stack.push(ElementBuilder {
-          tag_name: element.tag_name.clone(),
-          attributes: Vec::new(),
-          children: vec![Node::Element(element)],
-          start,
-        });
-        let builder = element_stack.pop().unwrap();
-        // Return the element from the builder's children
-        if let Some(parent) = element_stack.last_mut() {
-          parent.children.extend(builder.children);
-        }
+        nodes.push(Node::Element(element));
       }
     } else {
+      // Create arena-allocated vector for children
+      let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
+
       // Push to element stack for later matching with closing tag
       element_stack.push(ElementBuilder {
         tag_name,
         attributes,
-        children: Vec::new(),
+        children,
         start,
       });
     }
@@ -330,10 +335,10 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     close_tag_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-    nodes: &mut Vec<Node>,
-    element_stack: &mut Vec<ElementBuilder>,
+    nodes: &mut ArenaVec<'a, Node<'a>>,
+    element_stack: &mut Vec<ElementBuilder<'a>>,
   ) {
-    let mut tag_name = String::new();
+    let mut tag_name: &str = "";
     let mut end = close_tag_token.end;
 
     // Parse element name
@@ -341,7 +346,8 @@ impl<'a> HtmlParserImpl<'a> {
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
-      tag_name = self.get_token_text(&name_token).to_string();
+      // Zero-copy: reference source text directly
+      tag_name = self.get_token_text(&name_token);
       end = name_token.end;
     }
 
@@ -363,7 +369,7 @@ impl<'a> HtmlParserImpl<'a> {
     // Find matching opening tag in stack
     let mut found_index = None;
     for (i, builder) in element_stack.iter().enumerate().rev() {
-      if builder.tag_name.eq_ignore_ascii_case(&tag_name) {
+      if builder.tag_name.eq_ignore_ascii_case(tag_name) {
         found_index = Some(i);
         break;
       }
@@ -415,15 +421,16 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Parse text content.
-  fn parse_text(&self, token: &Token<HtmlKind>) -> Text {
+  fn parse_text(&self, token: &Token<HtmlKind>) -> Text<'a> {
     Text {
       span: token.span(),
-      value: self.get_token_text(token).to_string(),
+      // Zero-copy: reference source text directly instead of allocating String
+      value: self.get_token_text(token),
     }
   }
 
   /// Parse comment.
-  fn parse_comment(&self, token: &Token<HtmlKind>) -> Comment {
+  fn parse_comment(&self, token: &Token<HtmlKind>) -> Comment<'a> {
     let text = self.get_token_text(token);
 
     // Determine if it's a regular comment or bogus
@@ -433,16 +440,16 @@ impl<'a> HtmlParserImpl<'a> {
         .strip_prefix("<!--")
         .and_then(|s| s.strip_suffix("-->"))
         .unwrap_or(text.strip_prefix("<!--").unwrap());
-      (content.to_string(), false)
+      (content, false)
     } else if text.starts_with("<!") {
       // Bogus comment: <! ... >
       let content = text
         .strip_prefix("<!")
         .and_then(|s| s.strip_suffix(">"))
         .unwrap_or(text.strip_prefix("<!").unwrap());
-      (content.to_string(), true)
+      (content, true)
     } else {
-      (text.to_string(), false)
+      (text, false)
     };
 
     Comment {
@@ -453,7 +460,12 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Push a node to the appropriate location (parent element or root).
-  fn push_node(&self, nodes: &mut Vec<Node>, element_stack: &mut [ElementBuilder], node: Node) {
+  fn push_node(
+    &self,
+    nodes: &mut ArenaVec<'a, Node<'a>>,
+    element_stack: &mut [ElementBuilder<'a>],
+    node: Node<'a>,
+  ) {
     if let Some(parent) = element_stack.last_mut() {
       parent.children.push(node);
     } else {
@@ -462,18 +474,23 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Get the text content of a token.
-  fn get_token_text(&self, token: &Token<HtmlKind>) -> &str {
+  /// Returns a reference to the source text (zero-copy).
+  fn get_token_text(&self, token: &Token<HtmlKind>) -> &'a str {
+    // SAFETY: The source_text has lifetime 'a, and we return a slice of it.
+    // This slice is valid as long as the allocator and source text are alive.
     &self.source_text[token.start as usize..token.end as usize]
   }
 
   /// Remove quotes from attribute value.
-  fn unquote_attribute(&self, value: &str) -> String {
+  /// Returns a reference to the unquoted portion of the source text (zero-copy).
+  fn unquote_attribute(&self, value: &'a str) -> &'a str {
     if (value.starts_with('"') && value.ends_with('"'))
       || (value.starts_with('\'') && value.ends_with('\''))
     {
-      value[1..value.len() - 1].to_string()
+      // Return slice without quotes - still zero-copy
+      &value[1..value.len() - 1]
     } else {
-      value.to_string()
+      value
     }
   }
 

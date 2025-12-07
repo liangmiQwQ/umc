@@ -16,7 +16,7 @@
 //! let result = parser.parse();
 //! ```
 
-use oxc_allocator::Allocator;
+use oxc_allocator::{Allocator, Vec};
 use oxc_parser::ParseOptions;
 use umc_html_ast::Node;
 use umc_parser::{LanguageParser, Parser};
@@ -33,7 +33,9 @@ mod parse;
 pub struct Html;
 
 impl LanguageParser for Html {
-  type Result = Vec<Node>;
+  /// The parsed result is an arena-allocated vector of AST nodes.
+  /// Uses `oxc_allocator::Vec` for cache-friendly traversal and bulk deallocation.
+  type Result<'a> = Vec<'a, Node<'a>>;
   type Option = HtmlParserOption;
   type Parser<'a> = HtmlParserImpl<'a>;
 }
