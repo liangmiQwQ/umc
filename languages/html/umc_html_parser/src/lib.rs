@@ -22,10 +22,10 @@ use std::collections::HashSet;
 use umc_html_ast::Node;
 use umc_parser::{LanguageParser, Parser};
 
-use crate::{implement::HtmlParserImpl, option::HtmlParserOption};
+use crate::{option::HtmlParserOption, parse::HtmlParserImpl};
 
-mod implement;
 mod lexer;
+mod parse;
 
 /// HTML language parser marker type.
 ///
