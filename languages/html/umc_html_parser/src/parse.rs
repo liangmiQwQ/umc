@@ -240,7 +240,7 @@ impl<'a> HtmlParserImpl<'a> {
           // Zero-copy: reference source text directly
           let attr_text = self.get_token_text(&attr_token);
 
-          // If we have a pending attribute key without value, add it
+          // If we have a pending attribute key without value, stop storing it because a new attribute is coming
           if let Some(key) = current_attr_key.take() {
             attributes.push(Attribute { key, value: "" });
           }
