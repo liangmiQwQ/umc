@@ -20,14 +20,11 @@ use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
 use std::collections::HashSet;
 use umc_html_ast::Node;
-use umc_parser::{LanguageParser, ParseResult, Parser, ParserImpl};
+use umc_parser::{LanguageParser, Parser};
 
-use crate::{
-  implement::HtmlParserImpl,
-  lexer::{HtmlLexer, HtmlLexerOption},
-  option::HtmlParserOption,
-};
+use crate::{implement::HtmlParserImpl, option::HtmlParserOption};
 
+mod implement;
 mod lexer;
 
 /// HTML language parser marker type.
@@ -101,43 +98,6 @@ pub mod option {
           set
         },
       }
-    }
-  }
-}
-
-mod implement {
-  use super::*;
-  use crate::option::HtmlParserOption;
-
-  pub struct HtmlParserImpl<'a> {
-    allocator: &'a Allocator,
-    source_text: &'a str,
-    options: &'a HtmlParserOption,
-  }
-
-  impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
-    fn new(
-      allocator: &'a Allocator,
-      source_text: &'a str,
-      options: &'a <Html as LanguageParser>::Option,
-    ) -> Self {
-      HtmlParserImpl {
-        allocator,
-        source_text,
-        options,
-      }
-    }
-
-    fn parse(self) -> ParseResult<Vec<Node>> {
-      let mut lexer = HtmlLexer::new(
-        self.allocator,
-        self.source_text,
-        HtmlLexerOption {
-          embedded_language_tags: &self.options.embedded_language_tags,
-        },
-      );
-      let _: Vec<_> = lexer.tokens().collect();
-      todo!()
     }
   }
 }
