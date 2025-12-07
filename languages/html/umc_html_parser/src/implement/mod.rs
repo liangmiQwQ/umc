@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use oxc_allocator::{Allocator, Vec as OxcVec};
+use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 use umc_html_ast::{Attribute, Comment, Doctype, Element, Node, Text};
 use umc_parser::{LanguageParser, ParseResult, ParserImpl, token::Token};
@@ -46,17 +46,13 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
       },
     );
 
-    // Allocate tokens in the arena for better memory locality
-    let mut tokens_vec = OxcVec::new_in(self.allocator);
-    for token in lexer.tokens() {
-      tokens_vec.push(token);
-    }
-
     // Transfer lexer errors
     self.errors.append(&mut lexer.errors);
 
+    let iter = lexer.tokens().peekable();
+
     // Parse tokens into AST
-    let nodes = self.parse_tokens(&tokens_vec);
+    let nodes = self.parse_tokens(iter);
 
     ParseResult {
       program: nodes,
@@ -74,35 +70,35 @@ struct ElementBuilder {
 }
 
 impl<'a> HtmlParserImpl<'a> {
-  fn parse_tokens(&mut self, tokens: &[Token<HtmlKind>]) -> Vec<Node> {
+  fn parse_tokens(&mut self, iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>) -> Vec<Node> {
     let mut nodes = Vec::new();
     let mut element_stack: Vec<ElementBuilder> = Vec::new();
-    let mut iter = tokens.iter().peekable();
+    let mut iter = iter;
 
     while let Some(token) = iter.next() {
       match token.kind {
         HtmlKind::Eof => break,
 
         HtmlKind::Doctype => {
-          let doctype = self.parse_doctype(token, &mut iter);
+          let doctype = self.parse_doctype(&token, &mut iter);
           self.push_node(&mut nodes, &mut element_stack, Node::Doctype(doctype));
         }
 
         HtmlKind::TagStart => {
-          self.parse_opening_tag(token, &mut iter, &mut element_stack);
+          self.parse_opening_tag(&token, &mut iter, &mut element_stack);
         }
 
         HtmlKind::CloseTagStart => {
-          self.parse_closing_tag(token, &mut iter, &mut nodes, &mut element_stack);
+          self.parse_closing_tag(&token, &mut iter, &mut nodes, &mut element_stack);
         }
 
         HtmlKind::TextContent => {
-          let text = self.parse_text(token);
+          let text = self.parse_text(&token);
           self.push_node(&mut nodes, &mut element_stack, Node::Text(text));
         }
 
         HtmlKind::Comment => {
-          let comment = self.parse_comment(token);
+          let comment = self.parse_comment(&token);
           self.push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
         }
 
@@ -146,7 +142,7 @@ impl<'a> HtmlParserImpl<'a> {
   fn parse_doctype(
     &mut self,
     doctype_token: &Token<HtmlKind>,
-    iter: &mut Peekable<std::slice::Iter<Token<HtmlKind>>>,
+    iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
   ) -> Doctype {
     let start = doctype_token.start;
     let mut end = doctype_token.end;
@@ -162,7 +158,7 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
-          let attr_text = self.get_token_text(attr_token);
+          let attr_text = self.get_token_text(&attr_token);
           attributes.push(Attribute {
             key: attr_text.to_string(),
             value: String::new(),
@@ -176,7 +172,7 @@ impl<'a> HtmlParserImpl<'a> {
             && value_token.kind == HtmlKind::Attribute
           {
             let value_token = iter.next().unwrap();
-            let value_text = self.get_token_text(value_token);
+            let value_text = self.get_token_text(&value_token);
             // Update last attribute's value
             if let Some(attr) = attributes.last_mut() {
               attr.value = self.unquote_attribute(value_text);
@@ -204,7 +200,7 @@ impl<'a> HtmlParserImpl<'a> {
   fn parse_opening_tag(
     &mut self,
     tag_start_token: &Token<HtmlKind>,
-    iter: &mut Peekable<std::slice::Iter<Token<HtmlKind>>>,
+    iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
     element_stack: &mut Vec<ElementBuilder>,
   ) {
     let start = tag_start_token.start;
@@ -217,7 +213,7 @@ impl<'a> HtmlParserImpl<'a> {
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
-      tag_name = self.get_token_text(name_token).to_string();
+      tag_name = self.get_token_text(&name_token).to_string();
     }
 
     // Parse attributes until TagEnd or SelfCloseTagEnd
@@ -236,7 +232,7 @@ impl<'a> HtmlParserImpl<'a> {
         }
         HtmlKind::Attribute => {
           let attr_token = iter.next().unwrap();
-          let attr_text = self.get_token_text(attr_token);
+          let attr_text = self.get_token_text(&attr_token);
 
           // If we have a pending attribute key without value, add it
           if let Some(key) = current_attr_key.take() {
@@ -255,7 +251,7 @@ impl<'a> HtmlParserImpl<'a> {
             && value_token.kind == HtmlKind::Attribute
           {
             let value_token = iter.next().unwrap();
-            let value_text = self.get_token_text(value_token);
+            let value_text = self.get_token_text(&value_token);
 
             if let Some(key) = current_attr_key.take() {
               attributes.push(Attribute {
@@ -333,7 +329,7 @@ impl<'a> HtmlParserImpl<'a> {
   fn parse_closing_tag(
     &mut self,
     _close_tag_token: &Token<HtmlKind>,
-    iter: &mut Peekable<std::slice::Iter<Token<HtmlKind>>>,
+    iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
     nodes: &mut Vec<Node>,
     element_stack: &mut Vec<ElementBuilder>,
   ) {
@@ -345,7 +341,7 @@ impl<'a> HtmlParserImpl<'a> {
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
-      tag_name = self.get_token_text(name_token).to_string();
+      tag_name = self.get_token_text(&name_token).to_string();
       end = name_token.end;
     }
 
@@ -436,14 +432,14 @@ impl<'a> HtmlParserImpl<'a> {
       let content = text
         .strip_prefix("<!--")
         .and_then(|s| s.strip_suffix("-->"))
-        .unwrap_or(&text[4..]);
+        .unwrap_or(text.strip_prefix("<!--").unwrap());
       (content.to_string(), false)
     } else if text.starts_with("<!") {
       // Bogus comment: <! ... >
       let content = text
         .strip_prefix("<!")
         .and_then(|s| s.strip_suffix(">"))
-        .unwrap_or(&text[2..]);
+        .unwrap_or(text.strip_prefix("<!").unwrap());
       (content.to_string(), true)
     } else {
       (text.to_string(), false)
@@ -457,7 +453,7 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Push a node to the appropriate location (parent element or root).
-  fn push_node(&self, nodes: &mut Vec<Node>, element_stack: &mut Vec<ElementBuilder>, node: Node) {
+  fn push_node(&self, nodes: &mut Vec<Node>, element_stack: &mut [ElementBuilder], node: Node) {
     if let Some(parent) = element_stack.last_mut() {
       parent.children.push(node);
     } else {
