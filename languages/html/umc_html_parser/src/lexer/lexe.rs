@@ -1,6 +1,6 @@
 use oxc_diagnostics::OxcDiagnostic;
-use std::{iter::from_fn, str::Chars};
-use umc_parser::{char::len_utf8_u32, token::Token};
+use std::iter::from_fn;
+use umc_parser::token::Token;
 use umc_span::Span;
 
 use crate::lexer::{HtmlLexer, kind::HtmlKind, state::LexerStateKind};
@@ -13,7 +13,7 @@ impl<'a> HtmlLexer<'a> {
   /// Get the next token, and move the pointer
   fn next_token(&mut self) -> Option<Token<HtmlKind>> {
     // the file end, but still calling this function
-    if self.is_eof() {
+    if self.source.is_eof() {
       return match self.state.kind {
         LexerStateKind::Finished => None,
         _ => Some(self.finish()),
@@ -31,18 +31,13 @@ impl<'a> HtmlLexer<'a> {
   }
 
   #[inline]
-  fn is_eof(&self) -> bool {
-    self.source.pointer as usize >= self.source.source_text.len()
-  }
-
-  #[inline]
   fn finish(&mut self) -> Token<HtmlKind> {
     self.state.kind = LexerStateKind::Finished; // mark as finished
 
     Token::<HtmlKind> {
       kind: HtmlKind::Eof,
-      start: self.source.pointer,
-      end: self.source.pointer,
+      start: self.source.position,
+      end: self.source.position,
     }
   }
 }
@@ -50,57 +45,53 @@ impl<'a> HtmlLexer<'a> {
 // handler for HtmlLexerState::Content
 impl<'a> HtmlLexer<'a> {
   fn handle_content(&mut self) -> Token<HtmlKind> {
-    let mut iter: Chars<'_> = self.source.get_chars();
-    // safe unwarp, won't direct to this branch if pointer == file.len()
-    match iter.next().unwrap() {
+    let start = self.source.position;
+    // safe unwrap, won't direct to this branch if EOF
+    match self.source.bump().unwrap() {
       // for <
       '<' => {
         // maybe comment, doctype, tag or < starting content
-        let mut diff: u32 = len_utf8_u32('<');
-
-        match iter.next() {
+        match self.source.peek() {
           // for alphabetic character, as tag start
-          Some(item) if item.is_alphabetic() => {
-            // do not need to add diff, because we only need the < part
+          Some(&item) if item.is_alphabetic() => {
+            // do not consume the alphabetic char, TagStart is just '<'
             let result = Token::<HtmlKind> {
               kind: HtmlKind::TagStart,
-              start: self.source.pointer,
-              end: self.source.pointer + diff,
+              start,
+              end: self.source.position,
             };
 
-            self.source.advance_bytes(diff);
             self.state.kind = LexerStateKind::InTag; // update state
             self.state.allow_to_set_tag_name();
             result
           }
 
           // for / character, as closing tag
-          Some('/') => {
-            diff += len_utf8_u32('/');
+          Some(&'/') => {
+            self.source.bump(); // consume '/'
 
             let result = Token::<HtmlKind> {
               kind: HtmlKind::CloseTagStart,
-              start: self.source.pointer,
-              end: self.source.pointer + diff,
+              start,
+              end: self.source.position,
             };
 
-            self.source.advance_bytes(diff);
             self.state.kind = LexerStateKind::InTag; // update state
             result
           }
 
           // for ! character, as comment or doctype
-          Some('!') => {
-            diff += len_utf8_u32('!');
+          Some(&'!') => {
+            self.source.bump(); // consume '!'
 
             const COMMENT_START: [char; 2] = ['-', '-'];
             const DOCTYPE_START: [char; 7] = ['D', 'O', 'C', 'T', 'Y', 'P', 'E'];
             let mut match_doctype = true;
-            let mut match_commement = true;
+            let mut match_comment = true;
             let mut i = 0;
 
-            while let Some(item) = iter.next() {
-              diff += len_utf8_u32(item);
+            while let Some(&item) = self.source.peek() {
+              self.source.bump(); // consume the peeked char
 
               if match_doctype
                 && matches!(DOCTYPE_START.get(i), Some(&c) if c.eq_ignore_ascii_case(&item))
@@ -109,61 +100,56 @@ impl<'a> HtmlLexer<'a> {
                   // it's a doctype
                   let result = Token::<HtmlKind> {
                     kind: HtmlKind::Doctype,
-                    start: self.source.pointer,
-                    end: self.source.pointer + diff,
+                    start,
+                    end: self.source.position,
                   };
 
-                  self.source.advance_bytes(diff);
                   self.state.kind = LexerStateKind::AfterTagName; // update state
-
                   return result;
                 }
               } else {
                 match_doctype = false;
               }
 
-              if match_commement && COMMENT_START.get(i) == Some(&item) {
+              if match_comment && COMMENT_START.get(i) == Some(&item) {
                 if i == COMMENT_START.len() {
                   // it's a comment
-                  return self.handle_comment(&mut iter, &mut diff);
+                  return self.handle_comment(start);
                 }
               } else {
-                match_commement = false;
+                match_comment = false;
               }
 
-              if !match_doctype && !match_commement {
+              if !match_doctype && !match_comment {
                 // it is neither doctype nor comment, treat as bogus comment (ends with > instead of -->)
-                return self.handle_bogus_comment(&mut iter, &mut diff);
+                return self.handle_bogus_comment(start);
               }
 
               i += 1
             }
 
-            self.tailless_comment(diff)
+            self.tailless_comment(start)
           }
 
           // for none and other character, as content starting with <
           None | Some(_) => {
             // record until next tag start
-            self.handle_content_text(&mut iter, &mut diff)
+            self.handle_content_text(start)
           }
         }
       }
 
       // for content
-      c => {
+      _ => {
         // record until next tag start
-        let mut diff: u32 = len_utf8_u32(c);
-        self.handle_content_text(&mut iter, &mut diff)
+        self.handle_content_text(start)
       }
     }
   }
 
-  fn handle_bogus_comment(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
+  fn handle_bogus_comment(&mut self, start: u32) -> Token<HtmlKind> {
     let mut ended = false;
-    for item in iter {
-      *diff += len_utf8_u32(item);
-
+    while let Some(item) = self.source.bump() {
       if item == '>' {
         ended = true;
         break;
@@ -172,26 +158,22 @@ impl<'a> HtmlLexer<'a> {
 
     if !ended {
       // eof without finishing doctype or comment
-      return self.tailless_comment(*diff);
+      return self.tailless_comment(start);
     }
 
-    let result = Token::<HtmlKind> {
+    Token::<HtmlKind> {
       kind: HtmlKind::Comment,
-      start: self.source.pointer,
-      end: self.source.pointer + *diff,
-    };
-
-    self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<! something >| moretext
-    result
+      start,
+      end: self.source.position,
+    }
+    // It still on Content state like this: sometest|<! something >| moretext
   }
 
-  fn handle_comment(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
+  fn handle_comment(&mut self, start: u32) -> Token<HtmlKind> {
     let mut dash_count: u8 = 0;
     let mut ended = false;
 
-    for item in iter {
-      *diff += len_utf8_u32(item);
-
+    while let Some(item) = self.source.bump() {
       match item {
         '-' => {
           dash_count += 1;
@@ -213,20 +195,18 @@ impl<'a> HtmlLexer<'a> {
 
     if !ended {
       // eof without finishing doctype or comment
-      return self.tailless_comment(*diff);
+      return self.tailless_comment(start);
     }
 
-    let result = Token::<HtmlKind> {
+    Token::<HtmlKind> {
       kind: HtmlKind::Comment,
-      start: self.source.pointer,
-      end: self.source.pointer + *diff,
-    };
-
-    self.source.advance_bytes(*diff); // It still on Content state like this: sometest|<!-- something -->| moretext
-    result
+      start,
+      end: self.source.position,
+    }
+    // It still on Content state like this: sometest|<!-- something -->| moretext
   }
 
-  fn tailless_comment(&mut self, diff: u32) -> Token<HtmlKind> {
+  fn tailless_comment(&mut self, start: u32) -> Token<HtmlKind> {
     // eof without finishing doctype or comment
     // throw an error
     self.errors.push(
@@ -235,68 +215,67 @@ impl<'a> HtmlLexer<'a> {
         HtmlKind::TagEnd,
         HtmlKind::Eof
       ))
-      .with_label(Span::new(
-        self.source.pointer + diff,
-        self.source.pointer + diff,
-      )),
+      .with_label(Span::new(self.source.position, self.source.position)),
     );
 
     // return as comment
     let result = Token::<HtmlKind> {
       kind: HtmlKind::Comment,
-      start: self.source.pointer,
-      end: self.source.pointer + diff,
+      start,
+      end: self.source.position,
     };
 
-    self.source.advance_bytes(diff);
     self.state.kind = LexerStateKind::AfterTagName; // update state
     result
   }
 
-  fn handle_content_text(&mut self, iter: &mut Chars, diff: &mut u32) -> Token<HtmlKind> {
-    let mut check_next = false;
+  fn handle_content_text(&mut self, start: u32) -> Token<HtmlKind> {
+    loop {
+      let remaining = self.source.remaining();
 
-    for item in iter {
-      if check_next {
-        if item.is_alphabetic() || item == '/' || item == '!' {
-          break;
-        } else {
-          *diff += len_utf8_u32(item) + len_utf8_u32('<');
-          check_next = false;
-          continue;
-        }
+      if remaining.is_empty() {
+        break;
       }
 
-      if item == '<' {
-        check_next = true;
+      // Check if we're at a potential tag start
+      if remaining.starts_with('<') {
+        // Check what follows the '<'
+        let after_lt = &remaining[1..];
+        if after_lt.is_empty() {
+          // Just '<' at end, consume it as text
+          self.source.bump();
+        } else {
+          let next_char = after_lt.chars().next().unwrap();
+          if next_char.is_alphabetic() || next_char == '/' || next_char == '!' {
+            // This is a tag start, stop here (don't consume the '<')
+            break;
+          } else {
+            // Not a tag, consume '<' and continue
+            self.source.bump();
+          }
+        }
       } else {
-        *diff += len_utf8_u32(item);
+        self.source.bump();
       }
     }
 
-    let result = Token::<HtmlKind> {
+    Token::<HtmlKind> {
       kind: HtmlKind::TextContent,
-      start: self.source.pointer,
-      end: self.source.pointer + *diff,
-    };
-
-    self.source.advance_bytes(*diff);
-    result
+      start,
+      end: self.source.position,
+    }
   }
 }
 
 // handler for HtmlLexerState::EmbeddedContent
 impl<'a> HtmlLexer<'a> {
   fn handle_embedded_content(&mut self) -> Token<HtmlKind> {
-    let mut diff: u32 = 0;
+    let start = self.source.position;
     let closing_tag = format!("</{}", self.state.take_tag_name().unwrap()); // safe unwrap because only script/style can enter this state
     let mut ended = false;
 
-    for item in self.source.get_chars() {
-      diff += len_utf8_u32(item);
-
-      if self.source.source_text[(self.source.pointer + diff) as usize..].starts_with(&closing_tag)
-      {
+    while self.source.bump().is_some() {
+      if self.source.source_text[(self.source.position) as usize..].starts_with(&closing_tag) {
         ended = true;
         break;
       }
@@ -310,19 +289,15 @@ impl<'a> HtmlLexer<'a> {
           closing_tag,
           HtmlKind::Eof
         ))
-        .with_label(Span::new(
-          self.source.pointer + diff,
-          self.source.pointer + diff,
-        )),
+        .with_label(Span::new(self.source.position, self.source.position)),
       );
     }
 
     let result = Token::<HtmlKind> {
-      start: self.source.pointer,
-      end: self.source.pointer + diff,
+      start,
+      end: self.source.position,
       kind: HtmlKind::TextContent,
     };
-    self.source.advance_bytes(diff);
     self.state.kind = LexerStateKind::Content; // update state
     result
   }
@@ -331,57 +306,40 @@ impl<'a> HtmlLexer<'a> {
 // handler for HtmlLexerState::AfterTagName
 impl<'a> HtmlLexer<'a> {
   fn handle_after_tag_name(&mut self) -> Token<HtmlKind> {
-    let mut iter: Chars<'_> = self.source.get_chars();
-
-    // safe unwarp, won't direct to this branch if pointer == file.len()
-    match iter.next().unwrap() {
+    let start = self.source.position;
+    // safe unwrap, won't direct to this branch if EOF
+    match self.source.bump().unwrap() {
       // for whitespace
       c if c.is_whitespace() => {
-        let mut diff: u32 = len_utf8_u32(c);
-
-        for item in iter {
+        while let Some(&item) = self.source.peek() {
           if item.is_whitespace() {
-            diff += len_utf8_u32(item);
+            self.source.bump();
           } else {
             break;
           }
         }
 
-        let result = Token::<HtmlKind> {
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
+        Token::<HtmlKind> {
+          start,
+          end: self.source.position,
           kind: HtmlKind::Whitespace,
-        };
-
-        self.source.advance_bytes(diff);
-        result
+        }
       }
 
       // for =
-      '=' => {
-        let diff = len_utf8_u32('=');
-
-        let result = Token::<HtmlKind> {
-          kind: HtmlKind::Eq,
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
-        };
-
-        self.source.advance_bytes(diff);
-        result
-      }
+      '=' => Token::<HtmlKind> {
+        kind: HtmlKind::Eq,
+        start,
+        end: self.source.position,
+      },
 
       // for tag end (>)
       '>' => {
-        let diff = len_utf8_u32('>');
-
         let result = Token::<HtmlKind> {
           kind: HtmlKind::TagEnd,
-          start: self.source.pointer,
-          end: self.source.pointer + diff,
+          start,
+          end: self.source.position,
         };
-
-        self.source.advance_bytes(diff);
 
         // update state
         if let Some(tag_name) = self.state.get_tag_name()
@@ -397,62 +355,43 @@ impl<'a> HtmlLexer<'a> {
 
       // for self close end and attribute starts with `/`
       '/' => {
-        let mut diff = len_utf8_u32('/');
-
-        let result = {
-          let result = iter.next();
-          if let Some(next) = result {
-            diff += len_utf8_u32(next);
-          }
-          result
-        };
-
-        match result {
-          Some('>') => {
+        match self.source.peek() {
+          Some(&'>') => {
+            self.source.bump(); // consume '>'
             // self close
             let result = Token::<HtmlKind> {
               kind: HtmlKind::SelfCloseTagEnd,
-              start: self.source.pointer,
-              end: self.source.pointer + diff,
+              start,
+              end: self.source.position,
             };
 
-            self.source.advance_bytes(diff);
             self.state.take_tag_name(); // clear tag name
             self.state.kind = LexerStateKind::Content; // update state
             result
           }
-          None | Some(_) => self.handle_tag(&mut iter, &mut diff, HtmlKind::Attribute),
+          None | Some(_) => self.handle_tag(start, HtmlKind::Attribute),
         }
       }
 
       // for attribute with `"`
-      '"' => self.handle_quote_attribute(&mut iter, '"'),
+      '"' => self.handle_quote_attribute(start, '"'),
 
       // for attribute with `'`
-      '\'' => self.handle_quote_attribute(&mut iter, '\''),
+      '\'' => self.handle_quote_attribute(start, '\''),
 
       // for attribute without `"`
-      c => {
-        let mut diff = len_utf8_u32(c);
-        self.handle_tag(&mut iter, &mut diff, HtmlKind::Attribute)
-      }
+      _ => self.handle_tag(start, HtmlKind::Attribute),
     }
   }
 
-  fn handle_quote_attribute(&mut self, iter: &mut Chars, quote: char) -> Token<HtmlKind> {
+  fn handle_quote_attribute(&mut self, start: u32, quote: char) -> Token<HtmlKind> {
     // since html don't support \ escape, we don't need to manage its state
-    let mut diff = len_utf8_u32(quote);
     let mut ended = false;
 
-    for item in iter {
-      diff += len_utf8_u32(item);
-
-      match item {
-        c if c == quote => {
-          ended = true;
-          break;
-        } // the string is ended
-        _ => (),
+    while let Some(item) = self.source.bump() {
+      if item == quote {
+        ended = true;
+        break;
       }
     }
 
@@ -460,32 +399,23 @@ impl<'a> HtmlLexer<'a> {
       // throw an error, expect quote, but found eof
       self.errors.push(
         OxcDiagnostic::error(format!("Expected {}, but found {}", quote, HtmlKind::Eof))
-          .with_label(Span::new(
-            self.source.pointer + diff,
-            self.source.pointer + diff,
-          )),
+          .with_label(Span::new(self.source.position, self.source.position)),
       );
     }
 
-    let result = Token::<HtmlKind> {
-      start: self.source.pointer,
-      end: self.source.pointer + diff,
+    Token::<HtmlKind> {
+      start,
+      end: self.source.position,
       kind: HtmlKind::Attribute,
-    };
-
-    self.source.advance_bytes(diff);
-    result
+    }
   }
 }
 
 // handler for HtmlLexerState::InTag
 impl<'a> HtmlLexer<'a> {
   fn handle_in_tag(&mut self) -> Token<HtmlKind> {
-    // call the handle_tag
-    let mut iter = self.source.get_chars();
-    let mut diff: u32 = 0;
-
-    let result = self.handle_tag(&mut iter, &mut diff, HtmlKind::ElementName);
+    let start = self.source.position;
+    let result = self.handle_tag(start, HtmlKind::ElementName);
     self.state.kind = LexerStateKind::AfterTagName; // update state
     self
       .state
@@ -496,23 +426,20 @@ impl<'a> HtmlLexer<'a> {
 
 // some universal functions
 impl<'a> HtmlLexer<'a> {
-  fn handle_tag(&mut self, iter: &mut Chars, diff: &mut u32, kind: HtmlKind) -> Token<HtmlKind> {
-    for item in iter {
+  fn handle_tag(&mut self, start: u32, kind: HtmlKind) -> Token<HtmlKind> {
+    while let Some(&item) = self.source.peek() {
       if item.is_whitespace() || item == '>' || item == '=' || item == '/' {
         // end of a attribute
         break;
       } else {
-        *diff += len_utf8_u32(item);
+        self.source.bump();
       }
     }
 
-    let result = Token::<HtmlKind> {
-      start: self.source.pointer,
-      end: self.source.pointer + *diff,
+    Token::<HtmlKind> {
+      start,
+      end: self.source.position,
       kind,
-    };
-
-    self.source.advance_bytes(*diff);
-    result
+    }
   }
 }
