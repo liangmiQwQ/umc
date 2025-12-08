@@ -610,8 +610,16 @@ mod test {
     const HTML: &str = r#"<div>
   <br>
   <img src="test.jpg" alt="Test">
-  <input type="text" />
+  <input type="text">
+  <meta>Text</meta> <!-- Should Error -->
 </div>"#;
+
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn self_close_tags() {
+    const HTML: &str = r#"<div/><p />"#;
 
     assert_snapshot!(parse(HTML));
   }

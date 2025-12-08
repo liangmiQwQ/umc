@@ -8,7 +8,7 @@ Nodes: Vec(
             Element {
                 span: Span {
                     start: 0,
-                    end: 77,
+                    end: 117,
                 },
                 tag_name: "div",
                 attributes: Vec(
@@ -124,7 +124,7 @@ Nodes: Vec(
                             Element {
                                 span: Span {
                                     start: 49,
-                                    end: 70,
+                                    end: 68,
                                 },
                                 tag_name: "input",
                                 attributes: Vec(
@@ -162,8 +162,60 @@ Nodes: Vec(
                         Text(
                             Text {
                                 span: Span {
-                                    start: 70,
+                                    start: 68,
                                     end: 71,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 71,
+                                    end: 77,
+                                },
+                                tag_name: "meta",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 77,
+                                    end: 81,
+                                },
+                                value: "Text",
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 88,
+                                    end: 89,
+                                },
+                                value: " ",
+                            },
+                        ),
+                        Comment(
+                            Comment {
+                                span: Span {
+                                    start: 89,
+                                    end: 110,
+                                },
+                                bogus: false,
+                                value: " Should Error ",
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 110,
+                                    end: 111,
                                 },
                                 value: "\n",
                             },
@@ -174,4 +226,31 @@ Nodes: Vec(
         ),
     ],
 )
-Errors: []
+Errors: [
+    OxcDiagnostic {
+        inner: OxcDiagnosticInner {
+            message: "Unexpected closing tag: </meta>",
+            labels: Some(
+                [
+                    LabeledSpan {
+                        label: None,
+                        span: SourceSpan {
+                            offset: SourceOffset(
+                                81,
+                            ),
+                            length: 7,
+                        },
+                        primary: false,
+                    },
+                ],
+            ),
+            help: None,
+            severity: Error,
+            code: OxcCode {
+                scope: None,
+                number: None,
+            },
+            url: None,
+        },
+    },
+]
