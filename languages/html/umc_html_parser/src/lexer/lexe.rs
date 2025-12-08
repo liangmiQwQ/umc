@@ -238,9 +238,8 @@ impl<'a> HtmlLexer<'a> {
       }
 
       // Check if we're at a potential tag start
-      if remaining.starts_with('<') {
+      if let Some(after_lt) = remaining.strip_prefix('<') {
         // Check what follows the '<'
-        let after_lt = &remaining[1..];
         if after_lt.is_empty() {
           // Just '<' at end, consume it as text
           self.source.bump();
