@@ -1,0 +1,102 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 54,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 5,
+                                    end: 8,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 8,
+                                    end: 26,
+                                },
+                                tag_name: "p",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 11,
+                                                    end: 22,
+                                                },
+                                                value: "Paragraph 1",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 26,
+                                    end: 29,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 29,
+                                    end: 47,
+                                },
+                                tag_name: "p",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 32,
+                                                    end: 43,
+                                                },
+                                                value: "Paragraph 2",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 47,
+                                    end: 48,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []

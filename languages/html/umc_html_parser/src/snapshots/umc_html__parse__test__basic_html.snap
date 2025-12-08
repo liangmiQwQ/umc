@@ -1,0 +1,277 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Doctype(
+            Doctype {
+                span: Span {
+                    start: 0,
+                    end: 15,
+                },
+                attributes: Vec(
+                    [
+                        Attribute {
+                            span: Span {
+                                start: 10,
+                                end: 14,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 10,
+                                    end: 14,
+                                },
+                                value: "html",
+                            },
+                            value: None,
+                        },
+                    ],
+                ),
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 15,
+                    end: 16,
+                },
+                value: "\n",
+            },
+        ),
+        Element(
+            Element {
+                span: Span {
+                    start: 16,
+                    end: 142,
+                },
+                tag_name: "html",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            span: Span {
+                                start: 22,
+                                end: 31,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 22,
+                                    end: 26,
+                                },
+                                value: "lang",
+                            },
+                            value: Some(
+                                AttributeValue {
+                                    span: Span {
+                                        start: 27,
+                                        end: 31,
+                                    },
+                                    value: "en",
+                                    raw: "\"en\"",
+                                },
+                            ),
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 32,
+                                    end: 33,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 33,
+                                    end: 98,
+                                },
+                                tag_name: "head",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 39,
+                                                    end: 42,
+                                                },
+                                                value: "\n  ",
+                                            },
+                                        ),
+                                        Element(
+                                            Element {
+                                                span: Span {
+                                                    start: 42,
+                                                    end: 64,
+                                                },
+                                                tag_name: "meta",
+                                                attributes: Vec(
+                                                    [
+                                                        Attribute {
+                                                            span: Span {
+                                                                start: 48,
+                                                                end: 63,
+                                                            },
+                                                            key: AttributeKey {
+                                                                span: Span {
+                                                                    start: 48,
+                                                                    end: 55,
+                                                                },
+                                                                value: "charset",
+                                                            },
+                                                            value: Some(
+                                                                AttributeValue {
+                                                                    span: Span {
+                                                                        start: 56,
+                                                                        end: 63,
+                                                                    },
+                                                                    value: "UTF-8",
+                                                                    raw: "\"UTF-8\"",
+                                                                },
+                                                            ),
+                                                        },
+                                                    ],
+                                                ),
+                                                children: Vec(
+                                                    [],
+                                                ),
+                                            },
+                                        ),
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 64,
+                                                    end: 67,
+                                                },
+                                                value: "\n  ",
+                                            },
+                                        ),
+                                        Element(
+                                            Element {
+                                                span: Span {
+                                                    start: 67,
+                                                    end: 90,
+                                                },
+                                                tag_name: "title",
+                                                attributes: Vec(
+                                                    [],
+                                                ),
+                                                children: Vec(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 74,
+                                                                    end: 82,
+                                                                },
+                                                                value: "Document",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 90,
+                                                    end: 91,
+                                                },
+                                                value: "\n",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 98,
+                                    end: 99,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 99,
+                                    end: 134,
+                                },
+                                tag_name: "body",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 105,
+                                                    end: 108,
+                                                },
+                                                value: "\n  ",
+                                            },
+                                        ),
+                                        Element(
+                                            Element {
+                                                span: Span {
+                                                    start: 108,
+                                                    end: 126,
+                                                },
+                                                tag_name: "p",
+                                                attributes: Vec(
+                                                    [],
+                                                ),
+                                                children: Vec(
+                                                    [
+                                                        Text(
+                                                            Text {
+                                                                span: Span {
+                                                                    start: 111,
+                                                                    end: 122,
+                                                                },
+                                                                value: "Hello World",
+                                                            },
+                                                        ),
+                                                    ],
+                                                ),
+                                            },
+                                        ),
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 126,
+                                                    end: 127,
+                                                },
+                                                value: "\n",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 134,
+                                    end: 135,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []

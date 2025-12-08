@@ -1,0 +1,86 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 36,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 5,
+                                    end: 8,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 8,
+                                    end: 30,
+                                },
+                                tag_name: "p",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [
+                                        Text(
+                                            Text {
+                                                span: Span {
+                                                    start: 11,
+                                                    end: 30,
+                                                },
+                                                value: "Unclosed paragraph\n",
+                                            },
+                                        ),
+                                    ],
+                                ),
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: [
+    OxcDiagnostic {
+        inner: OxcDiagnosticInner {
+            message: "Implicitly closed element: <p>",
+            labels: Some(
+                [
+                    LabeledSpan {
+                        label: None,
+                        span: SourceSpan {
+                            offset: SourceOffset(
+                                8,
+                            ),
+                            length: 22,
+                        },
+                        primary: false,
+                    },
+                ],
+            ),
+            help: None,
+            severity: Error,
+            code: OxcCode {
+                scope: None,
+                number: None,
+            },
+            url: None,
+        },
+    },
+]

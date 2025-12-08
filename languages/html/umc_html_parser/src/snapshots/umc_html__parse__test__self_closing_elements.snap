@@ -1,0 +1,177 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 77,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 5,
+                                    end: 8,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 8,
+                                    end: 12,
+                                },
+                                tag_name: "br",
+                                attributes: Vec(
+                                    [],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 12,
+                                    end: 15,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 15,
+                                    end: 46,
+                                },
+                                tag_name: "img",
+                                attributes: Vec(
+                                    [
+                                        Attribute {
+                                            span: Span {
+                                                start: 20,
+                                                end: 34,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 20,
+                                                    end: 23,
+                                                },
+                                                value: "src",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 24,
+                                                        end: 34,
+                                                    },
+                                                    value: "test.jpg",
+                                                    raw: "\"test.jpg\"",
+                                                },
+                                            ),
+                                        },
+                                        Attribute {
+                                            span: Span {
+                                                start: 35,
+                                                end: 45,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 35,
+                                                    end: 38,
+                                                },
+                                                value: "alt",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 39,
+                                                        end: 45,
+                                                    },
+                                                    value: "Test",
+                                                    raw: "\"Test\"",
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 46,
+                                    end: 49,
+                                },
+                                value: "\n  ",
+                            },
+                        ),
+                        Element(
+                            Element {
+                                span: Span {
+                                    start: 49,
+                                    end: 70,
+                                },
+                                tag_name: "input",
+                                attributes: Vec(
+                                    [
+                                        Attribute {
+                                            span: Span {
+                                                start: 56,
+                                                end: 67,
+                                            },
+                                            key: AttributeKey {
+                                                span: Span {
+                                                    start: 56,
+                                                    end: 60,
+                                                },
+                                                value: "type",
+                                            },
+                                            value: Some(
+                                                AttributeValue {
+                                                    span: Span {
+                                                        start: 61,
+                                                        end: 67,
+                                                    },
+                                                    value: "text",
+                                                    raw: "\"text\"",
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                ),
+                                children: Vec(
+                                    [],
+                                ),
+                            },
+                        ),
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 70,
+                                    end: 71,
+                                },
+                                value: "\n",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []

@@ -1,0 +1,119 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Comment(
+            Comment {
+                span: Span {
+                    start: 0,
+                    end: 26,
+                },
+                bogus: false,
+                value: " This is a comment ",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 26,
+                    end: 27,
+                },
+                value: "\n",
+            },
+        ),
+        Element(
+            Element {
+                span: Span {
+                    start: 27,
+                    end: 45,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 32,
+                                    end: 39,
+                                },
+                                value: "Content",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 45,
+                    end: 46,
+                },
+                value: "\n",
+            },
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 46,
+                    end: 70,
+                },
+                bogus: false,
+                value: " Another comment ",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 70,
+                    end: 71,
+                },
+                value: "\n",
+            },
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 71,
+                    end: 99,
+                },
+                bogus: true,
+                value: " This is a bogus comment ",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 99,
+                    end: 100,
+                },
+                value: "\n",
+            },
+        ),
+        Comment(
+            Comment {
+                span: Span {
+                    start: 100,
+                    end: 120,
+                },
+                bogus: true,
+                value: "Bogus Comment Too",
+            },
+        ),
+        Text(
+            Text {
+                span: Span {
+                    start: 120,
+                    end: 121,
+                },
+                value: "\n",
+            },
+        ),
+    ],
+)
+Errors: []

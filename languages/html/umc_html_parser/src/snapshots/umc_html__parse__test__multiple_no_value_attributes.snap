@@ -1,0 +1,67 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 33,
+                },
+                tag_name: "input",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            span: Span {
+                                start: 7,
+                                end: 14,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 7,
+                                    end: 14,
+                                },
+                                value: "checked",
+                            },
+                            value: None,
+                        },
+                        Attribute {
+                            span: Span {
+                                start: 15,
+                                end: 23,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 15,
+                                    end: 23,
+                                },
+                                value: "disabled",
+                            },
+                            value: None,
+                        },
+                        Attribute {
+                            span: Span {
+                                start: 24,
+                                end: 32,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 24,
+                                    end: 32,
+                                },
+                                value: "readonly",
+                            },
+                            value: None,
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []
