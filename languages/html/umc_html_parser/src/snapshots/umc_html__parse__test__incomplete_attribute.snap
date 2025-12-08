@@ -1,0 +1,66 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 18,
+                },
+                tag_name: "div",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            span: Span {
+                                start: 5,
+                                end: 10,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 5,
+                                    end: 10,
+                                },
+                                value: "class",
+                            },
+                            value: None,
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [],
+                ),
+            },
+        ),
+    ],
+)
+Errors: [
+    OxcDiagnostic {
+        inner: OxcDiagnosticInner {
+            message: "Expected attribute value after '='",
+            labels: Some(
+                [
+                    LabeledSpan {
+                        label: None,
+                        span: SourceSpan {
+                            offset: SourceOffset(
+                                10,
+                            ),
+                            length: 1,
+                        },
+                        primary: false,
+                    },
+                ],
+            ),
+            help: None,
+            severity: Error,
+            code: OxcCode {
+                scope: None,
+                number: None,
+            },
+            url: None,
+        },
+    },
+]

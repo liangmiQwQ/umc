@@ -82,7 +82,7 @@ pub mod option {
   /// Configures how the HTML parser handles embedded languages like JavaScript and CSS.
   pub struct HtmlParserOption {
     /// The oxc_parser options for parsing content inside <script> tags.
-    /// If get None, the content in <script> tag will be regared as [Text](umc_html_ast::Text)
+    /// If get None, the content in <script> tag will be regarded as [Text](umc_html_ast::Text)
     pub parse_script: Option<ParseOptions>,
     /// A function that returns true if the given tag name is an embedded language tag (e.g., "script", "style")
     ///

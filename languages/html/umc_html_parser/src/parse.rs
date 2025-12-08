@@ -117,7 +117,7 @@ impl<'a> HtmlParserImpl<'a> {
           self.push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
         }
 
-        // Other kind will be process in the fn above
+        // Other token kinds are handled by the specific parsing functions above
 
         // Ignore other tokens at content level (whitespace, etc.)
         _ => (),
@@ -145,11 +145,7 @@ impl<'a> HtmlParserImpl<'a> {
       };
 
       // Push to parent or root
-      if let Some(parent) = element_stack.last_mut() {
-        parent.children.push(Node::Element(element));
-      } else {
-        nodes.push(Node::Element(element));
-      }
+      self.create_and_push_element(element, &mut nodes, &mut element_stack);
     }
 
     nodes
@@ -261,7 +257,7 @@ impl<'a> HtmlParserImpl<'a> {
           });
         }
         HtmlKind::Eq => {
-          iter.next();
+          let eq_token = iter.next().unwrap();
 
           // skip possible whitespace
           if let Some(token) = iter.peek()
@@ -284,6 +280,12 @@ impl<'a> HtmlParserImpl<'a> {
                 value: Some(value),
               });
             }
+          } else {
+            // Handle missing value after =
+            self.errors.push(
+              OxcDiagnostic::error("Expected attribute value after '='")
+                .with_label(Span::new(eq_token.start, eq_token.end)),
+            );
           }
         }
         HtmlKind::Whitespace => {
@@ -325,11 +327,7 @@ impl<'a> HtmlParserImpl<'a> {
       };
 
       // Push to parent or root
-      if let Some(parent) = element_stack.last_mut() {
-        parent.children.push(Node::Element(element));
-      } else {
-        nodes.push(Node::Element(element));
-      }
+      self.create_and_push_element(element, nodes, element_stack);
     } else {
       // Create arena-allocated vector for children
       let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
@@ -418,11 +416,7 @@ impl<'a> HtmlParserImpl<'a> {
         }
 
         // Push to parent or root
-        if let Some(parent) = element_stack.last_mut() {
-          parent.children.push(Node::Element(element));
-        } else {
-          nodes.push(Node::Element(element));
-        }
+        self.create_and_push_element(element, nodes, element_stack);
       }
     } else {
       // No matching opening tag - this is an orphan closing tag
@@ -524,6 +518,19 @@ impl<'a> HtmlParserImpl<'a> {
       Node::Element(e) => e.span.end,
       Node::Text(t) => t.span.end,
       Node::Comment(c) => c.span.end,
+    }
+  }
+
+  fn create_and_push_element(
+    &self,
+    element: Element<'a>,
+    nodes: &mut ArenaVec<'a, Node<'a>>,
+    element_stack: &mut [ElementBuilder<'a>],
+  ) {
+    if let Some(parent) = element_stack.last_mut() {
+      parent.children.push(Node::Element(element));
+    } else {
+      nodes.push(Node::Element(element));
     }
   }
 }
@@ -639,6 +646,12 @@ mod test {
 </span>
 <p>More content</p>"#;
 
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn incomplete_attribute() {
+    const HTML: &str = r#"<div class=></div>"#;
     assert_snapshot!(parse(HTML));
   }
 }
