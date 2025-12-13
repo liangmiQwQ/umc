@@ -11,5 +11,10 @@ repository.workspace = true
 rust-version.workspace = true
 description.workspace = true
 
-[dev-dependencies]
+[dependencies]
 criterion = { workspace = true }
+reqwest = { workspace = true }
+
+oxc_allocator = { workspace = true }
+umc_html_parser = { workspace = true }
+umc_parser = { workspace = true }
