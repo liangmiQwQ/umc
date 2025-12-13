@@ -36,6 +36,7 @@ miette = { package = "oxc-miette", version = "2.6.0", features = ["fancy-no-sysc
 criterion = "0.8.1"
 insta = "1.44.3"
 reqwest = "0.12.25"
+tokio = "1.48.0"
 
 # umc_ast = { version = "0.0.0-alpha.14", path = "crates/umc_ast" }
 umc_parser = { version = "0.0.0-alpha.14", path = "crates/umc_parser" }
