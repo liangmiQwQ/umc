@@ -23,7 +23,7 @@ strip = "symbols"
 ignored = ["napi"]
 
 [workspace.dependencies]
-napi = "3.6.1"
+napi = "3.7.0"
 napi-build = "2"
 napi-derive = "3.4.0"
 
