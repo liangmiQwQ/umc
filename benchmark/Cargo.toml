@@ -19,3 +19,7 @@ tokio = { workspace = true, features = ["full"] }
 oxc_allocator = { workspace = true }
 umc_html_parser = { workspace = true }
 umc_parser = { workspace = true }
+
+[[bench]]
+name = "html_benchmark"
+harness = false
