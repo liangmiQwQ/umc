@@ -1,0 +1,25 @@
+[package]
+name = "umc_benchmark"
+version.workspace = true
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+publish = false
+repository.workspace = true
+rust-version.workspace = true
+description.workspace = true
+
+[dependencies]
+criterion = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+
+oxc_allocator = { workspace = true }
+umc_html_parser = { workspace = true }
+umc_parser = { workspace = true }
+
+[[bench]]
+name = "html_benchmark"
+harness = false
