@@ -1,5 +1,5 @@
 [package]
-name = "umc_html"
+name = "umc_html_parser"
 version.workspace = true
 authors.workspace = true
 categories.workspace = true

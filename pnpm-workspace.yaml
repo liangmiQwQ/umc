@@ -6,18 +6,18 @@ catalogs:
   cli:
     dprint: ^0.50.2
     lint-staged: ^16.2.7
-    oxlint: ^1.31.0
-    oxlint-tsgolint: ^0.8.3
+    oxlint: ^1.32.0
+    oxlint-tsgolint: ^0.8.6
     simple-git-hooks: ^2.13.1
     taze: ^19.9.2
-    tsdown: ^0.17.0
+    tsdown: ^0.17.3
     vitest: ^4.0.15
     changelogithub: ^14.0.0
     bumpp: ^10.3.2
   types:
     typescript: ^5.9.3
-    '@types/node': ^24.10.1
-    type-fest: ^5.3.0
+    '@types/node': ^25.0.1
+    type-fest: ^5.3.1
   napi:
     '@napi-rs/cli': ^3.5.0
     '@napi-rs/wasm-runtime': ^1.1.0

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "languages/*/*", "packages/*"]
+members = ["benchmark", "crates/*", "languages/*/*", "packages/*"]
 
 [workspace.package]
 version = "0.0.0-alpha.14" # Unified packages version
@@ -23,7 +23,7 @@ strip = "symbols"
 ignored = ["napi"]
 
 [workspace.dependencies]
-napi = "3.6.1"
+napi = "3.7.0"
 napi-build = "2"
 napi-derive = "3.4.0"
 
@@ -33,10 +33,14 @@ oxc_parser = "0.98.0"
 
 miette = { package = "oxc-miette", version = "2.6.0", features = ["fancy-no-syscall"] }
 
+criterion = "0.8.1"
 insta = "1.44.3"
+reqwest = "0.12.25"
+tokio = "1.48.0"
 
 # umc_ast = { version = "0.0.0-alpha.14", path = "crates/umc_ast" }
 umc_parser = { version = "0.0.0-alpha.14", path = "crates/umc_parser" }
 umc_span = { version = "0.0.0-alpha.14", path = "crates/umc_span" }
 
 umc_html_ast = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_ast" }
+umc_html_parser = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_parser" }

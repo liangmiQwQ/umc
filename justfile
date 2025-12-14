@@ -51,3 +51,6 @@ bump TYPE:
   pnpm bump -y
   cargo workspaces version --no-git-commit -y {{ TYPE }}
   just build
+
+bench:
+  cargo bench -p umc_benchmark
