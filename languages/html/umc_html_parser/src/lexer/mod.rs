@@ -12,7 +12,7 @@ pub(crate) struct HtmlLexerOption<'a> {
 
 pub(crate) struct HtmlLexer<'a> {
   source: Source<'a>,
-  state: LexerState,
+  state: LexerState<'a>,
   option: HtmlLexerOption<'a>,
   pub errors: Vec<OxcDiagnostic>,
 }

@@ -52,6 +52,7 @@ impl<'a> HtmlLexer<'a> {
   fn handle_content(&mut self) -> Token<HtmlKind> {
     let mut iter: Chars<'_> = self.source.get_chars();
     // safe unwarp, won't direct to this branch if pointer == file.len()
+
     match iter.next().unwrap() {
       // for <
       '<' => {
@@ -489,7 +490,7 @@ impl<'a> HtmlLexer<'a> {
     self.state.kind = LexerStateKind::AfterTagName; // update state
     self
       .state
-      .set_tag_name(self.source.source_text[result.start as usize..result.end as usize].to_owned());
+      .set_tag_name(&self.source.source_text[result.start as usize..result.end as usize]);
     result
   }
 }
