@@ -237,24 +237,28 @@ impl<'a> HtmlLexer<'a> {
         break;
       }
 
-      // Check if we're at a potential tag start
-      if let Some(after_lt) = remaining.strip_prefix('<') {
-        // Check what follows the '<'
-        if after_lt.is_empty() {
-          // Just '<' at end, consume it as text
-          self.source.bump();
-        } else {
-          let next_char = after_lt.chars().next().unwrap();
-          if next_char.is_alphabetic() || next_char == '/' || next_char == '!' {
-            // This is a tag start, stop here (don't consume the '<')
+      if let Some(index) = remaining.find('<') {
+        if index > 0 {
+          self.source.advance(index as u32);
+        }
+
+        // Check if it is a real tag start
+        // We are strictly at '<' now
+        let remaining_after = self.source.remaining();
+        let mut chars = remaining_after[1..].chars();
+
+        if let Some(c) = chars.next() {
+          if c.is_alphabetic() || c == '/' || c == '!' {
             break;
           } else {
-            // Not a tag, consume '<' and continue
             self.source.bump();
           }
+        } else {
+          self.source.bump();
         }
       } else {
-        self.source.bump();
+        self.source.advance(remaining.len() as u32);
+        break;
       }
     }
 

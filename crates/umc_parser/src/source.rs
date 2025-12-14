@@ -103,4 +103,26 @@ impl<'a> Source<'a> {
   pub fn remaining(&self) -> &'a str {
     &self.source_text[self.position as usize..]
   }
+
+  /// Advance the position by `n` bytes.
+  /// This is useful when you want to skip a chunk of text that you have already processed
+  /// or identified using string slice methods (like `find` or `memchr`).
+  ///
+  /// # Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let mut source = Source::new("hello world");
+  /// source.advance(6);
+  /// assert_eq!(source.position, 6);
+  /// assert_eq!(source.peek(), Some(&'w'));
+  /// ```
+  #[inline]
+  pub fn advance(&mut self, n: u32) {
+    self.position += n;
+    self.chars = self.source_text[self.position as usize..]
+      .chars()
+      .peekable();
+  }
 }
