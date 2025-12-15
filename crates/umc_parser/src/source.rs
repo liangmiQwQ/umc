@@ -29,15 +29,25 @@ impl<'a> Source<'a> {
 }
 
 impl<'a> Source<'a> {
-  pub fn get(&self, index: u32) -> u8 {
-    self.source_text[index as usize]
+  pub fn get(&self, index: u32) -> Option<u8> {
+    self.source_text.get(index as usize).copied()
   }
 
   pub fn starts_with(&self, bytes: &[u8]) -> bool {
     self.source_text[self.pointer as usize..].starts_with(bytes)
   }
 
-  /// Advance the pointer forward by the specified number of bytes.
+  pub fn starts_with_lowercase(&self, bytes: &[u8]) -> bool {
+    self.source_text[self.pointer as usize..]
+      .to_ascii_lowercase()
+      .starts_with(bytes)
+  }
+
+  pub fn rest(&self) -> &[u8] {
+    &self.source_text[self.pointer as usize..]
+  }
+
+  /// Set the pointer location
   ///
   /// ## Example
   ///
@@ -45,11 +55,14 @@ impl<'a> Source<'a> {
   /// use umc_parser::source::Source;
   ///
   /// let mut source = Source::new("hello");
-  /// source.advance(2);
+  /// source.to(2);
   /// assert_eq!(source.pointer, 2);
   /// ```
-  pub fn advance(&mut self, bytes: u32) {
-    let target = self.pointer + bytes;
-    self.pointer = target;
+  pub fn to(&mut self, index: u32) {
+    self.pointer = index;
+  }
+
+  pub fn advance(&mut self, diff: u32) {
+    self.pointer += diff;
   }
 }

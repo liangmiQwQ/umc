@@ -2074,6 +2074,7 @@ name = "umc_html_parser"
 version = "0.0.0-alpha.14"
 dependencies = [
  "insta",
+ "memchr",
  "oxc_allocator",
  "oxc_diagnostics",
  "oxc_parser",
@@ -2086,7 +2087,6 @@ dependencies = [
 name = "umc_parser"
 version = "0.0.0-alpha.14"
 dependencies = [
- "memchr",
  "oxc_allocator",
  "oxc_diagnostics",
  "umc_span",

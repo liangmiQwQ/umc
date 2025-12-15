@@ -14,5 +14,4 @@ description.workspace = true
 oxc_allocator = { workspace = true }
 oxc_diagnostics = { workspace = true }
 
-memchr = { workspace = true }
 umc_span = { workspace = true }
