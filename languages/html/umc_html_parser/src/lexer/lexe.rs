@@ -51,15 +51,13 @@ impl<'a> HtmlLexer<'a> {
 // handler for HtmlLexerState::Content
 impl<'a> HtmlLexer<'a> {
   fn handle_content(&mut self) -> Token<HtmlKind> {
-    println!("{}", str::from_utf8(self.source.rest()).unwrap());
-
     let start = self.source.pointer;
 
+    self.source.advance(1);
     match self.source.get(start).unwrap() {
       b'<' => {
         match self.source.get(start + 1) {
           Some(item) if item.is_ascii_alphabetic() => {
-            self.source.advance(1);
             let result = Token::<HtmlKind> {
               kind: HtmlKind::TagStart,
               start,
@@ -73,7 +71,7 @@ impl<'a> HtmlLexer<'a> {
 
           // for / character, as closing tag
           Some(b'/') => {
-            self.source.advance(2);
+            self.source.advance(1);
             let result = Token::<HtmlKind> {
               kind: HtmlKind::CloseTagStart,
               start,
@@ -89,7 +87,7 @@ impl<'a> HtmlLexer<'a> {
             const DOCTYPE: &[u8] = b"doctype";
             const COMMENT_START: &[u8] = b"!--";
 
-            self.source.advance(2);
+            self.source.advance(1);
             if self.source.starts_with_lowercase(DOCTYPE) {
               self.source.advance(DOCTYPE.len() as u32);
               let result = Token::<HtmlKind> {
@@ -130,27 +128,26 @@ impl<'a> HtmlLexer<'a> {
             }
           }
 
-          Some(_) | None => self.handle_content_text(),
+          Some(_) | None => self.handle_content_text(start),
         }
       }
-      _ => self.handle_content_text(),
+      _ => self.handle_content_text(start),
     }
   }
 
-  fn handle_content_text(&mut self) -> Token<HtmlKind> {
+  fn handle_content_text(&mut self, start: u32) -> Token<HtmlKind> {
     let mut index = self.source.source_text.len() as u32;
     let mut iter = memchr_iter(b'<', self.source.rest());
 
     while let Some(i) = iter.next().map(|i| i as u32) {
-      if let Some(next) = self.source.get(i + 1)
+      if let Some(next) = self.source.get(self.source.pointer + i + 1)
         && (next.is_ascii_alphabetic() || next == b'/' || next == b'!')
       {
-        index = i + self.source.pointer;
+        index = self.source.pointer + i;
         break;
       }
     }
 
-    let start = self.source.pointer;
     self.source.to(index);
 
     Token::<HtmlKind> {
@@ -272,6 +269,8 @@ impl<'a> HtmlLexer<'a> {
           && next == b'>'
         {
           self.source.advance(2);
+          self.state.take_tag_name(); // clear tag name
+          self.state.kind = LexerStateKind::Content; // update lexer state
           Token::<HtmlKind> {
             kind: HtmlKind::SelfCloseTagEnd,
             start,
@@ -304,7 +303,7 @@ impl<'a> HtmlLexer<'a> {
     let mut end = self.source.source_text.len() as u32;
 
     if let Some(index) = memchr(quote, self.source.rest()) {
-      end = self.source.pointer + index as u32;
+      end = self.source.pointer + index as u32 + 1;
     } else {
       // throw an error, expect quote, but found eof
       self.errors.push(
