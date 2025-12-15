@@ -1,5 +1,3 @@
-use std::str::Chars;
-
 /// Tracks the current position in source text during parsing.
 ///
 /// This struct maintains a pointer into the source text and provides methods
@@ -8,7 +6,8 @@ pub struct Source<'a> {
   /// Current byte position in the source text (0-indexed)
   pub pointer: u32,
   /// The complete source text being parsed
-  pub source_text: &'a str,
+  /// Use slice instead of str since we always do byte-level operations
+  pub source_text: &'a [u8],
 }
 
 impl<'a> Source<'a> {
@@ -25,46 +24,111 @@ impl<'a> Source<'a> {
   pub fn new(source_text: &'a str) -> Source<'a> {
     Source {
       pointer: 0,
-      source_text,
+      source_text: source_text.as_bytes(),
     }
   }
 }
 
 impl<'a> Source<'a> {
-  /// Get an iterator over the remaining characters from the current position.
+  /// Get the byte at the given index
   ///
-  /// # Example
+  /// ## Example
   ///
   /// ```
   /// use umc_parser::source::Source;
   ///
-  /// let mut source = Source::new("abc");
-  /// source.advance_bytes(1);
-  /// let chars: String = source.get_chars().collect();
-  /// assert_eq!(chars, "bc");
+  /// let source = Source::new("hello");
+  /// assert_eq!(source.get(0), Some(b'h'));
+  /// assert_eq!(source.get(5), None);
   /// ```
-  pub fn get_chars(&self) -> Chars<'a> {
-    self.source_text[(self.pointer as usize)..].chars()
+  #[inline]
+  pub fn get(&self, index: u32) -> Option<u8> {
+    self.source_text.get(index as usize).copied()
   }
 
-  /// Advance the pointer forward by the specified number of bytes.
+  /// Check if the remaining source text starts with the given bytes
   ///
-  /// # Safety
+  /// ## Example
   ///
-  /// This method will panic if the byte count doesn't align with UTF-8 character
-  /// boundaries or if it advances beyond the end of the source text.
+  /// ```
+  /// use umc_parser::source::Source;
   ///
-  /// # Example
+  /// let source = Source::new("hello");
+  /// assert!(source.starts_with(b"he"));
+  /// assert!(!source.starts_with(b"hl"));
+  /// ```
+  #[inline]
+  pub fn starts_with(&self, bytes: &[u8]) -> bool {
+    self.source_text[self.pointer as usize..].starts_with(bytes)
+  }
+
+  /// Check if the remaining source text starts with the given bytes
+  /// Ignore case, but you need to pass in the bytes in lowercase
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let source = Source::new("HELLO");
+  /// assert!(source.starts_with_lowercase(b"he"));
+  /// assert!(!source.starts_with_lowercase(b"hl"));
+  /// ```
+  #[inline]
+  pub fn starts_with_lowercase(&self, bytes: &[u8]) -> bool {
+    self.source_text[self.pointer as usize..]
+      .to_ascii_lowercase()
+      .starts_with(bytes)
+  }
+
+  /// Get the remaining source text which is after the current pointer location
+  ///
+  /// ## Example
   ///
   /// ```
   /// use umc_parser::source::Source;
   ///
   /// let mut source = Source::new("hello");
-  /// source.advance_bytes(2);
+  /// source.advance(1);
+  /// assert_eq!(source.rest(), b"ello");
+  /// ```
+  #[inline]
+  pub fn rest(&self) -> &[u8] {
+    &self.source_text[self.pointer as usize..]
+  }
+
+  /// Set the pointer location
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let mut source = Source::new("hello");
+  /// source.advance(1);
+  /// source.to(2);
   /// assert_eq!(source.pointer, 2);
   /// ```
-  pub fn advance_bytes(&mut self, bytes: u32) {
-    let target = self.pointer + bytes;
-    self.pointer = target;
+  #[inline]
+  pub fn to(&mut self, index: u32) {
+    self.pointer = index;
+  }
+
+  /// Advance the pointer by a given amount
+  /// Based on current pointer location
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let mut source = Source::new("hello");
+  /// source.advance(2);
+  /// source.advance(2);
+  /// assert_eq!(source.pointer, 4);
+  /// ```
+  #[inline]
+  pub fn advance(&mut self, diff: u32) {
+    self.pointer += diff;
   }
 }
