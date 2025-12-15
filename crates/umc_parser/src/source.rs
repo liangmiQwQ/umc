@@ -41,6 +41,7 @@ impl<'a> Source<'a> {
   /// assert_eq!(source.get(0), Some(b'h'));
   /// assert_eq!(source.get(5), None);
   /// ```
+  #[inline]
   pub fn get(&self, index: u32) -> Option<u8> {
     self.source_text.get(index as usize).copied()
   }
@@ -56,6 +57,7 @@ impl<'a> Source<'a> {
   /// assert!(source.starts_with(b"he"));
   /// assert!(!source.starts_with(b"hl"));
   /// ```
+  #[inline]
   pub fn starts_with(&self, bytes: &[u8]) -> bool {
     self.source_text[self.pointer as usize..].starts_with(bytes)
   }
@@ -72,6 +74,7 @@ impl<'a> Source<'a> {
   /// assert!(source.starts_with_lowercase(b"he"));
   /// assert!(!source.starts_with_lowercase(b"hl"));
   /// ```
+  #[inline]
   pub fn starts_with_lowercase(&self, bytes: &[u8]) -> bool {
     self.source_text[self.pointer as usize..]
       .to_ascii_lowercase()
@@ -89,6 +92,7 @@ impl<'a> Source<'a> {
   /// source.advance(1);
   /// assert_eq!(source.rest(), b"ello");
   /// ```
+  #[inline]
   pub fn rest(&self) -> &[u8] {
     &self.source_text[self.pointer as usize..]
   }
@@ -105,6 +109,7 @@ impl<'a> Source<'a> {
   /// source.to(2);
   /// assert_eq!(source.pointer, 2);
   /// ```
+  #[inline]
   pub fn to(&mut self, index: u32) {
     self.pointer = index;
   }
@@ -122,6 +127,7 @@ impl<'a> Source<'a> {
   /// source.advance(2);
   /// assert_eq!(source.pointer, 4);
   /// ```
+  #[inline]
   pub fn advance(&mut self, diff: u32) {
     self.pointer += diff;
   }
