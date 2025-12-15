@@ -238,6 +238,7 @@ impl<'a> HtmlLexer<'a> {
           end: self.source.pointer,
         }
       }
+
       b'=' => {
         self.source.advance(1);
 
@@ -282,10 +283,16 @@ impl<'a> HtmlLexer<'a> {
       }
 
       // for attribute with `"`
-      b'"' => self.handle_quote_attribute(start, b'"'),
+      b'"' => {
+        self.source.advance(1);
+        self.handle_quote_attribute(start, b'"')
+      }
 
       // for attribute with `'`
-      b'\'' => self.handle_quote_attribute(start, b'\''),
+      b'\'' => {
+        self.source.advance(1);
+        self.handle_quote_attribute(start, b'\'')
+      }
 
       // for attribute without `"`
       _ => self.handle_tag(start, HtmlKind::Attribute),
@@ -297,12 +304,16 @@ impl<'a> HtmlLexer<'a> {
     let mut end = self.source.source_text.len() as u32;
 
     if let Some(index) = memchr(quote, self.source.rest()) {
-      end = index as u32;
+      end = self.source.pointer + index as u32;
     } else {
       // throw an error, expect quote, but found eof
       self.errors.push(
-        OxcDiagnostic::error(format!("Expected {}, but found {}", quote, HtmlKind::Eof))
-          .with_label(Span::new(end, end)),
+        OxcDiagnostic::error(format!(
+          "Expected {}, but found {}",
+          char::from(quote),
+          HtmlKind::Eof
+        ))
+        .with_label(Span::new(end, end)),
       );
     }
 
