@@ -85,7 +85,7 @@ impl<'a> Source<'a> {
   /// ```
   /// use umc_parser::source::Source;
   ///
-  /// let source = Source::new("hello");
+  /// let mut source = Source::new("hello");
   /// source.advance(1);
   /// assert_eq!(source.rest(), b"ello");
   /// ```
