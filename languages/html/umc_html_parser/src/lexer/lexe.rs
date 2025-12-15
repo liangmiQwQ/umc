@@ -51,6 +51,8 @@ impl<'a> HtmlLexer<'a> {
 // handler for HtmlLexerState::Content
 impl<'a> HtmlLexer<'a> {
   fn handle_content(&mut self) -> Token<HtmlKind> {
+    println!("{}", str::from_utf8(self.source.rest()).unwrap());
+
     let start = self.source.pointer;
 
     match self.source.get(start).unwrap() {
@@ -137,11 +139,9 @@ impl<'a> HtmlLexer<'a> {
 
   fn handle_content_text(&mut self) -> Token<HtmlKind> {
     let mut index = self.source.source_text.len() as u32;
+    let mut iter = memchr_iter(b'<', self.source.rest());
 
-    while let Some(i) = memchr_iter(b'<', self.source.rest())
-      .next()
-      .map(|i| i as u32)
-    {
+    while let Some(i) = iter.next().map(|i| i as u32) {
       if let Some(next) = self.source.get(i + 1)
         && (next.is_ascii_alphabetic() || next == b'/' || next == b'!')
       {
