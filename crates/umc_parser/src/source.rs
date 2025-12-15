@@ -6,6 +6,7 @@ pub struct Source<'a> {
   /// Current byte position in the source text (0-indexed)
   pub pointer: u32,
   /// The complete source text being parsed
+  /// Use slice instead of str since we always do byte-level operations
   pub source_text: &'a [u8],
 }
 
@@ -29,20 +30,65 @@ impl<'a> Source<'a> {
 }
 
 impl<'a> Source<'a> {
+  /// Get the byte at the given index
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let source = Source::new("hello");
+  /// assert_eq!(source.get(0), Some(b'h'));
+  /// assert_eq!(source.get(5), None);
+  /// ```
   pub fn get(&self, index: u32) -> Option<u8> {
     self.source_text.get(index as usize).copied()
   }
 
+  /// Check if the remaining source text starts with the given bytes
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let source = Source::new("hello");
+  /// assert!(source.starts_with(b"he"));
+  /// assert!(!source.starts_with(b"hl"));
+  /// ```
   pub fn starts_with(&self, bytes: &[u8]) -> bool {
     self.source_text[self.pointer as usize..].starts_with(bytes)
   }
 
+  /// Check if the remaining source text starts with the given bytes
+  /// Ignore case, but you need to pass in the bytes in lowercase
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let source = Source::new("HELLO");
+  /// assert!(source.starts_with_lowercase(b"he"));
+  /// assert!(!source.starts_with_lowercase(b"hl"));
+  /// ```
   pub fn starts_with_lowercase(&self, bytes: &[u8]) -> bool {
     self.source_text[self.pointer as usize..]
       .to_ascii_lowercase()
       .starts_with(bytes)
   }
 
+  /// Get the remaining source text which is after the current pointer location
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let source = Source::new("hello");
+  /// source.advance(1);
+  /// assert_eq!(source.rest(), b"ello");
+  /// ```
   pub fn rest(&self) -> &[u8] {
     &self.source_text[self.pointer as usize..]
   }
@@ -55,6 +101,7 @@ impl<'a> Source<'a> {
   /// use umc_parser::source::Source;
   ///
   /// let mut source = Source::new("hello");
+  /// source.advance(1);
   /// source.to(2);
   /// assert_eq!(source.pointer, 2);
   /// ```
@@ -62,6 +109,19 @@ impl<'a> Source<'a> {
     self.pointer = index;
   }
 
+  /// Advance the pointer by a given amount
+  /// Based on current pointer location
+  ///
+  /// ## Example
+  ///
+  /// ```
+  /// use umc_parser::source::Source;
+  ///
+  /// let mut source = Source::new("hello");
+  /// source.advance(2);
+  /// source.advance(2);
+  /// assert_eq!(source.pointer, 4);
+  /// ```
   pub fn advance(&mut self, diff: u32) {
     self.pointer += diff;
   }
