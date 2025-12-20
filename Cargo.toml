@@ -23,20 +23,20 @@ strip = "symbols"
 ignored = ["napi"]
 
 [workspace.dependencies]
-napi = "3.7.0"
+napi = "3.7.1"
 napi-build = "2"
-napi-derive = "3.4.0"
+napi-derive = "3.4.1"
 
-oxc_allocator = "0.98.0"
-oxc_diagnostics = "0.98.0"
-oxc_parser = "0.98.0"
+oxc_allocator = "0.104.0"
+oxc_diagnostics = "0.104.0"
+oxc_parser = "0.104.0"
 
 memchr = "2.7.6"
 miette = { package = "oxc-miette", version = "2.6.0", features = ["fancy-no-syscall"] }
 
 criterion = "0.8.1"
-insta = "1.44.3"
-reqwest = "0.12.25"
+insta = "1.45.0"
+reqwest = "0.12.26"
 tokio = "1.48.0"
 
 # umc_ast = { version = "0.0.0-alpha.14", path = "core/umc_ast" }
