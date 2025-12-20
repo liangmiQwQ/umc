@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use oxc_allocator::{Allocator, Vec as ArenaVec};
+use oxc_allocator::{Allocator, Box, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
 use umc_html_ast::{
   Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Text,
@@ -96,6 +96,7 @@ impl<'a> HtmlParserImpl<'a> {
 
         HtmlKind::Doctype => {
           let doctype = self.parse_doctype(&token, &mut iter);
+          let doctype = Box::new_in(doctype, self.allocator);
           self.push_node(&mut nodes, &mut element_stack, Node::Doctype(doctype));
         }
 
@@ -109,11 +110,13 @@ impl<'a> HtmlParserImpl<'a> {
 
         HtmlKind::TextContent => {
           let text = self.parse_text(&token);
+          let text = Box::new_in(text, self.allocator);
           self.push_node(&mut nodes, &mut element_stack, Node::Text(text));
         }
 
         HtmlKind::Comment => {
           let comment = self.parse_comment(&token);
+          let comment = Box::new_in(comment, self.allocator);
           self.push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
         }
 
@@ -527,6 +530,8 @@ impl<'a> HtmlParserImpl<'a> {
     nodes: &mut ArenaVec<'a, Node<'a>>,
     element_stack: &mut [ElementBuilder<'a>],
   ) {
+    let element = Box::new_in(element, self.allocator);
+
     if let Some(parent) = element_stack.last_mut() {
       parent.children.push(Node::Element(element));
     } else {

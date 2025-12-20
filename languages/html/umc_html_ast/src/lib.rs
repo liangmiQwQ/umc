@@ -32,7 +32,7 @@
 //! };
 //! ```
 
-use oxc_allocator::Vec;
+use oxc_allocator::{Box, Vec};
 use umc_span::Span;
 
 /// HTML AST node types.
@@ -44,13 +44,13 @@ use umc_span::Span;
 #[derive(Debug)]
 pub enum Node<'a> {
   /// HTML DOCTYPE declaration
-  Doctype(Doctype<'a>),
+  Doctype(Box<'a, Doctype<'a>>),
   /// HTML element with tag, attributes, and children
-  Element(Element<'a>),
+  Element(Box<'a, Element<'a>>),
   /// Text content node
-  Text(Text<'a>),
+  Text(Box<'a, Text<'a>>),
   /// HTML comment node
-  Comment(Comment<'a>),
+  Comment(Box<'a, Comment<'a>>),
 }
 
 /// HTML DOCTYPE declaration node.
