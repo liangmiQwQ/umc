@@ -12,14 +12,15 @@ rust-version.workspace = true
 description.workspace = true
 
 [dependencies]
-criterion = { workspace = true }
-reqwest = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
-
-oxc_allocator = { workspace = true }
-umc_html_parser = { workspace = true }
-umc_parser = { workspace = true }
 
 [[bench]]
 name = "html_benchmark"
 harness = false
+
+[dev-dependencies]
+criterion = { workspace = true }
+oxc_allocator = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+umc_html_parser = { workspace = true }
+umc_parser = { workspace = true }
