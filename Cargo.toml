@@ -33,6 +33,7 @@ oxc_parser = "0.104.0"
 
 memchr = "2.7.6"
 miette = { package = "oxc-miette", version = "2.6.0", features = ["fancy-no-syscall"] }
+smallvec = "1.15.0"
 
 criterion = "0.8.1"
 insta = "1.45.0"

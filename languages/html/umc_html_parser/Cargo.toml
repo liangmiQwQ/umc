@@ -16,6 +16,7 @@ oxc_diagnostics = { workspace = true }
 oxc_parser = { workspace = true, features = [] }
 
 memchr = { workspace = true }
+smallvec = { workspace = true }
 umc_html_ast = { workspace = true }
 umc_parser = { workspace = true }
 umc_span = { workspace = true }

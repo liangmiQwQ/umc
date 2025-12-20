@@ -2,6 +2,7 @@ use std::iter::Peekable;
 
 use oxc_allocator::{Allocator, Box, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
+use smallvec::SmallVec;
 use umc_html_ast::{
   Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Text,
 };
@@ -70,12 +71,21 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
   }
 }
 
+/// Default inline capacity for SmallVec collections.
+/// Chosen based on typical HTML element characteristics:
+/// - Most elements have fewer than 8 attributes
+/// - Most elements have fewer than 8 direct children
+const SMALL_VEC_CAPACITY: usize = 8;
+
 /// Represents an element being built during parsing.
-/// Uses arena-allocated vectors for children and attributes.
+/// Uses stack-based SmallVec for efficient collection during parsing,
+/// then converts to arena-allocated vectors when the element is complete.
 struct ElementBuilder<'a> {
   tag_name: &'a str,
-  attributes: ArenaVec<'a, Attribute<'a>>,
-  children: ArenaVec<'a, Node<'a>>,
+  /// Attributes collected on stack, converted to ArenaVec when element is finalized
+  attributes: SmallVec<[Attribute<'a>; SMALL_VEC_CAPACITY]>,
+  /// Children collected on stack, converted to ArenaVec when element is finalized
+  children: SmallVec<[Node<'a>; SMALL_VEC_CAPACITY]>,
   start: u32,
 }
 
@@ -84,9 +94,9 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     mut iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>,
   ) -> ArenaVec<'a, Node<'a>> {
-    // Create arena-allocated vector for root nodes
-    // Uses bump allocation: O(1) push operations, cache-friendly traversal
-    let mut nodes: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
+    // Use stack-based SmallVec for root nodes during parsing,
+    // converted to ArenaVec at the end with exact capacity
+    let mut nodes: SmallVec<[Node<'a>; SMALL_VEC_CAPACITY]> = SmallVec::new();
     let mut element_stack: Vec<ElementBuilder<'a>> = Vec::new();
 
     while let Some(token) = iter.next() {
@@ -142,15 +152,17 @@ impl<'a> HtmlParserImpl<'a> {
       let element = Element {
         span: Span::new(builder.start, end),
         tag_name: builder.tag_name,
-        attributes: builder.attributes,
-        children: builder.children,
+        // Convert SmallVec to ArenaVec with exact capacity
+        attributes: ArenaVec::from_iter_in(builder.attributes, self.allocator),
+        children: ArenaVec::from_iter_in(builder.children, self.allocator),
       };
 
       // Push to parent or root
       self.create_and_push_element(element, &mut nodes, &mut element_stack);
     }
 
-    nodes
+    // Convert SmallVec to ArenaVec with exact capacity (single allocation)
+    ArenaVec::from_iter_in(nodes, self.allocator)
   }
 
   /// Parse DOCTYPE declaration with its attributes.
@@ -161,8 +173,8 @@ impl<'a> HtmlParserImpl<'a> {
   ) -> Doctype<'a> {
     let start = doctype_token.start;
     let mut end = doctype_token.end;
-    // Create arena-allocated vector for DOCTYPE attributes
-    let mut attributes: ArenaVec<'a, Attribute<'a>> = ArenaVec::new_in(self.allocator);
+    // Use stack-based SmallVec for DOCTYPE attributes during parsing
+    let mut attributes: SmallVec<[Attribute<'a>; SMALL_VEC_CAPACITY]> = SmallVec::new();
 
     // Parse DOCTYPE attributes until TagEnd
     while let Some(token) = iter.peek() {
@@ -198,7 +210,8 @@ impl<'a> HtmlParserImpl<'a> {
 
     Doctype {
       span: Span::new(start, end),
-      attributes,
+      // Convert SmallVec to ArenaVec with exact capacity
+      attributes: ArenaVec::from_iter_in(attributes, self.allocator),
     }
   }
 
@@ -207,13 +220,13 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     tag_start_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-    nodes: &mut ArenaVec<'a, Node<'a>>,
+    nodes: &mut NodeSmallVec<'a>,
     element_stack: &mut Vec<ElementBuilder<'a>>,
   ) {
     let start = tag_start_token.start;
     let mut tag_name: &'a str = "";
-    // Create arena-allocated vector for element attributes
-    let mut attributes: ArenaVec<'a, Attribute<'a>> = ArenaVec::new_in(self.allocator);
+    // Use stack-based SmallVec for element attributes during parsing
+    let mut attributes: SmallVec<[Attribute<'a>; SMALL_VEC_CAPACITY]> = SmallVec::new();
     let mut is_self_closing = false;
 
     // Parse element name
@@ -318,27 +331,24 @@ impl<'a> HtmlParserImpl<'a> {
         .map(|t| t.start)
         .unwrap_or(self.source_text.len() as u32);
 
-      // Create arena-allocated empty vector for children
-      let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
-
       let element = Element {
         span: Span::new(start, end),
         tag_name,
-        attributes,
-        children,
+        // Convert SmallVec to ArenaVec with exact capacity
+        attributes: ArenaVec::from_iter_in(attributes, self.allocator),
+        // Empty children for void/self-closing elements
+        children: ArenaVec::new_in(self.allocator),
       };
 
       // Push to parent or root
       self.create_and_push_element(element, nodes, element_stack);
     } else {
-      // Create arena-allocated vector for children
-      let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
-
       // Push to element stack for later matching with closing tag
+      // Children will be collected in SmallVec during parsing
       element_stack.push(ElementBuilder {
         tag_name,
         attributes,
-        children,
+        children: SmallVec::new(),
         start,
       });
     }
@@ -349,7 +359,7 @@ impl<'a> HtmlParserImpl<'a> {
     &mut self,
     close_tag_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-    nodes: &mut ArenaVec<'a, Node<'a>>,
+    nodes: &mut NodeSmallVec<'a>,
     element_stack: &mut Vec<ElementBuilder<'a>>,
   ) {
     let mut tag_name: &str = "";
@@ -405,8 +415,9 @@ impl<'a> HtmlParserImpl<'a> {
         let element = Element {
           span: Span::new(builder.start, elem_end),
           tag_name: builder.tag_name,
-          attributes: builder.attributes,
-          children: builder.children,
+          // Convert SmallVec to ArenaVec with exact capacity
+          attributes: ArenaVec::from_iter_in(builder.attributes, self.allocator),
+          children: ArenaVec::from_iter_in(builder.children, self.allocator),
         };
 
         if element_stack.len() > index {
@@ -468,12 +479,15 @@ impl<'a> HtmlParserImpl<'a> {
   }
 }
 
+/// Type alias for SmallVec used for nodes during parsing
+type NodeSmallVec<'a> = SmallVec<[Node<'a>; SMALL_VEC_CAPACITY]>;
+
 // Some common function and utils
 impl<'a> HtmlParserImpl<'a> {
   /// Push a node to the appropriate location (parent element or root).
   fn push_node(
     &self,
-    nodes: &mut ArenaVec<'a, Node<'a>>,
+    nodes: &mut NodeSmallVec<'a>,
     element_stack: &mut [ElementBuilder<'a>],
     node: Node<'a>,
   ) {
@@ -526,7 +540,7 @@ impl<'a> HtmlParserImpl<'a> {
   fn create_and_push_element(
     &self,
     element: Element<'a>,
-    nodes: &mut ArenaVec<'a, Node<'a>>,
+    nodes: &mut NodeSmallVec<'a>,
     element_stack: &mut [ElementBuilder<'a>],
   ) {
     let element = Box::new_in(element, self.allocator);

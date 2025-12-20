@@ -2079,6 +2079,7 @@ dependencies = [
  "oxc_allocator",
  "oxc_diagnostics",
  "oxc_parser",
+ "smallvec",
  "umc_html_ast",
  "umc_parser",
  "umc_span",
