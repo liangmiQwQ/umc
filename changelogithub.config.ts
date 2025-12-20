@@ -7,7 +7,6 @@ export default defineConfig({
     perf: { title: 'Performance' },
     refactor: { title: 'Refactor' },
     docs: { title: 'Documentation' },
-    chore: { title: 'Other' },
   },
   titles: {
     breakingChanges: '💥 BREAKING CHANGES 💥',
