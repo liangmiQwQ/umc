@@ -82,13 +82,12 @@ struct ElementBuilder<'a> {
 impl<'a> HtmlParserImpl<'a> {
   fn parse_tokens(
     &mut self,
-    iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>,
+    mut iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>,
   ) -> ArenaVec<'a, Node<'a>> {
     // Create arena-allocated vector for root nodes
     // Uses bump allocation: O(1) push operations, cache-friendly traversal
     let mut nodes: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
     let mut element_stack: Vec<ElementBuilder<'a>> = Vec::new();
-    let mut iter = iter;
 
     while let Some(token) = iter.next() {
       match token.kind {
