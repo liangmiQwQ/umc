@@ -2048,11 +2048,11 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "umc_ast"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 
 [[package]]
 name = "umc_benchmark"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "criterion",
  "oxc_allocator",
@@ -2064,7 +2064,7 @@ dependencies = [
 
 [[package]]
 name = "umc_html_ast"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "oxc_allocator",
  "umc_span",
@@ -2072,7 +2072,7 @@ dependencies = [
 
 [[package]]
 name = "umc_html_parser"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "insta",
  "memchr",
@@ -2086,7 +2086,7 @@ dependencies = [
 
 [[package]]
 name = "umc_parser"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "oxc_allocator",
  "oxc_diagnostics",
@@ -2095,7 +2095,7 @@ dependencies = [
 
 [[package]]
 name = "umc_parser_napi"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "napi",
  "napi-build",
@@ -2104,7 +2104,7 @@ dependencies = [
 
 [[package]]
 name = "umc_span"
-version = "0.0.0-alpha.14"
+version = "0.0.0"
 dependencies = [
  "oxc-miette",
  "oxc_allocator",
