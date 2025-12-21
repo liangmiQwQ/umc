@@ -41,7 +41,7 @@ pub mod token;
 /// struct Html;
 ///
 /// impl LanguageParser for Html {
-///   type Result<'a> = oxc_allocator::Vec<'a, Node<'a>>;
+///   type Result<'a> = Program<'a>;
 ///   type Option = HtmlParserOption;
 ///   type Parser<'a> = HtmlParserImpl<'a>;
 /// }

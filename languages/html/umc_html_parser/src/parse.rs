@@ -3,7 +3,7 @@ use std::iter::Peekable;
 use oxc_allocator::{Allocator, Box, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
 use umc_html_ast::{
-  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Text,
+  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Program, Text,
 };
 use umc_parser::{LanguageParser, ParseResult, ParserImpl, token::Token};
 use umc_span::Span;
@@ -45,7 +45,7 @@ impl<'a> ParserImpl<'a, Html> for HtmlParserImpl<'a> {
     }
   }
 
-  fn parse(mut self) -> ParseResult<ArenaVec<'a, Node<'a>>> {
+  fn parse(mut self) -> ParseResult<Program<'a>> {
     let mut lexer = HtmlLexer::new(
       self.source_text,
       HtmlLexerOption {
@@ -83,7 +83,7 @@ impl<'a> HtmlParserImpl<'a> {
   fn parse_tokens(
     &mut self,
     mut iter: Peekable<impl Iterator<Item = Token<HtmlKind>>>,
-  ) -> ArenaVec<'a, Node<'a>> {
+  ) -> Program<'a> {
     // Create arena-allocated vector for root nodes
     // Uses bump allocation: O(1) push operations, cache-friendly traversal
     let mut nodes: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);

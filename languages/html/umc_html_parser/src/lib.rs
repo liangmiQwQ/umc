@@ -18,7 +18,7 @@
 
 use oxc_allocator::{Allocator, Vec};
 use oxc_parser::ParseOptions;
-use umc_html_ast::Node;
+use umc_html_ast::{Node, Program};
 use umc_parser::{LanguageParser, Parser};
 
 use crate::{option::HtmlParserOption, parse::HtmlParserImpl};
@@ -35,7 +35,7 @@ pub struct Html;
 impl LanguageParser for Html {
   /// The parsed result is an arena-allocated vector of AST nodes.
   /// Uses `oxc_allocator::Vec` for cache-friendly traversal and bulk deallocation.
-  type Result<'a> = Vec<'a, Node<'a>>;
+  type Result<'a> = Program<'a>;
   type Option = HtmlParserOption;
   type Parser<'a> = HtmlParserImpl<'a>;
 }

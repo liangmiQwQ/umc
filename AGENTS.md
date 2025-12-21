@@ -116,7 +116,7 @@ fn main() {
     // 5. Handle results
     if result.errors.is_empty() {
         println!("Successfully parsed!");
-        // `result.program` depends on the language, for HTML it is Vec<'a, Node<'a>>
+        // `result.program` depends on the language, for HTML it is `Program<'a>` (Alias to `Vec<'a, Node<'a>>`)
         for node in result.program {
             println!("{:?}", node);
         }

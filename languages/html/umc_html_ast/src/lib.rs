@@ -53,6 +53,11 @@ pub enum Node<'a> {
   Comment(Box<'a, Comment<'a>>),
 }
 
+/// An alias for a vector of HTML AST nodes.
+///
+/// This type is used to represent the root of an HTML document.
+pub type Program<'a> = Vec<'a, Node<'a>>;
+
 /// HTML DOCTYPE declaration node.
 ///
 /// Represents the `<!DOCTYPE ...>` declaration at the beginning of HTML documents.
