@@ -10,5 +10,13 @@
     "napi-derive": ["napi"],
     "tracing": ["instrument"]
   },
-  "git.branchProtectionPrompt": "alwaysCommit"
+
+  "git.branchProtectionPrompt": "alwaysCommit",
+
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "pnpm*, *.config.ts, *.json, .node-version, VERSION_INFO",
+    "Cargo.toml": "Cargo.lock, .rustfmt.toml, rust-toolchain.toml, .cargo",
+    "AGENTS.md": "CLAUDE.md"
+  }
 }
