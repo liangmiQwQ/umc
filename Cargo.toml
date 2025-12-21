@@ -39,12 +39,12 @@ insta = "1.45.0"
 reqwest = "0.12.26"
 tokio = "1.48.0"
 
-# umc_ast = { version = "0.0.0-alpha.14", path = "core/umc_ast" }
-umc_parser = { version = "0.0.0-alpha.14", path = "core/umc_parser" }
-umc_span = { version = "0.0.0-alpha.14", path = "core/umc_span" }
+umc_ast = { version = "0.0.0", path = "core/umc_ast" }
+umc_parser = { version = "0.0.0", path = "core/umc_parser" }
+umc_span = { version = "0.0.0", path = "core/umc_span" }
 
-umc_html_ast = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_ast" }
-umc_html_parser = { version = "0.0.0-alpha.14", path = "languages/html/umc_html_parser" }
+umc_html_ast = { version = "0.0.0", path = "languages/html/umc_html_ast" }
+umc_html_parser = { version = "0.0.0", path = "languages/html/umc_html_parser" }
 
 [workspace.lints.rust]
 absolute_paths_not_starting_with_crate = "warn"

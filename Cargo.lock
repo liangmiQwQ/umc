@@ -2067,6 +2067,7 @@ name = "umc_html_ast"
 version = "0.0.0"
 dependencies = [
  "oxc_allocator",
+ "umc_ast",
  "umc_span",
 ]
 
