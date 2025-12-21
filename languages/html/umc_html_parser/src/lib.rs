@@ -16,9 +16,9 @@
 //! let result = parser.parse();
 //! ```
 
-use oxc_allocator::{Allocator, Vec};
+use oxc_allocator::Allocator;
 use oxc_parser::ParseOptions;
-use umc_html_ast::{Node, Program};
+use umc_html_ast::Program;
 use umc_parser::{LanguageParser, Parser};
 
 use crate::{option::HtmlParserOption, parse::HtmlParserImpl};
