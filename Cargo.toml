@@ -42,6 +42,7 @@ tokio = "1.48.0"
 umc_ast = { version = "0.0.0", path = "core/umc_ast" }
 umc_parser = { version = "0.0.0", path = "core/umc_parser" }
 umc_span = { version = "0.0.0", path = "core/umc_span" }
+umc_traverse = { version = "0.0.0", path = "core/umc_traverse" }
 
 umc_html_ast = { version = "0.0.0", path = "languages/html/umc_html_ast" }
 umc_html_parser = { version = "0.0.0", path = "languages/html/umc_html_parser" }
