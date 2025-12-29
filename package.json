@@ -35,5 +35,5 @@
     "*.@(js|ts|tsx)": "pnpm lint -- --fix",
     "*.rs": "cargo fmt --"
   },
-  "packageManager": "pnpm@10.26.1"
+  "packageManager": "pnpm@10.26.2"
 }

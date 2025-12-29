@@ -11,7 +11,7 @@ rust-version.workspace = true
 description.workspace = true
 
 [dependencies]
-oxc_allocator = "0.104.0"
+oxc_allocator = "0.106.0"
 umc_html_ast = { version = "0.0.0", path = "../languages/html/umc_html_ast" }
 umc_html_parser = { version = "0.0.0", path = "../languages/html/umc_html_parser" }
 umc_html_traverse = { version = "0.0.0", path = "../languages/html/umc_html_traverse" }

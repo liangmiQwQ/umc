@@ -4,13 +4,13 @@ packages:
 
 catalogs:
   cli:
-    dprint: ^0.50.2
+    dprint: ^0.51.1
     lint-staged: ^16.2.7
-    oxlint: ^1.34.0
+    oxlint: ^1.36.0
     oxlint-tsgolint: ^0.10.0
     simple-git-hooks: ^2.13.1
     taze: ^19.9.2
-    tsdown: ^0.18.1
+    tsdown: ^0.18.3
     vitest: ^4.0.16
     changelogithub: ^14.0.0
     bumpp: ^10.3.2
