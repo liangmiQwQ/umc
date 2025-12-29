@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["benchmark", "core/*", "languages/*/*", "packages/*"]
+members = ["benchmark", "core/*", "example", "languages/*/*", "packages/*"]
 
 [workspace.package]
 version = "0.0.0" # Unified packages version
