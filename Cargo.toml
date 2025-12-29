@@ -38,8 +38,6 @@ criterion = "0.8.1"
 insta = "1.45.0"
 reqwest = "0.12.26"
 tokio = "1.48.0"
-
-umc_ast = { version = "0.0.0", path = "core/umc_ast" }
 umc_parser = { version = "0.0.0", path = "core/umc_parser" }
 umc_span = { version = "0.0.0", path = "core/umc_span" }
 umc_traverse = { version = "0.0.0", path = "core/umc_traverse" }

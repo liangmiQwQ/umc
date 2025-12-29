@@ -377,7 +377,6 @@ dependencies = [
  "umc_html_parser",
  "umc_html_traverse",
  "umc_parser",
- "umc_span",
  "umc_traverse",
 ]
 
@@ -2080,7 +2079,6 @@ name = "umc_html_ast"
 version = "0.0.0"
 dependencies = [
  "oxc_allocator",
- "umc_ast",
  "umc_span",
 ]
 
