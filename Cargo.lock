@@ -369,6 +369,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "example"
+version = "0.0.0"
+dependencies = [
+ "oxc_allocator",
+ "umc_html_ast",
+ "umc_html_parser",
+ "umc_html_traverse",
+ "umc_parser",
+ "umc_span",
+ "umc_traverse",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

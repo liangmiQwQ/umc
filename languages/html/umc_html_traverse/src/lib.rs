@@ -4,46 +4,46 @@ use umc_html_ast::{
 use umc_traverse::TraverseOperate;
 
 #[expect(unused_variables)]
-pub trait TraverseHtml {
-  fn enter_program(&self, program: &Program) -> TraverseOperate {
+pub trait TraverseHtml<'a> {
+  fn enter_program(&mut self, program: &Program<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_node(&self, node: &Node) -> TraverseOperate {
+  fn enter_node(&mut self, node: &Node<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_element(&self, element: &Element) -> TraverseOperate {
+  fn enter_element(&mut self, element: &Element<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_doctype(&self, doctype: &Doctype) -> TraverseOperate {
+  fn enter_doctype(&mut self, doctype: &Doctype<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_comment(&self, comment: &Comment) -> TraverseOperate {
+  fn enter_comment(&mut self, comment: &Comment<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_text(&self, text: &Text) -> TraverseOperate {
+  fn enter_text(&mut self, text: &Text<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute(&self, attribute: &Attribute) -> TraverseOperate {
+  fn enter_attribute(&mut self, attribute: &Attribute<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute_key(&self, attribute_key: &AttributeKey) -> TraverseOperate {
+  fn enter_attribute_key(&mut self, attribute_key: &AttributeKey<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute_value(&self, attribute_value: &AttributeValue) -> TraverseOperate {
+  fn enter_attribute_value(&mut self, attribute_value: &AttributeValue<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn exit_program(&self, program: &Program) {}
-  fn exit_node(&self, node: &Node) {}
-  fn exit_element(&self, element: &Element) {}
-  fn exit_doctype(&self, doctype: &Doctype) {}
-  fn exit_comment(&self, comment: &Comment) {}
-  fn exit_text(&self, text: &Text) {}
-  fn exit_attribute(&self, attribute: &Attribute) {}
-  fn exit_attribute_key(&self, attribute_key: &AttributeKey) {}
-  fn exit_attribute_value(&self, attribute_value: &AttributeValue) {}
+  fn exit_program(&mut self, program: &Program<'a>) {}
+  fn exit_node(&mut self, node: &Node<'a>) {}
+  fn exit_element(&mut self, element: &Element<'a>) {}
+  fn exit_doctype(&mut self, doctype: &Doctype<'a>) {}
+  fn exit_comment(&mut self, comment: &Comment<'a>) {}
+  fn exit_text(&mut self, text: &Text<'a>) {}
+  fn exit_attribute(&mut self, attribute: &Attribute<'a>) {}
+  fn exit_attribute_key(&mut self, attribute_key: &AttributeKey<'a>) {}
+  fn exit_attribute_value(&mut self, attribute_value: &AttributeValue<'a>) {}
 }
 
-pub fn traverse_program(program: &Program, traverse: &impl TraverseHtml) {
+pub fn traverse_program<'a>(program: &Program<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_program(program) != TraverseOperate::Skip {
     for node in program {
       traverse_node(node, traverse);
@@ -52,7 +52,7 @@ pub fn traverse_program(program: &Program, traverse: &impl TraverseHtml) {
   }
 }
 
-pub fn traverse_node(node: &Node, traverse: &impl TraverseHtml) {
+pub fn traverse_node<'a>(node: &Node<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_node(node) != TraverseOperate::Skip {
     match node {
       Node::Doctype(doctype) => traverse_doctype(doctype, traverse),
@@ -64,7 +64,7 @@ pub fn traverse_node(node: &Node, traverse: &impl TraverseHtml) {
   }
 }
 
-pub fn traverse_doctype(doctype: &Doctype, traverse: &impl TraverseHtml) {
+pub fn traverse_doctype<'a>(doctype: &Doctype<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_doctype(doctype) != TraverseOperate::Skip {
     for attribute in &doctype.attributes {
       traverse_attribute(attribute, traverse);
@@ -73,7 +73,7 @@ pub fn traverse_doctype(doctype: &Doctype, traverse: &impl TraverseHtml) {
   }
 }
 
-pub fn traverse_element(element: &Element, traverse: &impl TraverseHtml) {
+pub fn traverse_element<'a>(element: &Element<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_element(element) != TraverseOperate::Skip {
     for attribute in &element.attributes {
       traverse_attribute(attribute, traverse);
@@ -85,19 +85,19 @@ pub fn traverse_element(element: &Element, traverse: &impl TraverseHtml) {
   }
 }
 
-pub fn traverse_comment(comment: &Comment, traverse: &impl TraverseHtml) {
+pub fn traverse_comment<'a>(comment: &Comment<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_comment(comment) != TraverseOperate::Skip {
     traverse.exit_comment(comment);
   }
 }
 
-pub fn traverse_text(text: &Text, traverse: &impl TraverseHtml) {
+pub fn traverse_text<'a>(text: &Text<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_text(text) != TraverseOperate::Skip {
     traverse.exit_text(text);
   }
 }
 
-pub fn traverse_attribute(attribute: &Attribute, traverse: &impl TraverseHtml) {
+pub fn traverse_attribute<'a>(attribute: &Attribute<'a>, traverse: &mut impl TraverseHtml<'a>) {
   if traverse.enter_attribute(attribute) != TraverseOperate::Skip {
     traverse_attribute_key(&attribute.key, traverse);
     if let Some(value) = &attribute.value {
@@ -107,59 +107,68 @@ pub fn traverse_attribute(attribute: &Attribute, traverse: &impl TraverseHtml) {
   }
 }
 
-pub fn traverse_attribute_key(attribute_key: &AttributeKey, traverse: &impl TraverseHtml) {
+pub fn traverse_attribute_key<'a>(
+  attribute_key: &AttributeKey<'a>,
+  traverse: &mut impl TraverseHtml<'a>,
+) {
   if traverse.enter_attribute_key(attribute_key) != TraverseOperate::Skip {
     traverse.exit_attribute_key(attribute_key);
   }
 }
 
-pub fn traverse_attribute_value(attribute_value: &AttributeValue, traverse: &impl TraverseHtml) {
+pub fn traverse_attribute_value<'a>(
+  attribute_value: &AttributeValue<'a>,
+  traverse: &mut impl TraverseHtml<'a>,
+) {
   if traverse.enter_attribute_value(attribute_value) != TraverseOperate::Skip {
     traverse.exit_attribute_value(attribute_value);
   }
 }
 
 #[expect(unused_variables)]
-pub trait TraverseHtmlMut {
-  fn enter_program(&self, program: &mut Program) -> TraverseOperate {
+pub trait TraverseHtmlMut<'a> {
+  fn enter_program(&mut self, program: &mut Program<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_node(&self, node: &mut Node) -> TraverseOperate {
+  fn enter_node(&mut self, node: &mut Node<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_element(&self, element: &mut Element) -> TraverseOperate {
+  fn enter_element(&mut self, element: &mut Element<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_doctype(&self, doctype: &mut Doctype) -> TraverseOperate {
+  fn enter_doctype(&mut self, doctype: &mut Doctype<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_comment(&self, comment: &mut Comment) -> TraverseOperate {
+  fn enter_comment(&mut self, comment: &mut Comment<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_text(&self, text: &mut Text) -> TraverseOperate {
+  fn enter_text(&mut self, text: &mut Text<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute(&self, attribute: &mut Attribute) -> TraverseOperate {
+  fn enter_attribute(&mut self, attribute: &mut Attribute<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute_key(&self, attribute_key: &mut AttributeKey) -> TraverseOperate {
+  fn enter_attribute_key(&mut self, attribute_key: &mut AttributeKey<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn enter_attribute_value(&self, attribute_value: &mut AttributeValue) -> TraverseOperate {
+  fn enter_attribute_value(&mut self, attribute_value: &mut AttributeValue<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
-  fn exit_program(&self, program: &mut Program) {}
-  fn exit_node(&self, node: &mut Node) {}
-  fn exit_element(&self, element: &mut Element) {}
-  fn exit_doctype(&self, doctype: &mut Doctype) {}
-  fn exit_comment(&self, comment: &mut Comment) {}
-  fn exit_text(&self, text: &mut Text) {}
-  fn exit_attribute(&self, attribute: &mut Attribute) {}
-  fn exit_attribute_key(&self, attribute_key: &mut AttributeKey) {}
-  fn exit_attribute_value(&self, attribute_value: &mut AttributeValue) {}
+  fn exit_program(&mut self, program: &mut Program<'a>) {}
+  fn exit_node(&mut self, node: &mut Node<'a>) {}
+  fn exit_element(&mut self, element: &mut Element<'a>) {}
+  fn exit_doctype(&mut self, doctype: &mut Doctype<'a>) {}
+  fn exit_comment(&mut self, comment: &mut Comment<'a>) {}
+  fn exit_text(&mut self, text: &mut Text<'a>) {}
+  fn exit_attribute(&mut self, attribute: &mut Attribute<'a>) {}
+  fn exit_attribute_key(&mut self, attribute_key: &mut AttributeKey<'a>) {}
+  fn exit_attribute_value(&mut self, attribute_value: &mut AttributeValue<'a>) {}
 }
 
-pub fn traverse_program_mut(program: &mut Program, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_program_mut<'a>(
+  program: &mut Program<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
+) {
   if traverse.enter_program(program) != TraverseOperate::Skip {
     for node in &mut *program {
       traverse_node_mut(node, traverse);
@@ -168,7 +177,7 @@ pub fn traverse_program_mut(program: &mut Program, traverse: &impl TraverseHtmlM
   }
 }
 
-pub fn traverse_node_mut(node: &mut Node, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_node_mut<'a>(node: &mut Node<'a>, traverse: &mut impl TraverseHtmlMut<'a>) {
   if traverse.enter_node(node) != TraverseOperate::Skip {
     match node {
       Node::Doctype(doctype) => traverse_doctype_mut(doctype, traverse),
@@ -180,7 +189,10 @@ pub fn traverse_node_mut(node: &mut Node, traverse: &impl TraverseHtmlMut) {
   }
 }
 
-pub fn traverse_doctype_mut(doctype: &mut Doctype, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_doctype_mut<'a>(
+  doctype: &mut Doctype<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
+) {
   if traverse.enter_doctype(doctype) != TraverseOperate::Skip {
     for attribute in &mut doctype.attributes {
       traverse_attribute_mut(attribute, traverse);
@@ -189,7 +201,10 @@ pub fn traverse_doctype_mut(doctype: &mut Doctype, traverse: &impl TraverseHtmlM
   }
 }
 
-pub fn traverse_element_mut(element: &mut Element, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_element_mut<'a>(
+  element: &mut Element<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
+) {
   if traverse.enter_element(element) != TraverseOperate::Skip {
     for attribute in &mut element.attributes {
       traverse_attribute_mut(attribute, traverse);
@@ -201,19 +216,25 @@ pub fn traverse_element_mut(element: &mut Element, traverse: &impl TraverseHtmlM
   }
 }
 
-pub fn traverse_comment_mut(comment: &mut Comment, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_comment_mut<'a>(
+  comment: &mut Comment<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
+) {
   if traverse.enter_comment(comment) != TraverseOperate::Skip {
     traverse.exit_comment(comment);
   }
 }
 
-pub fn traverse_text_mut(text: &mut Text, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_text_mut<'a>(text: &mut Text<'a>, traverse: &mut impl TraverseHtmlMut<'a>) {
   if traverse.enter_text(text) != TraverseOperate::Skip {
     traverse.exit_text(text);
   }
 }
 
-pub fn traverse_attribute_mut(attribute: &mut Attribute, traverse: &impl TraverseHtmlMut) {
+pub fn traverse_attribute_mut<'a>(
+  attribute: &mut Attribute<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
+) {
   if traverse.enter_attribute(attribute) != TraverseOperate::Skip {
     traverse_attribute_key_mut(&mut attribute.key, traverse);
     if let Some(value) = &mut attribute.value {
@@ -223,18 +244,18 @@ pub fn traverse_attribute_mut(attribute: &mut Attribute, traverse: &impl Travers
   }
 }
 
-pub fn traverse_attribute_key_mut(
-  attribute_key: &mut AttributeKey,
-  traverse: &impl TraverseHtmlMut,
+pub fn traverse_attribute_key_mut<'a>(
+  attribute_key: &mut AttributeKey<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
 ) {
   if traverse.enter_attribute_key(attribute_key) != TraverseOperate::Skip {
     traverse.exit_attribute_key(attribute_key);
   }
 }
 
-pub fn traverse_attribute_value_mut(
-  attribute_value: &mut AttributeValue,
-  traverse: &impl TraverseHtmlMut,
+pub fn traverse_attribute_value_mut<'a>(
+  attribute_value: &mut AttributeValue<'a>,
+  traverse: &mut impl TraverseHtmlMut<'a>,
 ) {
   if traverse.enter_attribute_value(attribute_value) != TraverseOperate::Skip {
     traverse.exit_attribute_value(attribute_value);
