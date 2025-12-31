@@ -2077,7 +2077,6 @@ version = "0.0.0"
 dependencies = [
  "oxc_allocator",
  "oxc_ast",
- "oxc_diagnostics",
  "umc_span",
 ]
 
