@@ -53,7 +53,7 @@ Errors: [
                         label: None,
                         span: SourceSpan {
                             offset: SourceOffset(
-                                16,
+                                24,
                             ),
                             length: 1,
                         },

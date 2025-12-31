@@ -1,7 +1,7 @@
 use std::iter::Peekable;
 
 use oxc_allocator::{Allocator, Box, Vec as ArenaVec};
-use oxc_diagnostics::OxcDiagnostic;
+use oxc_diagnostics::{LabeledSpan, OxcDiagnostic};
 use oxc_parser::Parser as JsParser;
 use oxc_span::SourceType;
 use umc_html_ast::{
@@ -340,6 +340,7 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Parse closing tag and pop matching element from stack.
+  #[allow(clippy::too_many_lines)]
   fn parse_closing_tag(
     &mut self,
     close_tag_token: &Token<HtmlKind>,
@@ -399,6 +400,35 @@ impl<'a> HtmlParserImpl<'a> {
 
         // Check if this is a script element that should be parsed
         let is_script = builder.tag_name.eq_ignore_ascii_case("script");
+        let mut should_parse = is_script && self.options.parse_script.is_some();
+
+        if should_parse {
+          for attr in &builder.attributes {
+            let key = attr.key.value;
+            if key.eq_ignore_ascii_case("src") {
+              should_parse = false;
+              break;
+            }
+            #[allow(clippy::collapsible_if)]
+            if key.eq_ignore_ascii_case("type") {
+              if let Some(val) = &attr.value {
+                let v = val.value.to_ascii_lowercase();
+                match v.as_str() {
+                  ""
+                  | "text/javascript"
+                  | "application/javascript"
+                  | "module"
+                  | "text/ecmascript"
+                  | "application/ecmascript" => {}
+                  _ => {
+                    should_parse = false;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
 
         if element_stack.len() > index {
           // This is an implicitly closed element
@@ -408,7 +438,7 @@ impl<'a> HtmlParserImpl<'a> {
           );
         }
 
-        if is_script && self.options.parse_script.is_some() {
+        if should_parse {
           // Create a Script node with parsed JavaScript
           self.create_and_push_script(
             span,
@@ -562,17 +592,29 @@ impl<'a> HtmlParserImpl<'a> {
     nodes: &mut ArenaVec<'a, Node<'a>>,
     element_stack: &mut [ElementBuilder<'a>],
   ) {
-    // Extract script content from children (should be a single Text node)
-    let script_content: &str = children
-      .iter()
-      .find_map(|node| {
-        if let Node::Text(text) = node {
-          Some(text.value)
-        } else {
-          None
-        }
-      })
-      .unwrap_or("");
+    // Extract script content from children
+    // If there is a single text node, use it directly (zero-copy)
+    // Otherwise, concatenate text nodes and allocate in arena
+    let script_content: &str = if children.len() == 1 {
+      if let Some(Node::Text(text)) = children.first() {
+        text.value
+      } else {
+        ""
+      }
+    } else {
+      let content = children
+        .iter()
+        .filter_map(|node| {
+          if let Node::Text(text) = node {
+            Some(text.value)
+          } else {
+            None
+          }
+        })
+        .collect::<Vec<_>>()
+        .concat();
+      self.allocator.alloc_str(&content)
+    };
 
     // Parse the JavaScript content
     let source_type = SourceType::default();
@@ -583,7 +625,33 @@ impl<'a> HtmlParserImpl<'a> {
       .parse();
 
     // Store JavaScript parsing errors in the main parser errors
-    self.errors.extend(ret.errors);
+    // Adjust error spans to be relative to the HTML source
+    let start_offset = children
+      .iter()
+      .find_map(|node| {
+        if let Node::Text(text) = node {
+          Some(text.span.start)
+        } else {
+          None
+        }
+      })
+      .unwrap_or(span.start);
+
+    for mut error in ret.errors {
+      if let Some(labels) = error.labels.take() {
+        let new_labels = labels
+          .into_iter()
+          .map(|label| {
+            let offset = label.offset() + start_offset as usize;
+            let len = label.len();
+            let msg = label.label().map(ToString::to_string);
+            LabeledSpan::new_with_span(msg, (offset, len))
+          })
+          .collect();
+        error.labels = Some(new_labels);
+      }
+      self.errors.push(error);
+    }
 
     let script = Script {
       span,
@@ -736,6 +804,18 @@ mod test {
     const HTML: &str = r#"<script>
       const a =;
     </script>"#;
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn script_with_src() {
+    const HTML: &str = r#"<script src="foo.js"></script>"#;
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn script_with_invalid_type() {
+    const HTML: &str = r#"<script type="foo/bar">console.log(1)</script>"#;
     assert_snapshot!(parse(HTML));
   }
 }

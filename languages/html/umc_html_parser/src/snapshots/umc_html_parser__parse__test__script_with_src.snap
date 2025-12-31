@@ -1,0 +1,58 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Element(
+            Element {
+                span: Span {
+                    start: 0,
+                    end: 30,
+                },
+                tag_name: "script",
+                attributes: Vec(
+                    [
+                        Attribute {
+                            span: Span {
+                                start: 8,
+                                end: 20,
+                            },
+                            key: AttributeKey {
+                                span: Span {
+                                    start: 8,
+                                    end: 11,
+                                },
+                                value: "src",
+                            },
+                            value: Some(
+                                AttributeValue {
+                                    span: Span {
+                                        start: 12,
+                                        end: 20,
+                                    },
+                                    value: "foo.js",
+                                    raw: "\"foo.js\"",
+                                },
+                            ),
+                        },
+                    ],
+                ),
+                children: Vec(
+                    [
+                        Text(
+                            Text {
+                                span: Span {
+                                    start: 21,
+                                    end: 21,
+                                },
+                                value: "",
+                            },
+                        ),
+                    ],
+                ),
+            },
+        ),
+    ],
+)
+Errors: []
