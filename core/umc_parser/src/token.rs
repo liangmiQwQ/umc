@@ -8,7 +8,7 @@ use umc_span::Span;
 /// # Type Parameters
 ///
 /// * `T` - The token kind type (e.g., `HtmlKind` for HTML tokens)
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Token<T> {
   /// The kind or type of this token
   pub kind: T,
@@ -34,7 +34,7 @@ impl<T> Token<T> {
   /// assert_eq!(span.start, 0);
   /// assert_eq!(span.end, 5);
   /// ```
-  pub fn span(&self) -> Span {
+  pub const fn span(&self) -> Span {
     Span::new(self.start, self.end)
   }
 }

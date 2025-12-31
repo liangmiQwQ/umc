@@ -2,15 +2,15 @@ use crate::lexer::state::{LexerState, LexerStateKind};
 use oxc_diagnostics::OxcDiagnostic;
 use umc_parser::source::Source;
 
-pub(crate) mod kind;
+pub mod kind;
 mod lexe;
 mod state;
 
-pub(crate) struct HtmlLexerOption<'a> {
+pub struct HtmlLexerOption<'a> {
   pub is_embedded_language_tag: &'a dyn Fn(&str) -> bool,
 }
 
-pub(crate) struct HtmlLexer<'a> {
+pub struct HtmlLexer<'a> {
   source: Source<'a>,
   state: LexerState<'a>,
   option: HtmlLexerOption<'a>,
@@ -18,7 +18,7 @@ pub(crate) struct HtmlLexer<'a> {
 }
 
 impl<'a> HtmlLexer<'a> {
-  pub fn new(source_text: &'a str, option: HtmlLexerOption<'a>) -> HtmlLexer<'a> {
+  pub const fn new(source_text: &'a str, option: HtmlLexerOption<'a>) -> Self {
     HtmlLexer {
       source: Source::new(source_text),
       state: LexerState::new(LexerStateKind::Content),

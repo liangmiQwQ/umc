@@ -19,8 +19,6 @@
 use oxc_allocator::Allocator;
 use oxc_diagnostics::OxcDiagnostic;
 
-/// Character utility functions for UTF-8 handling.
-pub mod char;
 /// Source text tracking and navigation.
 pub mod source;
 /// Token types and utilities.
@@ -116,6 +114,7 @@ impl<'a, T: LanguageParser> Parser<'a, T> {
   }
 
   /// Override the parser option
+  #[must_use]
   pub fn with_options(mut self, options: T::Option) -> Self {
     self.options = options;
     self

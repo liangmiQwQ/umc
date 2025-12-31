@@ -13,3 +13,6 @@ description.workspace = true
 [dependencies]
 oxc_allocator = { workspace = true }
 umc_span = { workspace = true }
+
+[lints]
+workspace = true

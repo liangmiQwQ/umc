@@ -26,3 +26,6 @@ insta = { workspace = true }
 [features]
 default = ["regular_expression"]
 regular_expression = ["oxc_parser/regular_expression"]
+
+[lints]
+workspace = true

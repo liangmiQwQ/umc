@@ -21,7 +21,7 @@ impl<'a> Source<'a> {
   /// let source = Source::new("<html></html>");
   /// assert_eq!(source.pointer, 0);
   /// ```
-  pub fn new(source_text: &'a str) -> Source<'a> {
+  pub const fn new(source_text: &'a str) -> Self {
     Source {
       pointer: 0,
       source_text: source_text.as_bytes(),
@@ -29,7 +29,7 @@ impl<'a> Source<'a> {
   }
 }
 
-impl<'a> Source<'a> {
+impl Source<'_> {
   /// Get the byte at the given index
   ///
   /// ## Example
@@ -110,7 +110,7 @@ impl<'a> Source<'a> {
   /// assert_eq!(source.pointer, 2);
   /// ```
   #[inline]
-  pub fn to(&mut self, index: u32) {
+  pub const fn to(&mut self, index: u32) {
     self.pointer = index;
   }
 
@@ -128,7 +128,7 @@ impl<'a> Source<'a> {
   /// assert_eq!(source.pointer, 4);
   /// ```
   #[inline]
-  pub fn advance(&mut self, diff: u32) {
+  pub const fn advance(&mut self, diff: u32) {
     self.pointer += diff;
   }
 }

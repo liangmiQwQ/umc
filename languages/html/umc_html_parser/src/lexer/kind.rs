@@ -44,11 +44,12 @@ pub enum HtmlKind {
   Whitespace,
 }
 
+#[allow(clippy::enum_glob_use)]
 use HtmlKind::*;
 
 impl HtmlKind {
   #[must_use]
-  pub fn to_str(self) -> &'static str {
+  pub const fn to_str(self) -> &'static str {
     match self {
       Eof => "EOF",
 

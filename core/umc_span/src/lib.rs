@@ -110,7 +110,8 @@ impl Span {
   /// assert_eq!(fifth, Span::sized(5, 0));
   /// assert_eq!(fifth, Span::new(5, 5));
   /// ```
-  pub fn empty(at: u32) -> Self {
+  #[inline]
+  pub const fn empty(at: u32) -> Self {
     Self::new(at, at)
   }
 
@@ -194,7 +195,7 @@ impl Span {
   /// assert!(!span.contains_inclusive(Span::empty(0)));
   /// ```
   #[inline]
-  pub const fn contains_inclusive(self, span: Span) -> bool {
+  pub const fn contains_inclusive(self, span: Self) -> bool {
     self.start <= span.start && span.end <= self.end
   }
 
@@ -258,7 +259,7 @@ impl Span {
   /// [`expand_left`]: Span::expand_left
   /// [`expand_right`]: Span::expand_right
   #[must_use]
-  pub fn expand(self, offset: u32) -> Self {
+  pub const fn expand(self, offset: u32) -> Self {
     Self::new(
       self.start.saturating_sub(offset),
       self.end.saturating_add(offset),
@@ -532,7 +533,7 @@ impl Span {
 }
 
 impl Index<Span> for str {
-  type Output = str;
+  type Output = Self;
 
   #[inline]
   fn index(&self, index: Span) -> &Self::Output {
@@ -562,7 +563,7 @@ impl From<Span> for SourceSpan {
 
 impl From<Span> for LabeledSpan {
   fn from(val: Span) -> Self {
-    LabeledSpan::underline(val)
+    Self::underline(val)
   }
 }
 

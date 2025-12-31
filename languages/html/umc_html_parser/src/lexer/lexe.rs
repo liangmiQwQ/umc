@@ -6,7 +6,7 @@ use umc_span::Span;
 
 use crate::lexer::{HtmlLexer, kind::HtmlKind, state::LexerStateKind};
 
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   pub fn tokens(&mut self) -> impl Iterator<Item = Token<HtmlKind>> {
     from_fn(move || self.next_token())
   }
@@ -32,12 +32,12 @@ impl<'a> HtmlLexer<'a> {
   }
 
   #[inline]
-  fn is_eof(&self) -> bool {
+  const fn is_eof(&self) -> bool {
     self.source.pointer as usize >= self.source.source_text.len()
   }
 
   #[inline]
-  fn finish(&mut self) -> Token<HtmlKind> {
+  const fn finish(&mut self) -> Token<HtmlKind> {
     self.state.kind = LexerStateKind::Finished; // mark as finished
 
     Token::<HtmlKind> {
@@ -49,7 +49,7 @@ impl<'a> HtmlLexer<'a> {
 }
 
 // handler for HtmlLexerState::Content
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   fn handle_content(&mut self) -> Token<HtmlKind> {
     let start = self.source.pointer;
 
@@ -181,7 +181,7 @@ impl<'a> HtmlLexer<'a> {
 }
 
 // handler for HtmlLexerState::EmbeddedContent
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   fn handle_embedded_content(&mut self) -> Token<HtmlKind> {
     let closing_tag_string = format!("</{}", self.state.take_tag_name().unwrap());
     let closing_tag = closing_tag_string.as_bytes(); // safe unwrap because only script/style can enter this state
@@ -214,7 +214,7 @@ impl<'a> HtmlLexer<'a> {
 }
 
 // handler for HtmlLexerState::AfterTagName
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   fn handle_after_tag_name(&mut self) -> Token<HtmlKind> {
     let start = self.source.pointer;
 
@@ -300,12 +300,11 @@ impl<'a> HtmlLexer<'a> {
 
   fn handle_quote_attribute(&mut self, start: u32, quote: u8) -> Token<HtmlKind> {
     // since html don't support \ escape, we don't need to manage its state
-    let mut end = self.source.source_text.len() as u32;
-
-    if let Some(index) = memchr(quote, self.source.rest()) {
-      end = self.source.pointer + index as u32 + 1;
+    let end = if let Some(index) = memchr(quote, self.source.rest()) {
+      self.source.pointer + index as u32 + 1
     } else {
       // throw an error, expect quote, but found eof
+      let end = self.source.source_text.len() as u32;
       self.errors.push(
         OxcDiagnostic::error(format!(
           "Expected {}, but found {}",
@@ -314,7 +313,9 @@ impl<'a> HtmlLexer<'a> {
         ))
         .with_label(Span::new(end, end)),
       );
-    }
+
+      end
+    };
 
     self.source.to(end);
 
@@ -327,7 +328,7 @@ impl<'a> HtmlLexer<'a> {
 }
 
 // handler for HtmlLexerState::InTag
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   fn handle_in_tag(&mut self) -> Token<HtmlKind> {
     // call the handle_tag
     let result = self.handle_tag(self.source.pointer, HtmlKind::ElementName);
@@ -340,7 +341,7 @@ impl<'a> HtmlLexer<'a> {
 }
 
 // some universal functions
-impl<'a> HtmlLexer<'a> {
+impl HtmlLexer<'_> {
   fn handle_tag(&mut self, start: u32, kind: HtmlKind) -> Token<HtmlKind> {
     let mut i = 0;
     while i < self.source.rest().len()

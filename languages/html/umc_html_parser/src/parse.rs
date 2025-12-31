@@ -96,7 +96,7 @@ impl<'a> HtmlParserImpl<'a> {
         HtmlKind::Doctype => {
           let doctype = self.parse_doctype(&token, &mut iter);
           let doctype = Box::new_in(doctype, self.allocator);
-          self.push_node(&mut nodes, &mut element_stack, Node::Doctype(doctype));
+          Self::push_node(&mut nodes, &mut element_stack, Node::Doctype(doctype));
         }
 
         HtmlKind::TagStart => {
@@ -110,13 +110,13 @@ impl<'a> HtmlParserImpl<'a> {
         HtmlKind::TextContent => {
           let text = self.parse_text(&token);
           let text = Box::new_in(text, self.allocator);
-          self.push_node(&mut nodes, &mut element_stack, Node::Text(text));
+          Self::push_node(&mut nodes, &mut element_stack, Node::Text(text));
         }
 
         HtmlKind::Comment => {
           let comment = self.parse_comment(&token);
           let comment = Box::new_in(comment, self.allocator);
-          self.push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
+          Self::push_node(&mut nodes, &mut element_stack, Node::Comment(comment));
         }
 
         // Other token kinds are handled by the specific parsing functions above
@@ -131,8 +131,7 @@ impl<'a> HtmlParserImpl<'a> {
       let end = builder
         .children
         .last()
-        .map(|n| self.node_end(n))
-        .unwrap_or(builder.start);
+        .map_or(builder.start, |n| Self::node_end(n));
 
       self.errors.push(
         OxcDiagnostic::error(format!("Unclosed element: <{}>", builder.tag_name))
@@ -155,7 +154,7 @@ impl<'a> HtmlParserImpl<'a> {
 
   /// Parse DOCTYPE declaration with its attributes.
   fn parse_doctype(
-    &mut self,
+    &self,
     doctype_token: &Token<HtmlKind>,
     iter: &mut Peekable<impl Iterator<Item = Token<HtmlKind>>>,
   ) -> Doctype<'a> {
@@ -186,9 +185,6 @@ impl<'a> HtmlParserImpl<'a> {
           });
           end = attr_token.end;
         }
-        HtmlKind::Whitespace => {
-          iter.next();
-        }
         HtmlKind::Eof => break,
         _ => {
           iter.next();
@@ -203,6 +199,7 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Parse opening tag and push element to stack.
+  #[allow(clippy::too_many_lines)]
   fn parse_opening_tag(
     &mut self,
     tag_start_token: &Token<HtmlKind>,
@@ -290,9 +287,6 @@ impl<'a> HtmlParserImpl<'a> {
             );
           }
         }
-        HtmlKind::Whitespace => {
-          iter.next();
-        }
         HtmlKind::Eof => break,
         _ => {
           iter.next();
@@ -315,8 +309,7 @@ impl<'a> HtmlParserImpl<'a> {
       // Self-closing elements don't go on the stack
       let end = iter
         .peek()
-        .map(|t| t.start)
-        .unwrap_or(self.source_text.len() as u32);
+        .map_or(self.source_text.len() as u32, |t| t.start);
 
       // Create arena-allocated empty vector for children
       let children: ArenaVec<'a, Node<'a>> = ArenaVec::new_in(self.allocator);
@@ -353,16 +346,15 @@ impl<'a> HtmlParserImpl<'a> {
     element_stack: &mut Vec<ElementBuilder<'a>>,
   ) {
     let mut tag_name: &str = "";
-    let mut end = close_tag_token.end;
-
-    // Parse element name
-    if let Some(token) = iter.peek()
+    let mut end = if let Some(token) = iter.peek()
       && token.kind == HtmlKind::ElementName
     {
       let name_token = iter.next().unwrap();
       tag_name = self.get_token_text(&name_token);
-      end = name_token.end;
-    }
+      name_token.end
+    } else {
+      close_tag_token.end
+    };
 
     // Skip until TagEnd
     while let Some(token) = iter.peek() {
@@ -398,8 +390,7 @@ impl<'a> HtmlParserImpl<'a> {
           builder
             .children
             .last()
-            .map(|n| self.node_end(n))
-            .unwrap_or(builder.start)
+            .map_or(builder.start, |n| Self::node_end(n))
         };
 
         let element = Element {
@@ -423,7 +414,7 @@ impl<'a> HtmlParserImpl<'a> {
     } else {
       // No matching opening tag - this is an orphan closing tag
       self.errors.push(
-        OxcDiagnostic::error(format!("Unexpected closing tag: </{}>", tag_name))
+        OxcDiagnostic::error(format!("Unexpected closing tag: </{tag_name}>"))
           .with_label(Span::new(close_tag_token.start, end)),
       );
     }
@@ -447,14 +438,14 @@ impl<'a> HtmlParserImpl<'a> {
       let content = text
         .strip_prefix("<!--")
         .and_then(|s| s.strip_suffix("-->"))
-        .unwrap_or(text.strip_prefix("<!--").unwrap());
+        .unwrap_or_else(|| text.strip_prefix("<!--").unwrap());
       (content, false)
     } else if text.starts_with("<!") {
       // Bogus comment: <! ... >
       let content = text
         .strip_prefix("<!")
         .and_then(|s| s.strip_suffix(">"))
-        .unwrap_or(text.strip_prefix("<!").unwrap());
+        .unwrap_or_else(|| text.strip_prefix("<!").unwrap());
       (content, true)
     } else {
       (text, false)
@@ -472,7 +463,6 @@ impl<'a> HtmlParserImpl<'a> {
 impl<'a> HtmlParserImpl<'a> {
   /// Push a node to the appropriate location (parent element or root).
   fn push_node(
-    &self,
     nodes: &mut ArenaVec<'a, Node<'a>>,
     element_stack: &mut [ElementBuilder<'a>],
     node: Node<'a>,
@@ -514,7 +504,7 @@ impl<'a> HtmlParserImpl<'a> {
   }
 
   /// Get the end position of a node.
-  fn node_end(&self, node: &Node) -> u32 {
+  fn node_end(node: &Node) -> u32 {
     match node {
       Node::Doctype(d) => d.span.end,
       Node::Element(e) => e.span.end,

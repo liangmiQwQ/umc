@@ -75,7 +75,7 @@ impl<'a> CreateHtml<'a> for Parser<'a, Html> {
 /// This module contains the [`HtmlParserOption`] struct for configuring
 /// how the HTML parser handles embedded languages and special content.
 pub mod option {
-  use super::*;
+  use super::ParseOptions;
 
   /// HTML parser configuration options.
   ///
@@ -108,7 +108,7 @@ pub mod option {
 
   impl Default for HtmlParserOption {
     fn default() -> Self {
-      HtmlParserOption {
+      Self {
         parse_script: Some(ParseOptions::default()),
         is_embedded_language_tag: Box::new(|tag_name: &str| {
           matches!(tag_name.to_ascii_lowercase().as_str(), "script" | "style")

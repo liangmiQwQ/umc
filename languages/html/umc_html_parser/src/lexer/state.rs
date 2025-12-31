@@ -22,8 +22,8 @@ pub(super) struct LexerState<'a> {
   allow_to_set_tag_name: bool,
 }
 
-impl<'a> LexerState<'a> {
-  pub fn new(kind: LexerStateKind) -> Self {
+impl LexerState<'_> {
+  pub const fn new(kind: LexerStateKind) -> Self {
     LexerState {
       kind,
       tag_name: None,
@@ -33,11 +33,11 @@ impl<'a> LexerState<'a> {
 }
 
 impl<'a> LexerState<'a> {
-  pub fn allow_to_set_tag_name(&mut self) {
+  pub const fn allow_to_set_tag_name(&mut self) {
     self.allow_to_set_tag_name = true;
   }
 
-  pub fn set_tag_name(&mut self, tag_name: &'a str) {
+  pub const fn set_tag_name(&mut self, tag_name: &'a str) {
     if self.allow_to_set_tag_name {
       self.tag_name = Some(tag_name);
     }
@@ -45,11 +45,11 @@ impl<'a> LexerState<'a> {
     self.allow_to_set_tag_name = false;
   }
 
-  pub fn get_tag_name(&mut self) -> Option<&str> {
+  pub const fn get_tag_name(&self) -> Option<&str> {
     self.tag_name
   }
 
-  pub fn take_tag_name(&mut self) -> Option<&str> {
+  pub const fn take_tag_name(&mut self) -> Option<&str> {
     self.tag_name.take()
   }
 }

@@ -13,3 +13,6 @@ description.workspace = true
 [dependencies]
 miette = { workspace = true }
 oxc_allocator = { workspace = true }
+
+[lints]
+workspace = true
