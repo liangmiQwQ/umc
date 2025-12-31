@@ -1,0 +1,199 @@
+---
+source: languages/html/umc_html_parser/src/parse.rs
+expression: parse(HTML)
+---
+Nodes: Vec(
+    [
+        Script(
+            Script {
+                span: Span {
+                    start: 0,
+                    end: 78,
+                },
+                tag_name: "script",
+                attributes: Vec(
+                    [],
+                ),
+                program: Program {
+                    span: Span {
+                        start: 0,
+                        end: 61,
+                    },
+                    source_text: "\n      const a = 1;\n      function b() { return a + 1; }\n    ",
+                    comments: Vec(
+                        [],
+                    ),
+                    hashbang: None,
+                    directives: Vec(
+                        [],
+                    ),
+                    body: Vec(
+                        [
+                            VariableDeclaration(
+                                VariableDeclaration {
+                                    span: Span {
+                                        start: 7,
+                                        end: 19,
+                                    },
+                                    declarations: Vec(
+                                        [
+                                            VariableDeclarator {
+                                                span: Span {
+                                                    start: 13,
+                                                    end: 18,
+                                                },
+                                                id: BindingIdentifier(
+                                                    BindingIdentifier {
+                                                        span: Span {
+                                                            start: 13,
+                                                            end: 14,
+                                                        },
+                                                        name: "a",
+                                                        symbol_id: Cell {
+                                                            value: None,
+                                                        },
+                                                    },
+                                                ),
+                                                type_annotation: None,
+                                                init: Some(
+                                                    NumericLiteral(
+                                                        NumericLiteral {
+                                                            span: Span {
+                                                                start: 17,
+                                                                end: 18,
+                                                            },
+                                                            value: 1.0,
+                                                            raw: Some(
+                                                                "1",
+                                                            ),
+                                                            base: Decimal,
+                                                        },
+                                                    ),
+                                                ),
+                                                kind: Const,
+                                                definite: false,
+                                            },
+                                        ],
+                                    ),
+                                    kind: Const,
+                                    declare: false,
+                                },
+                            ),
+                            FunctionDeclaration(
+                                Function {
+                                    span: Span {
+                                        start: 26,
+                                        end: 56,
+                                    },
+                                    id: Some(
+                                        BindingIdentifier {
+                                            span: Span {
+                                                start: 35,
+                                                end: 36,
+                                            },
+                                            name: "b",
+                                            symbol_id: Cell {
+                                                value: None,
+                                            },
+                                        },
+                                    ),
+                                    type_parameters: None,
+                                    this_param: None,
+                                    params: FormalParameters {
+                                        span: Span {
+                                            start: 36,
+                                            end: 38,
+                                        },
+                                        items: Vec(
+                                            [],
+                                        ),
+                                        rest: None,
+                                        kind: FormalParameter,
+                                    },
+                                    return_type: None,
+                                    body: Some(
+                                        FunctionBody {
+                                            span: Span {
+                                                start: 39,
+                                                end: 56,
+                                            },
+                                            directives: Vec(
+                                                [],
+                                            ),
+                                            statements: Vec(
+                                                [
+                                                    ReturnStatement(
+                                                        ReturnStatement {
+                                                            span: Span {
+                                                                start: 41,
+                                                                end: 54,
+                                                            },
+                                                            argument: Some(
+                                                                BinaryExpression(
+                                                                    BinaryExpression {
+                                                                        span: Span {
+                                                                            start: 48,
+                                                                            end: 53,
+                                                                        },
+                                                                        left: Identifier(
+                                                                            IdentifierReference {
+                                                                                span: Span {
+                                                                                    start: 48,
+                                                                                    end: 49,
+                                                                                },
+                                                                                name: "a",
+                                                                                reference_id: Cell {
+                                                                                    value: None,
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        right: NumericLiteral(
+                                                                            NumericLiteral {
+                                                                                span: Span {
+                                                                                    start: 52,
+                                                                                    end: 53,
+                                                                                },
+                                                                                value: 1.0,
+                                                                                raw: Some(
+                                                                                    "1",
+                                                                                ),
+                                                                                base: Decimal,
+                                                                            },
+                                                                        ),
+                                                                        operator: Addition,
+                                                                    },
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ),
+                                                ],
+                                            ),
+                                        },
+                                    ),
+                                    scope_id: Cell {
+                                        value: None,
+                                    },
+                                    type: FunctionDeclaration,
+                                    generator: false,
+                                    async: false,
+                                    declare: false,
+                                    pure: false,
+                                    pife: false,
+                                },
+                            ),
+                        ],
+                    ),
+                    scope_id: Cell {
+                        value: None,
+                    },
+                    source_type: SourceType {
+                        language: JavaScript,
+                        module_kind: Module,
+                        variant: Standard,
+                    },
+                },
+            },
+        ),
+    ],
+)
+Errors: []

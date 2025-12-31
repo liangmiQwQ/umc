@@ -1,5 +1,5 @@
 use umc_html_ast::{
-  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Program, Text,
+  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Program, Script, Text,
 };
 use umc_traverse::TraverseOperate;
 
@@ -23,6 +23,9 @@ pub trait TraverseHtml<'a> {
   fn enter_text(&mut self, text: &Text<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
+  fn enter_script(&mut self, script: &Script<'a>) -> TraverseOperate {
+    TraverseOperate::Continue
+  }
   fn enter_attribute(&mut self, attribute: &Attribute<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
@@ -38,6 +41,7 @@ pub trait TraverseHtml<'a> {
   fn exit_doctype(&mut self, doctype: &Doctype<'a>) {}
   fn exit_comment(&mut self, comment: &Comment<'a>) {}
   fn exit_text(&mut self, text: &Text<'a>) {}
+  fn exit_script(&mut self, script: &Script<'a>) {}
   fn exit_attribute(&mut self, attribute: &Attribute<'a>) {}
   fn exit_attribute_key(&mut self, attribute_key: &AttributeKey<'a>) {}
   fn exit_attribute_value(&mut self, attribute_value: &AttributeValue<'a>) {}
@@ -59,6 +63,7 @@ pub fn traverse_node<'a>(node: &Node<'a>, traverse: &mut impl TraverseHtml<'a>) 
       Node::Element(element) => traverse_element(element, traverse),
       Node::Text(text) => traverse_text(text, traverse),
       Node::Comment(comment) => traverse_comment(comment, traverse),
+      Node::Script(script) => traverse_script(script, traverse),
     }
     traverse.exit_node(node);
   }
@@ -125,6 +130,18 @@ pub fn traverse_attribute_value<'a>(
   }
 }
 
+/// Traverse a script node without traversing the JavaScript AST.
+/// Per requirement, we only traverse the HTML attributes, not the JS nodes.
+pub fn traverse_script<'a>(script: &Script<'a>, traverse: &mut impl TraverseHtml<'a>) {
+  if traverse.enter_script(script) != TraverseOperate::Skip {
+    for attribute in &script.attributes {
+      traverse_attribute(attribute, traverse);
+    }
+    // Note: We intentionally do NOT traverse the JavaScript AST nodes
+    traverse.exit_script(script);
+  }
+}
+
 #[expect(unused_variables)]
 pub trait TraverseHtmlMut<'a> {
   fn enter_program(&mut self, program: &mut Program<'a>) -> TraverseOperate {
@@ -145,6 +162,9 @@ pub trait TraverseHtmlMut<'a> {
   fn enter_text(&mut self, text: &mut Text<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
+  fn enter_script(&mut self, script: &mut Script<'a>) -> TraverseOperate {
+    TraverseOperate::Continue
+  }
   fn enter_attribute(&mut self, attribute: &mut Attribute<'a>) -> TraverseOperate {
     TraverseOperate::Continue
   }
@@ -160,6 +180,7 @@ pub trait TraverseHtmlMut<'a> {
   fn exit_doctype(&mut self, doctype: &mut Doctype<'a>) {}
   fn exit_comment(&mut self, comment: &mut Comment<'a>) {}
   fn exit_text(&mut self, text: &mut Text<'a>) {}
+  fn exit_script(&mut self, script: &mut Script<'a>) {}
   fn exit_attribute(&mut self, attribute: &mut Attribute<'a>) {}
   fn exit_attribute_key(&mut self, attribute_key: &mut AttributeKey<'a>) {}
   fn exit_attribute_value(&mut self, attribute_value: &mut AttributeValue<'a>) {}
@@ -184,6 +205,7 @@ pub fn traverse_node_mut<'a>(node: &mut Node<'a>, traverse: &mut impl TraverseHt
       Node::Element(element) => traverse_element_mut(element, traverse),
       Node::Text(text) => traverse_text_mut(text, traverse),
       Node::Comment(comment) => traverse_comment_mut(comment, traverse),
+      Node::Script(script) => traverse_script_mut(script, traverse),
     }
     traverse.exit_node(node);
   }
@@ -259,5 +281,17 @@ pub fn traverse_attribute_value_mut<'a>(
 ) {
   if traverse.enter_attribute_value(attribute_value) != TraverseOperate::Skip {
     traverse.exit_attribute_value(attribute_value);
+  }
+}
+
+/// Traverse a script node mutably without traversing the JavaScript AST.
+/// Per requirement, we only traverse the HTML attributes, not the JS nodes.
+pub fn traverse_script_mut<'a>(script: &mut Script<'a>, traverse: &mut impl TraverseHtmlMut<'a>) {
+  if traverse.enter_script(script) != TraverseOperate::Skip {
+    for attribute in &mut script.attributes {
+      traverse_attribute_mut(attribute, traverse);
+    }
+    // Note: We intentionally do NOT traverse the JavaScript AST nodes
+    traverse.exit_script(script);
   }
 }

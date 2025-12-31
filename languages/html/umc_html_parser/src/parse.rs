@@ -2,8 +2,10 @@ use std::iter::Peekable;
 
 use oxc_allocator::{Allocator, Box, Vec as ArenaVec};
 use oxc_diagnostics::OxcDiagnostic;
+use oxc_parser::Parser as JsParser;
+use oxc_span::SourceType;
 use umc_html_ast::{
-  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Program, Text,
+  Attribute, AttributeKey, AttributeValue, Comment, Doctype, Element, Node, Program, Script, Text,
 };
 use umc_parser::{LanguageParser, ParseResult, ParserImpl, token::Token};
 use umc_span::Span;
@@ -393,23 +395,41 @@ impl<'a> HtmlParserImpl<'a> {
             .map_or(builder.start, |n| Self::node_end(n))
         };
 
-        let element = Element {
-          span: Span::new(builder.start, elem_end),
-          tag_name: builder.tag_name,
-          attributes: builder.attributes,
-          children: builder.children,
-        };
+        let span = Span::new(builder.start, elem_end);
+
+        // Check if this is a script element that should be parsed
+        let is_script = builder.tag_name.eq_ignore_ascii_case("script");
 
         if element_stack.len() > index {
           // This is an implicitly closed element
           self.errors.push(
-            OxcDiagnostic::error(format!("Implicitly closed element: <{}>", element.tag_name))
-              .with_label(element.span),
+            OxcDiagnostic::error(format!("Implicitly closed element: <{}>", builder.tag_name))
+              .with_label(span),
           );
         }
 
-        // Push to parent or root
-        self.create_and_push_element(element, nodes, element_stack);
+        if is_script && self.options.parse_script.is_some() {
+          // Create a Script node with parsed JavaScript
+          self.create_and_push_script(
+            span,
+            builder.tag_name,
+            builder.attributes,
+            &builder.children,
+            nodes,
+            element_stack,
+          );
+        } else {
+          // Create a regular Element node
+          let element = Element {
+            span,
+            tag_name: builder.tag_name,
+            attributes: builder.attributes,
+            children: builder.children,
+          };
+
+          // Push to parent or root
+          self.create_and_push_element(element, nodes, element_stack);
+        }
       }
     } else {
       // No matching opening tag - this is an orphan closing tag
@@ -510,6 +530,7 @@ impl<'a> HtmlParserImpl<'a> {
       Node::Element(e) => e.span.end,
       Node::Text(t) => t.span.end,
       Node::Comment(c) => c.span.end,
+      Node::Script(s) => s.span.end,
     }
   }
 
@@ -525,6 +546,58 @@ impl<'a> HtmlParserImpl<'a> {
       parent.children.push(Node::Element(element));
     } else {
       nodes.push(Node::Element(element));
+    }
+  }
+
+  /// Create a Script node with parsed JavaScript content.
+  ///
+  /// Extracts the text content from children (if any), parses it with oxc_parser,
+  /// and creates a Script node containing the parsed JavaScript AST.
+  fn create_and_push_script(
+    &mut self,
+    span: Span,
+    tag_name: &'a str,
+    attributes: ArenaVec<'a, Attribute<'a>>,
+    children: &ArenaVec<'a, Node<'a>>,
+    nodes: &mut ArenaVec<'a, Node<'a>>,
+    element_stack: &mut [ElementBuilder<'a>],
+  ) {
+    // Extract script content from children (should be a single Text node)
+    let script_content: &str = children
+      .iter()
+      .find_map(|node| {
+        if let Node::Text(text) = node {
+          Some(text.value)
+        } else {
+          None
+        }
+      })
+      .unwrap_or("");
+
+    // Parse the JavaScript content
+    let source_type = SourceType::default();
+    let parse_options = *self.options.parse_script.as_ref().unwrap();
+
+    let ret = JsParser::new(self.allocator, script_content, source_type)
+      .with_options(parse_options)
+      .parse();
+
+    // Store JavaScript parsing errors in the main parser errors
+    self.errors.extend(ret.errors);
+
+    let script = Script {
+      span,
+      tag_name,
+      attributes,
+      program: ret.program,
+    };
+
+    let script = Box::new_in(script, self.allocator);
+
+    if let Some(parent) = element_stack.last_mut() {
+      parent.children.push(Node::Script(script));
+    } else {
+      nodes.push(Node::Script(script));
     }
   }
 }
@@ -646,6 +719,23 @@ mod test {
   #[test]
   fn incomplete_attribute() {
     const HTML: &str = r#"<div class=></div>"#;
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn script_parsing() {
+    const HTML: &str = r#"<script>
+      const a = 1;
+      function b() { return a + 1; }
+    </script>"#;
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn script_parsing_error() {
+    const HTML: &str = r#"<script>
+      const a =;
+    </script>"#;
     assert_snapshot!(parse(HTML));
   }
 }
