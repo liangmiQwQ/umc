@@ -19,7 +19,7 @@ Nodes: Vec(
                         start: 0,
                         end: 61,
                     },
-                    source_text: "\n      const a = 1;\n      function b() { return a + 1; }\n    ",
+                    source_text: "\n      const a = 1;\n      function b() { return a + 2; }\n    ",
                     comments: Vec(
                         [],
                     ),
@@ -153,9 +153,9 @@ Nodes: Vec(
                                                                                     start: 52,
                                                                                     end: 53,
                                                                                 },
-                                                                                value: 1.0,
+                                                                                value: 2.0,
                                                                                 raw: Some(
-                                                                                    "1",
+                                                                                    "2",
                                                                                 ),
                                                                                 base: Decimal,
                                                                             },

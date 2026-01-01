@@ -794,7 +794,7 @@ mod test {
   fn script_parsing() {
     const HTML: &str = r#"<script>
       const a = 1;
-      function b() { return a + 1; }
+      function b() { return a + 2; }
     </script>"#;
     assert_snapshot!(parse(HTML));
   }
@@ -810,6 +810,12 @@ mod test {
   #[test]
   fn script_with_src() {
     const HTML: &str = r#"<script src="foo.js"></script>"#;
+    assert_snapshot!(parse(HTML));
+  }
+
+  #[test]
+  fn self_close_script() {
+    const HTML: &str = r#"<script src="foo.js" />"#;
     assert_snapshot!(parse(HTML));
   }
 
