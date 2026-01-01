@@ -98,14 +98,14 @@ mod test {
   // errors
   #[test]
   fn no_complete_doctype() {
-    const HTML_STRING: &str = r#"<!DOCTYP"#;
+    const HTML_STRING: &str = r"<!DOCTYP";
 
     assert_snapshot!(test(HTML_STRING));
   }
 
   #[test]
   fn no_complete_comment() {
-    const HTML_STRING: &str = r#"<!-"#;
+    const HTML_STRING: &str = r"<!-";
 
     assert_snapshot!(test(HTML_STRING));
   }

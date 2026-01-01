@@ -51,6 +51,8 @@ pub enum Node<'a> {
   Text(Box<'a, Text<'a>>),
   /// HTML comment node
   Comment(Box<'a, Comment<'a>>),
+  /// Script element with parsed JavaScript content
+  Script(Box<'a, Script<'a>>),
 }
 
 /// An alias for a vector of HTML AST nodes.
@@ -122,6 +124,24 @@ pub struct Comment<'a> {
   /// The comment text content (without the `<!--` and `-->` delimiters).
   /// References the original source text (zero-copy).
   pub value: &'a str,
+}
+
+/// Script element with parsed JavaScript content.
+///
+/// Represents a `<script>` element where the JavaScript content has been
+/// parsed by `oxc_parser` into an AST.
+///
+/// The lifetime `'a` is tied to the allocator that owns the memory.
+#[derive(Debug)]
+pub struct Script<'a> {
+  /// Source location of this script element
+  pub span: Span,
+  /// Tag name (always "script", case-insensitive in source)
+  pub tag_name: &'a str,
+  /// Element attributes (e.g., type, src, defer)
+  pub attributes: Vec<'a, Attribute<'a>>,
+  /// The parsed JavaScript program from oxc_parser
+  pub program: oxc_ast::ast::Program<'a>,
 }
 
 /// HTML element attribute.
