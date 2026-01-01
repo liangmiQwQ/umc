@@ -702,10 +702,10 @@ mod test {
 
   #[test]
   fn nested_elements() {
-    const HTML: &str = r#"<div>
+    const HTML: &str = r"<div>
   <p>Paragraph 1</p>
   <p>Paragraph 2</p>
-</div>"#;
+</div>";
 
     assert_snapshot!(parse(HTML));
   }
@@ -723,12 +723,12 @@ mod test {
 
   #[test]
   fn comments() {
-    const HTML: &str = r#"<!-- This is a comment -->
+    const HTML: &str = r"<!-- This is a comment -->
 <div>Content</div>
 <!-- Another comment -->
 <! This is a bogus comment >
 <!Bogus Comment Too>
-"#;
+";
 
     assert_snapshot!(parse(HTML));
   }
@@ -742,7 +742,7 @@ mod test {
 
   #[test]
   fn multiple_no_value_attributes() {
-    const HTML: &str = r#"<input checked disabled readonly>"#;
+    const HTML: &str = r"<input checked disabled readonly>";
 
     assert_snapshot!(parse(HTML));
   }
@@ -761,49 +761,49 @@ mod test {
 
   #[test]
   fn self_close_tags() {
-    const HTML: &str = r#"<div/><p />"#;
+    const HTML: &str = r"<div/><p />";
 
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
   fn no_closing_tag() {
-    const HTML: &str = r#"<div>
+    const HTML: &str = r"<div>
   <p>Unclosed paragraph
-</div>"#;
+</div>";
 
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
   fn orphan_closing_tag() {
-    const HTML: &str = r#"<div>Content</div>
+    const HTML: &str = r"<div>Content</div>
 </span>
-<p>More content</p>"#;
+<p>More content</p>";
 
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
   fn incomplete_attribute() {
-    const HTML: &str = r#"<div class=></div>"#;
+    const HTML: &str = r"<div class=></div>";
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
   fn script_parsing() {
-    const HTML: &str = r#"<script>
+    const HTML: &str = r"<script>
       const a = 1;
       function b() { return a + 2; }
-    </script>"#;
+    </script>";
     assert_snapshot!(parse(HTML));
   }
 
   #[test]
   fn script_parsing_error() {
-    const HTML: &str = r#"<script>
+    const HTML: &str = r"<script>
       const a =;
-    </script>"#;
+    </script>";
     assert_snapshot!(parse(HTML));
   }
 
